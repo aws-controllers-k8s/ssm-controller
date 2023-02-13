@@ -1,0 +1,10 @@
+ignore:
+  resource_names:
+      - Activation
+      - Association
+      - AssociationBatch
+      - Document
+      - MaintenanceWindow
+      - OpsItem
+      - PatchBaseline
+      - ResourceDataSync
