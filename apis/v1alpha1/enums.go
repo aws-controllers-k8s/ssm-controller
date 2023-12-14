@@ -129,6 +129,7 @@ const (
 	AutomationExecutionStatus_ChangeCalendarOverrideRejected AutomationExecutionStatus = "ChangeCalendarOverrideRejected"
 	AutomationExecutionStatus_CompletedWithSuccess           AutomationExecutionStatus = "CompletedWithSuccess"
 	AutomationExecutionStatus_CompletedWithFailure           AutomationExecutionStatus = "CompletedWithFailure"
+	AutomationExecutionStatus_Exited                         AutomationExecutionStatus = "Exited"
 )
 
 type AutomationSubtype string
@@ -235,8 +236,8 @@ const (
 type ConnectionStatus string
 
 const (
-	ConnectionStatus_Connected    ConnectionStatus = "Connected"
-	ConnectionStatus_NotConnected ConnectionStatus = "NotConnected"
+	ConnectionStatus_connected    ConnectionStatus = "connected"
+	ConnectionStatus_notconnected ConnectionStatus = "notconnected"
 )
 
 type DescribeActivationsFilterKeys string
@@ -489,6 +490,8 @@ const (
 	OperatingSystem_MACOS                   OperatingSystem = "MACOS"
 	OperatingSystem_RASPBIAN                OperatingSystem = "RASPBIAN"
 	OperatingSystem_ROCKY_LINUX             OperatingSystem = "ROCKY_LINUX"
+	OperatingSystem_ALMA_LINUX              OperatingSystem = "ALMA_LINUX"
+	OperatingSystem_AMAZON_LINUX_2023       OperatingSystem = "AMAZON_LINUX_2023"
 )
 
 type OpsFilterOperatorType string
@@ -746,7 +749,6 @@ type ResourceType string
 
 const (
 	ResourceType_ManagedInstance ResourceType = "ManagedInstance"
-	ResourceType_Document        ResourceType = "Document"
 	ResourceType_EC2Instance     ResourceType = "EC2Instance"
 )
 
@@ -823,12 +825,15 @@ const (
 type StepExecutionFilterKey string
 
 const (
-	StepExecutionFilterKey_StartTimeBefore     StepExecutionFilterKey = "StartTimeBefore"
-	StepExecutionFilterKey_StartTimeAfter      StepExecutionFilterKey = "StartTimeAfter"
-	StepExecutionFilterKey_StepExecutionStatus StepExecutionFilterKey = "StepExecutionStatus"
-	StepExecutionFilterKey_StepExecutionId     StepExecutionFilterKey = "StepExecutionId"
-	StepExecutionFilterKey_StepName            StepExecutionFilterKey = "StepName"
-	StepExecutionFilterKey_Action              StepExecutionFilterKey = "Action"
+	StepExecutionFilterKey_StartTimeBefore         StepExecutionFilterKey = "StartTimeBefore"
+	StepExecutionFilterKey_StartTimeAfter          StepExecutionFilterKey = "StartTimeAfter"
+	StepExecutionFilterKey_StepExecutionStatus     StepExecutionFilterKey = "StepExecutionStatus"
+	StepExecutionFilterKey_StepExecutionId         StepExecutionFilterKey = "StepExecutionId"
+	StepExecutionFilterKey_StepName                StepExecutionFilterKey = "StepName"
+	StepExecutionFilterKey_Action                  StepExecutionFilterKey = "Action"
+	StepExecutionFilterKey_ParentStepExecutionId   StepExecutionFilterKey = "ParentStepExecutionId"
+	StepExecutionFilterKey_ParentStepIteration     StepExecutionFilterKey = "ParentStepIteration"
+	StepExecutionFilterKey_ParentStepIteratorValue StepExecutionFilterKey = "ParentStepIteratorValue"
 )
 
 type StopType string
