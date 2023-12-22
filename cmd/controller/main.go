@@ -27,6 +27,7 @@ import (
 	svcsdk "github.com/aws/aws-sdk-go/service/ssm"
 	flag "github.com/spf13/pflag"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrlrt "sigs.k8s.io/controller-runtime"
 	ctrlrtmetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
@@ -58,7 +59,13 @@ func main() {
 	flag.Parse()
 	ackCfg.SetupLogger()
 
-	if err := ackCfg.Validate(); err != nil {
+	managerFactories := svcresource.GetManagerFactories()
+	resourceGVKs := make([]schema.GroupVersionKind, 0, len(managerFactories))
+	for _, mf := range managerFactories {
+		resourceGVKs = append(resourceGVKs, mf.ResourceDescriptor().GroupVersionKind())
+	}
+
+	if err := ackCfg.Validate(ackcfg.WithGVKs(resourceGVKs)); err != nil {
 		setupLog.Error(
 			err, "Unable to create controller manager",
 			"aws.service", awsServiceAlias,
@@ -76,13 +83,14 @@ func main() {
 	}
 
 	mgr, err := ctrlrt.NewManager(ctrlrt.GetConfigOrDie(), ctrlrt.Options{
-		Scheme:             scheme,
-		Port:               port,
-		Host:               host,
-		MetricsBindAddress: ackCfg.MetricsAddr,
-		LeaderElection:     ackCfg.EnableLeaderElection,
-		LeaderElectionID:   awsServiceAPIGroup,
-		Namespace:          ackCfg.WatchNamespace,
+		Scheme:                  scheme,
+		Port:                    port,
+		Host:                    host,
+		MetricsBindAddress:      ackCfg.MetricsAddr,
+		LeaderElection:          ackCfg.EnableLeaderElection,
+		LeaderElectionID:        "ack-" + awsServiceAPIGroup,
+		Namespace:               ackCfg.WatchNamespace,
+		LeaderElectionNamespace: ackCfg.LeaderElectionNamespace,
 	})
 	if err != nil {
 		setupLog.Error(
