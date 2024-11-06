@@ -5,5 +5,14 @@ ignore:
       - AssociationBatch
       - MaintenanceWindow
       - OpsItem
-      - PatchBaseline
-      - ResourceDataSync
+resources:
+  PatchBaseline:
+    fields:
+      Name:
+        is_primary_key: true
+  ResourceDataSync:
+    fields:
+      SyncName:
+        is_primary_key: true
+    tags:
+      ignore: true

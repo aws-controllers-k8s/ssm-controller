@@ -10,6 +10,8 @@ rules:
   - ssm.services.k8s.aws
   resources:
   - documents
+  - patchbaselines
+  - resourcedatasyncs
   verbs:
   - create
   - delete
@@ -22,6 +24,8 @@ rules:
   - ssm.services.k8s.aws
   resources:
   - documents
+  - patchbaselines
+  - resourcedatasyncs
   verbs:
   - get
   - patch

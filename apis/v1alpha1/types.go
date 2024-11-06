@@ -86,11 +86,7 @@ type AssociationVersionInfo struct {
 
 // A structure that includes attributes that describe a document attachment.
 type AttachmentContent struct {
-	Hash     *string `json:"hash,omitempty"`
-	HashType *string `json:"hashType,omitempty"`
-	Name     *string `json:"name,omitempty"`
-	Size     *int64  `json:"size,omitempty"`
-	URL      *string `json:"url,omitempty"`
+	Name *string `json:"name,omitempty"`
 }
 
 // An attribute of an attachment, such as the attachment name.
@@ -128,7 +124,17 @@ type AutomationExecutionMetadata struct {
 
 // Defines the basic information about a patch baseline override.
 type BaselineOverride struct {
-	ApprovedPatchesEnableNonSecurity *bool `json:"approvedPatchesEnableNonSecurity,omitempty"`
+	// A set of rules defining the approval rules for a patch baseline.
+	ApprovalRules                    *PatchRuleGroup `json:"approvalRules,omitempty"`
+	ApprovedPatches                  []*string       `json:"approvedPatches,omitempty"`
+	ApprovedPatchesComplianceLevel   *string         `json:"approvedPatchesComplianceLevel,omitempty"`
+	ApprovedPatchesEnableNonSecurity *bool           `json:"approvedPatchesEnableNonSecurity,omitempty"`
+	// A set of patch filters, typically used for approval rules.
+	GlobalFilters         *PatchFilterGroup `json:"globalFilters,omitempty"`
+	OperatingSystem       *string           `json:"operatingSystem,omitempty"`
+	RejectedPatches       []*string         `json:"rejectedPatches,omitempty"`
+	RejectedPatchesAction *string           `json:"rejectedPatchesAction,omitempty"`
+	Sources               []*PatchSource    `json:"sources,omitempty"`
 }
 
 // Describes a command request.
@@ -378,9 +384,11 @@ type InstanceInformation struct {
 // patches along with metadata about the operation when this information was
 // gathered for the managed node.
 type InstancePatchState struct {
+	BaselineID                       *string      `json:"baselineID,omitempty"`
 	LastNoRebootInstallOperationTime *metav1.Time `json:"lastNoRebootInstallOperationTime,omitempty"`
 	OperationEndTime                 *metav1.Time `json:"operationEndTime,omitempty"`
 	OperationStartTime               *metav1.Time `json:"operationStartTime,omitempty"`
+	PatchGroup                       *string      `json:"patchGroup,omitempty"`
 }
 
 // The parameters for an AUTOMATION task type.
@@ -506,7 +514,17 @@ type ParameterMetadata struct {
 
 // Represents metadata about a patch.
 type Patch struct {
+	ID          *string      `json:"id,omitempty"`
 	ReleaseDate *metav1.Time `json:"releaseDate,omitempty"`
+}
+
+// Defines the basic information about a patch baseline.
+type PatchBaselineIdentity struct {
+	BaselineDescription *string `json:"baselineDescription,omitempty"`
+	BaselineID          *string `json:"baselineID,omitempty"`
+	BaselineName        *string `json:"baselineName,omitempty"`
+	DefaultBaseline     *bool   `json:"defaultBaseline,omitempty"`
+	OperatingSystem     *string `json:"operatingSystem,omitempty"`
 }
 
 // Information about the state of a patch on a particular managed node as it
@@ -515,19 +533,197 @@ type PatchComplianceData struct {
 	InstalledTime *metav1.Time `json:"installedTime,omitempty"`
 }
 
+// Defines which patches should be included in a patch baseline.
+//
+// A patch filter consists of a key and a set of values. The filter key is a
+// patch property. For example, the available filter keys for WINDOWS are PATCH_SET,
+// PRODUCT, PRODUCT_FAMILY, CLASSIFICATION, and MSRC_SEVERITY.
+//
+// The filter values define a matching criterion for the patch property indicated
+// by the key. For example, if the filter key is PRODUCT and the filter values
+// are ["Office 2013", "Office 2016"], then the filter accepts all patches where
+// product name is either "Office 2013" or "Office 2016". The filter values
+// can be exact values for the patch property given as a key, or a wildcard
+// (*), which matches all values.
+//
+// You can view lists of valid values for the patch properties by running the
+// DescribePatchProperties command. For information about which patch properties
+// can be used with each major operating system, see DescribePatchProperties.
+type PatchFilter struct {
+	Key    *string   `json:"key,omitempty"`
+	Values []*string `json:"values,omitempty"`
+}
+
+// A set of patch filters, typically used for approval rules.
+type PatchFilterGroup struct {
+	PatchFilters []*PatchFilter `json:"patchFilters,omitempty"`
+}
+
+// The mapping between a patch group and the patch baseline the patch group
+// is registered with.
+type PatchGroupPatchBaselineMapping struct {
+	// Defines the basic information about a patch baseline.
+	BaselineIdentity *PatchBaselineIdentity `json:"baselineIdentity,omitempty"`
+	PatchGroup       *string                `json:"patchGroup,omitempty"`
+}
+
+// Defines a filter used in Patch Manager APIs. Supported filter keys depend
+// on the API operation that includes the filter. Patch Manager API operations
+// that use PatchOrchestratorFilter include the following:
+//
+//   - DescribeAvailablePatches
+//
+//   - DescribeInstancePatches
+//
+//   - DescribePatchBaselines
+//
+//   - DescribePatchGroups
+type PatchOrchestratorFilter struct {
+	Key    *string   `json:"key,omitempty"`
+	Values []*string `json:"values,omitempty"`
+}
+
 // Defines an approval rule for a patch baseline.
 type PatchRule struct {
-	EnableNonSecurity *bool `json:"enableNonSecurity,omitempty"`
+	ApproveAfterDays  *int64  `json:"approveAfterDays,omitempty"`
+	ApproveUntilDate  *string `json:"approveUntilDate,omitempty"`
+	ComplianceLevel   *string `json:"complianceLevel,omitempty"`
+	EnableNonSecurity *bool   `json:"enableNonSecurity,omitempty"`
+	// A set of patch filters, typically used for approval rules.
+	PatchFilterGroup *PatchFilterGroup `json:"patchFilterGroup,omitempty"`
+}
+
+// A set of rules defining the approval rules for a patch baseline.
+type PatchRuleGroup struct {
+	PatchRules []*PatchRule `json:"patchRules,omitempty"`
+}
+
+// Information about the patches to use to update the managed nodes, including
+// target operating systems and source repository. Applies to Linux managed
+// nodes only.
+type PatchSource struct {
+	Configuration *string   `json:"configuration,omitempty"`
+	Name          *string   `json:"name,omitempty"`
+	Products      []*string `json:"products,omitempty"`
 }
 
 // Information about the approval status of a patch.
 type PatchStatus struct {
-	ApprovalDate *metav1.Time `json:"approvalDate,omitempty"`
+	ApprovalDate    *metav1.Time `json:"approvalDate,omitempty"`
+	ComplianceLevel *string      `json:"complianceLevel,omitempty"`
 }
 
 // Information about targets that resolved during the Automation execution.
 type ResolvedTargets struct {
 	Truncated *bool `json:"truncated,omitempty"`
+}
+
+// Information about the AwsOrganizationsSource resource data sync source. A
+// sync source of this type can synchronize data from Organizations or, if an
+// Amazon Web Services organization isn't present, from multiple Amazon Web
+// Services Regions.
+type ResourceDataSyncAWSOrganizationsSource struct {
+	OrganizationSourceType *string                               `json:"organizationSourceType,omitempty"`
+	OrganizationalUnits    []*ResourceDataSyncOrganizationalUnit `json:"organizationalUnits,omitempty"`
+}
+
+// Synchronize Amazon Web Services Systems Manager Inventory data from multiple
+// Amazon Web Services accounts defined in Organizations to a centralized Amazon
+// S3 bucket. Data is synchronized to individual key prefixes in the central
+// bucket. Each key prefix represents a different Amazon Web Services account
+// ID.
+type ResourceDataSyncDestinationDataSharing struct {
+	DestinationDataSharingType *string `json:"destinationDataSharingType,omitempty"`
+}
+
+// Information about a resource data sync configuration, including its current
+// status and last successful sync.
+type ResourceDataSyncItem struct {
+	LastStatus             *string      `json:"lastStatus,omitempty"`
+	LastSuccessfulSyncTime *metav1.Time `json:"lastSuccessfulSyncTime,omitempty"`
+	LastSyncStatusMessage  *string      `json:"lastSyncStatusMessage,omitempty"`
+	LastSyncTime           *metav1.Time `json:"lastSyncTime,omitempty"`
+	// Information about the target S3 bucket for the resource data sync.
+	S3Destination        *ResourceDataSyncS3Destination `json:"s3Destination,omitempty"`
+	SyncCreatedTime      *metav1.Time                   `json:"syncCreatedTime,omitempty"`
+	SyncLastModifiedTime *metav1.Time                   `json:"syncLastModifiedTime,omitempty"`
+	SyncName             *string                        `json:"syncName,omitempty"`
+	// The data type name for including resource data sync state. There are four
+	// sync states:
+	//
+	// OrganizationNotExists (Your organization doesn't exist)
+	//
+	// NoPermissions (The system can't locate the service-linked role. This role
+	// is automatically created when a user creates a resource data sync in Amazon
+	// Web Services Systems Manager Explorer.)
+	//
+	// InvalidOrganizationalUnit (You specified or selected an invalid unit in the
+	// resource data sync configuration.)
+	//
+	// TrustedAccessDisabled (You disabled Systems Manager access in the organization
+	// in Organizations.)
+	SyncSource *ResourceDataSyncSourceWithState `json:"syncSource,omitempty"`
+	SyncType   *string                          `json:"syncType,omitempty"`
+}
+
+// The Organizations organizational unit data source for the sync.
+type ResourceDataSyncOrganizationalUnit struct {
+	OrganizationalUnitID *string `json:"organizationalUnitID,omitempty"`
+}
+
+// Information about the target S3 bucket for the resource data sync.
+type ResourceDataSyncS3Destination struct {
+	AWSKMSKeyARN *string `json:"awsKMSKeyARN,omitempty"`
+	BucketName   *string `json:"bucketName,omitempty"`
+	// Synchronize Amazon Web Services Systems Manager Inventory data from multiple
+	// Amazon Web Services accounts defined in Organizations to a centralized Amazon
+	// S3 bucket. Data is synchronized to individual key prefixes in the central
+	// bucket. Each key prefix represents a different Amazon Web Services account
+	// ID.
+	DestinationDataSharing *ResourceDataSyncDestinationDataSharing `json:"destinationDataSharing,omitempty"`
+	Prefix                 *string                                 `json:"prefix,omitempty"`
+	Region                 *string                                 `json:"region,omitempty"`
+	SyncFormat             *string                                 `json:"syncFormat,omitempty"`
+}
+
+// Information about the source of the data included in the resource data sync.
+type ResourceDataSyncSource struct {
+	// Information about the AwsOrganizationsSource resource data sync source. A
+	// sync source of this type can synchronize data from Organizations or, if an
+	// Amazon Web Services organization isn't present, from multiple Amazon Web
+	// Services Regions.
+	AWSOrganizationsSource  *ResourceDataSyncAWSOrganizationsSource `json:"awsOrganizationsSource,omitempty"`
+	EnableAllOpsDataSources *bool                                   `json:"enableAllOpsDataSources,omitempty"`
+	IncludeFutureRegions    *bool                                   `json:"includeFutureRegions,omitempty"`
+	SourceRegions           []*string                               `json:"sourceRegions,omitempty"`
+	SourceType              *string                                 `json:"sourceType,omitempty"`
+}
+
+// The data type name for including resource data sync state. There are four
+// sync states:
+//
+// OrganizationNotExists (Your organization doesn't exist)
+//
+// NoPermissions (The system can't locate the service-linked role. This role
+// is automatically created when a user creates a resource data sync in Amazon
+// Web Services Systems Manager Explorer.)
+//
+// InvalidOrganizationalUnit (You specified or selected an invalid unit in the
+// resource data sync configuration.)
+//
+// TrustedAccessDisabled (You disabled Systems Manager access in the organization
+// in Organizations.)
+type ResourceDataSyncSourceWithState struct {
+	// Information about the AwsOrganizationsSource resource data sync source. A
+	// sync source of this type can synchronize data from Organizations or, if an
+	// Amazon Web Services organization isn't present, from multiple Amazon Web
+	// Services Regions.
+	AWSOrganizationsSource  *ResourceDataSyncAWSOrganizationsSource `json:"awsOrganizationsSource,omitempty"`
+	EnableAllOpsDataSources *bool                                   `json:"enableAllOpsDataSources,omitempty"`
+	IncludeFutureRegions    *bool                                   `json:"includeFutureRegions,omitempty"`
+	SourceRegions           []*string                               `json:"sourceRegions,omitempty"`
+	SourceType              *string                                 `json:"sourceType,omitempty"`
+	State                   *string                                 `json:"state,omitempty"`
 }
 
 // Information about the result of a document review request.

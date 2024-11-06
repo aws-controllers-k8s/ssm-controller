@@ -40,6 +40,8 @@ import (
 	svcsdk "github.com/aws/aws-sdk-go/service/ssm"
 
 	_ "github.com/aws-controllers-k8s/ssm-controller/pkg/resource/document"
+	_ "github.com/aws-controllers-k8s/ssm-controller/pkg/resource/patch_baseline"
+	_ "github.com/aws-controllers-k8s/ssm-controller/pkg/resource/resource_data_sync"
 
 	"github.com/aws-controllers-k8s/ssm-controller/pkg/version"
 )
