@@ -3,7 +3,6 @@ ignore:
       - Activation
       - Association
       - AssociationBatch
-      - Document
       - MaintenanceWindow
       - OpsItem
       - PatchBaseline
