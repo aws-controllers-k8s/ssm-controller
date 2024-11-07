@@ -1,0 +1,21 @@
+apiVersion: ssm.services.k8s.aws/v1alpha1
+kind: Document
+metadata:
+  name: test-document
+spec:
+  name: test-document
+  content: |
+    {
+      "schemaVersion": "1.2",
+      "description": "Updated SSM Document",
+      "mainSteps": [
+        {
+          "action": "aws:runShellScript",
+          "name": "example",
+          "inputs": {
+            "runCommand": ["echo Updated content"]
+          }
+        }
+      ]
+    }
+  documentType: "Command"
