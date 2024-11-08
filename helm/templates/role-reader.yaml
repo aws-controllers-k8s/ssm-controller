@@ -9,6 +9,9 @@ rules:
 - apiGroups:
   - ssm.services.k8s.aws
   resources:
+  - documents
+  - patchbaselines
+  - resourcedatasyncs
   verbs:
   - get
   - list
