@@ -1,0 +1,15 @@
+apiVersion: ssm.services.k8s.aws/v1alpha1
+kind: PatchBaseline
+metadata:
+  name: test-patchbaseline
+spec:
+  name: test-patchbaseline
+  operatingSystem: WINDOWS
+  approvedPatches:
+    - KB123456
+    - KB789012
+  approvalRules:
+    patchRules:
+      - approveAfterDays: 7
+        complianceLevel: CRITICAL
+        enableNonSecurity: true

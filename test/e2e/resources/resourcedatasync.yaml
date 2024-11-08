@@ -1,0 +1,12 @@
+apiVersion: ssm.services.k8s.aws/v1alpha1
+kind: ResourceDataSync
+metadata:
+  name: test-resourcedatasync
+spec:
+  syncName: test-sync
+  syncType: SyncToDestination
+  s3Destination:
+    bucketName: test-bucket
+    syncFormat: JsonSerDe
+    region: us-west-2
+    prefix: "sync-prefix"
