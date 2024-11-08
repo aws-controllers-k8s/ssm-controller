@@ -2,7 +2,6 @@ import pytest
 import time
 from acktest.k8s import resource as k8s
 from acktest.resources import load_resource_file
-from acktest.aws.identity import get_region
 
 RESOURCE_PLURAL = "documents"
 RESOURCE_NAME = "test-document"
