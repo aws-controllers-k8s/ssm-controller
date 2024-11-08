@@ -8,5 +8,5 @@ roleRef:
   name: ack-ssm-controller
 subjects:
 - kind: ServiceAccount
-  name: ack--controller
+  name: ack-ssm-controller
   namespace: ack-system

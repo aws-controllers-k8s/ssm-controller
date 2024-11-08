@@ -99,7 +99,7 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       terminationGracePeriodSeconds: 10
-      serviceAccountName: ack--controller
+      serviceAccountName: ack-ssm-controller
       hostIPC: false
       hostPID: false
       hostNetwork: false
