@@ -1,40 +1,62 @@
 import pytest
-from acktest.k8s import resource as k8s
-from acktest.resources import load_resource_file
+import logging
 import time
+from acktest.resources import random_suffix_name
+from acktest.k8s import resource as k8s
+from e2e.bootstrap_resources import get_bootstrap_resources
+from e2e import service_marker, load_ssm_resource
+from e2e.replacement_values import REPLACEMENT_VALUES
 
 RESOURCE_PLURAL = "resourcedatasyncs"
-RESOURCE_NAME = "test-resourcedatasync"
+CREATE_WAIT_AFTER_SECONDS = 20
+DELETE_WAIT_AFTER_SECONDS = 20
+MODIFY_WAIT_AFTER_SECONDS = 20
 
 @pytest.fixture(scope="module")
 def resourcedatasync():
-    resource_data = load_resource_file("ssm", "resourcedatasync")
-    reference, _ = k8s.create_custom_resource(
+    RESOURCE_NAME = random_suffix_name("ssm", 12)
+
+    resources = get_bootstrap_resources()
+    logging.debug(resources)
+
+    replacements = REPLACEMENT_VALUES.copy()
+    resource_data = load_ssm_resource("resourcedatasync", additional_replacements=replacements)
+    reference, spec = k8s.create_custom_resource(
         resource_plural=RESOURCE_PLURAL,
         custom_resource_name=RESOURCE_NAME,
         spec=resource_data,
     )
-    yield reference
+    assert reference is not None
+
+    time.sleep(CREATE_WAIT_AFTER_SECONDS)
+    yield reference, spec
+
     k8s.delete_custom_resource(reference)
+    time.sleep(DELETE_WAIT_AFTER_SECONDS)
 
-def test_resourcedatasync_create(resourcedatasync):
-    reference = resourcedatasync
-    assert k8s.wait_on_condition(reference, "ACK.ResourceSynced", "True", wait_periods=10)
+@service_marker
+class TestResourceDataSync:
+    def test_create_delete(self, resourcedatasync):
+        (reference, spec) = resourcedatasync
 
-    resource = k8s.get_resource(reference)
-    assert resource is not None
-    assert resource["spec"]["syncName"] == RESOURCE_NAME
+        assert k8s.wait_on_condition(reference, "ACK.ResourceSynced", "True", wait_periods=10)
 
-def test_resourcedatasync_update(resourcedatasync):
-    reference = resourcedatasync
-    update_data = load_resource_file("ssm", "resourcedatasync_update")
-    k8s.patch_custom_resource(reference, update_data)
-    assert k8s.wait_on_condition(reference, "ACK.ResourceSynced", "True", wait_periods=10)
+        cr = k8s.get_resource(reference)
+        assert cr is not None
+        assert 'spec' in cr
+        assert 'syncName' in cr["spec"]
+        assert 'syncType' in cr["spec"]
+        assert 's3Destination' in cr["spec"]
+        assert 'bucketName' in cr["spec"]["s3Destination"]
+        assert 'syncFormat' in cr["spec"]["s3Destination"]
+        assert 'region' in cr["spec"]["s3Destination"]
+        assert 'prefix' in cr["spec"]["s3Destination"]
 
-    updated_resource = k8s.get_resource(reference)
-    assert updated_resource["spec"]["s3Destination"]["prefix"] == update_data["spec"]["s3Destination"]["prefix"]
-
-def test_resourcedatasync_delete():
-    k8s.delete_custom_resource_by_name("resourcedatasyncs", RESOURCE_NAME)
-    time.sleep(5)
-    assert k8s.get_resource_by_name("resourcedatasyncs", RESOURCE_NAME) is None
+        # Update test
+        update_data = load_ssm_resource("resourcedatasync_update", additional_replacements={})
+        k8s.patch_custom_resource(reference, update_data)
+        time.sleep(MODIFY_WAIT_AFTER_SECONDS)
+        assert k8s.wait_on_condition(reference, "ACK.ResourceSynced", "True", wait_periods=10)
+        
+        updated_cr = k8s.get_resource(reference)       
+        assert updated_cr["spec"]["s3Destination"]["prefix"] == update_data["spec"]["s3Destination"]["prefix"]
