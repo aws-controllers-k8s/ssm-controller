@@ -4,24 +4,23 @@ import time
 from acktest.resources import random_suffix_name
 from acktest.k8s import resource as k8s
 from e2e.bootstrap_resources import get_bootstrap_resources
-from e2e import service_marker, load_ssm_file
+from e2e import service_marker, load_ssm_resource
 from e2e.replacement_values import REPLACEMENT_VALUES
 
-RESOURCE_PLURAL = "documents"
+RESOURCE_PLURAL = "resourcedatasyncs"
 CREATE_WAIT_AFTER_SECONDS = 20
 DELETE_WAIT_AFTER_SECONDS = 20
 MODIFY_WAIT_AFTER_SECONDS = 20
 
-
 @pytest.fixture(scope="module")
-def document():
-    RESOURCE_NAME = random_suffix_name("document", 12)
+def resourcedatasync():
+    RESOURCE_NAME = random_suffix_name("ssm", 12)
 
     resources = get_bootstrap_resources()
     logging.debug(resources)
 
     replacements = REPLACEMENT_VALUES.copy()
-    resource_data = load_ssm_file("document", additional_replacements=replacements)
+    resource_data = load_ssm_resource("resourcedatasync", additional_replacements=replacements)
     reference, spec = k8s.create_custom_resource(
         resource_plural=RESOURCE_PLURAL,
         custom_resource_name=RESOURCE_NAME,
@@ -35,25 +34,36 @@ def document():
     k8s.delete_custom_resource(reference)
     time.sleep(DELETE_WAIT_AFTER_SECONDS)
 
-
 @service_marker
-class TestDocument:
-    def test_create_delete(self, document):
-        (reference, spec) = document
+class TestResourceDataSync:
+    def test_create_delete(self, resourcedatasync):
+        (reference, spec) = resourcedatasync
 
         assert k8s.wait_on_condition(reference, "ACK.ResourceSynced", "True", wait_periods=10)
 
         cr = k8s.get_resource(reference)
         assert cr is not None
         assert 'spec' in cr
-        assert 'name' in cr["spec"]
-        assert 'content' in cr["spec"]
+        assert 'syncName' in cr["spec"]
+        assert 'syncType' in cr["spec"]
+        assert 's3Destination' in cr["spec"]
+        assert 'bucketName' in cr["spec"]["s3Destination"]
+        assert 'syncFormat' in cr["spec"]["s3Destination"]
+        assert 'region' in cr["spec"]["s3Destination"]
+        assert 'prefix' in cr["spec"]["s3Destination"]
 
         # Update test
-        update_data = load_ssm_file("document_update", additional_replacements={})
+        update_data = {
+            "spec": {
+                "s3Destination": {
+                    "prefix": "updated-sync-prefix"
+                }
+            }
+        }
+
         k8s.patch_custom_resource(reference, update_data)
         time.sleep(MODIFY_WAIT_AFTER_SECONDS)
         assert k8s.wait_on_condition(reference, "ACK.ResourceSynced", "True", wait_periods=10)
-        
+
         updated_cr = k8s.get_resource(reference)       
-        assert updated_cr["spec"]["content"] == update_data["spec"]["content"]
+        assert updated_cr["spec"]["s3Destination"]["prefix"] == update_data["spec"]["s3Destination"]["prefix"]
