@@ -8,7 +8,7 @@ from e2e import service_marker, load_ssm_resource, CRD_GROUP, CRD_VERSION
 from e2e.replacement_values import REPLACEMENT_VALUES
 
 RESOURCE_PLURAL = "patchbaselines"
-CREATE_WAIT_AFTER_SECONDS = 20
+CREATE_WAIT_AFTER_SECONDS = 60
 DELETE_WAIT_AFTER_SECONDS = 20
 MODIFY_WAIT_AFTER_SECONDS = 20
 
@@ -31,7 +31,8 @@ def patchbaseline():
     )
 
     k8s.create_custom_resource(reference, resource_data)
-    cr = k8s.wait_resource_consumed_by_controller(reference, timeout=120)
+    time.sleep(CREATE_WAIT_AFTER_SECONDS)
+    cr = k8s.wait_resource_consumed_by_controller(reference)
 
     assert cr is not None
     assert k8s.get_resource_exists(reference)

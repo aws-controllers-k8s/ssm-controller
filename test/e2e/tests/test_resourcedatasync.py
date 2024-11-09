@@ -17,10 +17,10 @@ def resourcedatasync():
     RESOURCE_NAME = random_suffix_name("resourcedatasync", 12)
 
     resources = get_bootstrap_resources()
-    logging.debug(resources)
+    logging.debug(f"Bootstrap resources: {resources}")
 
     replacements = REPLACEMENT_VALUES.copy()
-    replacements["BUCKET_NAME"] = get_bootstrap_resources().ResourceSyncBucket.name
+    replacements["BUCKET_NAME"] = resources.ResourceSyncBucket.name
     resource_data = load_ssm_resource("resourcedatasync", additional_replacements=replacements)
 
     reference = k8s.CustomResourceReference(
@@ -31,15 +31,34 @@ def resourcedatasync():
         namespace='default',
     )
 
-    k8s.create_custom_resource(reference, resource_data)
-    cr = k8s.wait_resource_consumed_by_controller(reference)
-    assert cr is not None
+    try:
+        k8s.create_custom_resource(reference, resource_data)
+    except Exception as e:
+        logging.error(f"Failed to create ResourceDataSync: {e}")
+        raise
 
-    time.sleep(CREATE_WAIT_AFTER_SECONDS)
+    max_attempts = 10
+    for attempt in range(max_attempts):
+        time.sleep(5)  # Wait for 5 seconds between checks
+        if k8s.get_resource_exists(reference):
+            logging.info(f"ResourceDataSync created successfully after {attempt + 1} attempts")
+            break
+        logging.warning(f"ResourceDataSync not found, attempt {attempt + 1}/{max_attempts}")
+    else:
+        raise TimeoutError("ResourceDataSync was not created within the expected time")
+
+    assert k8s.wait_on_condition(reference, "ACK.ResourceSynced", "True", wait_periods=20)
+    
+    cr = k8s.get_resource(reference)
+    assert cr is not None
+    logging.info(f"ResourceDataSync CR: {cr}")
+
     yield reference, cr
 
+    # Cleanup
     k8s.delete_custom_resource(reference)
     time.sleep(DELETE_WAIT_AFTER_SECONDS)
+
 
 @service_marker
 class TestResourceDataSync:
