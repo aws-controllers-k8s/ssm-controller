@@ -4,7 +4,7 @@ import time
 from acktest.resources import random_suffix_name
 from acktest.k8s import resource as k8s
 from e2e.bootstrap_resources import get_bootstrap_resources
-from e2e import service_marker, load_ssm_resource
+from e2e import service_marker, load_ssm_resource, CRD_GROUP, CRD_VERSION
 from e2e.replacement_values import REPLACEMENT_VALUES
 
 RESOURCE_PLURAL = "resourcedatasyncs"
@@ -21,15 +21,21 @@ def resourcedatasync():
 
     replacements = REPLACEMENT_VALUES.copy()
     resource_data = load_ssm_resource("resourcedatasync", additional_replacements=replacements)
-    reference, spec = k8s.create_custom_resource(
-        resource_plural=RESOURCE_PLURAL,
-        custom_resource_name=RESOURCE_NAME,
-        spec=resource_data,
+
+    reference = k8s.CustomResourceReference(
+        CRD_GROUP,
+        CRD_VERSION,
+        RESOURCE_PLURAL,
+        RESOURCE_NAME,
+        namespace='default',
     )
-    assert reference is not None
+
+    k8s.create_custom_resource(reference, resource_data)
+    cr = k8s.wait_resource_consumed_by_controller(reference, wait_periods=CREATE_WAIT_AFTER_SECONDS)
+    assert cr is not None
 
     time.sleep(CREATE_WAIT_AFTER_SECONDS)
-    yield reference, spec
+    yield reference, cr
 
     k8s.delete_custom_resource(reference)
     time.sleep(DELETE_WAIT_AFTER_SECONDS)
@@ -37,7 +43,7 @@ def resourcedatasync():
 @service_marker
 class TestResourceDataSync:
     def test_create_delete(self, resourcedatasync):
-        (reference, spec) = resourcedatasync
+        (reference, _) = resourcedatasync
 
         assert k8s.wait_on_condition(reference, "ACK.ResourceSynced", "True", wait_periods=10)
 
