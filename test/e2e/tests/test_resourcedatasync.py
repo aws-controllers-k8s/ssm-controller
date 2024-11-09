@@ -14,7 +14,7 @@ MODIFY_WAIT_AFTER_SECONDS = 20
 
 @pytest.fixture(scope="module")
 def resourcedatasync():
-    RESOURCE_NAME = random_suffix_name("ssm", 12)
+    RESOURCE_NAME = random_suffix_name("resourcedatasync", 12)
 
     resources = get_bootstrap_resources()
     logging.debug(resources)
@@ -31,7 +31,7 @@ def resourcedatasync():
     )
 
     k8s.create_custom_resource(reference, resource_data)
-    cr = k8s.wait_resource_consumed_by_controller(reference, wait_periods=CREATE_WAIT_AFTER_SECONDS)
+    cr = k8s.wait_resource_consumed_by_controller(reference)
     assert cr is not None
 
     time.sleep(CREATE_WAIT_AFTER_SECONDS)

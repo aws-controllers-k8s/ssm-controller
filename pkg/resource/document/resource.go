@@ -90,13 +90,17 @@ func (r *resource) SetIdentifiers(identifier *ackv1alpha1.AWSIdentifiers) error 
 	}
 	r.ko.Spec.Name = &identifier.NameOrID
 
-	f0, f0ok := identifier.AdditionalKeys["documentVersion"]
+	f0, f0ok := identifier.AdditionalKeys["documentFormat"]
 	if f0ok {
-		r.ko.Status.DocumentVersion = &f0
+		r.ko.Spec.DocumentFormat = &f0
 	}
-	f2, f2ok := identifier.AdditionalKeys["versionName"]
-	if f2ok {
-		r.ko.Spec.VersionName = &f2
+	f1, f1ok := identifier.AdditionalKeys["documentVersion"]
+	if f1ok {
+		r.ko.Status.DocumentVersion = &f1
+	}
+	f3, f3ok := identifier.AdditionalKeys["versionName"]
+	if f3ok {
+		r.ko.Spec.VersionName = &f3
 	}
 
 	return nil

@@ -31,7 +31,7 @@ def patchbaseline():
     )
 
     k8s.create_custom_resource(reference, resource_data)
-    cr = k8s.wait_resource_consumed_by_controller(reference, wait_periods=CREATE_WAIT_AFTER_SECONDS)
+    cr = k8s.wait_resource_consumed_by_controller(reference)
 
 
     assert cr is not None
