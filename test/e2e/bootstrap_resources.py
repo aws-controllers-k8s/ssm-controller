@@ -18,7 +18,7 @@ for them.
 from dataclasses import dataclass
 from acktest.bootstrapping import Resources
 from e2e import bootstrap_directory
-from e2e.bootstrapping.s3 import Bucket
+from acktest.bootstrapping.s3 import Bucket
 
 
 @dataclass
