@@ -12,7 +12,6 @@ spec:
     patchRules:
       - approveAfterDays: 7
         complianceLevel: CRITICAL
-        enableNonSecurity: true
         patchFilterGroup:
           patchFilters:
             - key: PRODUCT

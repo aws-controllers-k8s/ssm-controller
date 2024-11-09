@@ -64,7 +64,6 @@ class TestPatchBaseline:
                         {
                             "approveAfterDays": 10,
                             "complianceLevel": "HIGH",
-                            "enableNonSecurity": False,
                             "patchFilterGroup": {
                                 "patchFilters": [
                                     {
