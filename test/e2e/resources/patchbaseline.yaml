@@ -13,3 +13,12 @@ spec:
       - approveAfterDays: 7
         complianceLevel: CRITICAL
         enableNonSecurity: true
+        patchFilterGroup:
+          patchFilters:
+            - key: PRODUCT
+              values:
+                - WindowsServer2016
+            - key: CLASSIFICATION
+              values:
+                - CriticalUpdates
+                - SecurityUpdates

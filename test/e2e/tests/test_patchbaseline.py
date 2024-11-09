@@ -33,7 +33,6 @@ def patchbaseline():
     k8s.create_custom_resource(reference, resource_data)
     cr = k8s.wait_resource_consumed_by_controller(reference)
 
-
     assert cr is not None
     assert k8s.get_resource_exists(reference)
     yield reference, cr
@@ -58,25 +57,36 @@ class TestPatchBaseline:
 
         # Update test
         update_data = {
-                "spec": {
-                    "approvedPatches": ["KB345678"],
-                    "approvalRules": {
-                        "patchRules": [
-                            {
-                                "approveAfterDays": 10,
-                                "complianceLevel": "HIGH",
-                                "enableNonSecurity": False
+            "spec": {
+                "approvedPatches": ["KB345678"],
+                "approvalRules": {
+                    "patchRules": [
+                        {
+                            "approveAfterDays": 10,
+                            "complianceLevel": "HIGH",
+                            "enableNonSecurity": False,
+                            "patchFilterGroup": {
+                                "patchFilters": [
+                                    {
+                                        "key": "PRODUCT",
+                                        "values": ["WindowsServer2019"]
+                                    },
+                                    {
+                                        "key": "CLASSIFICATION",
+                                        "values": ["CriticalUpdates"]
+                                    }
+                                ]
                             }
-                        ]
-                    }
+                        }
+                    ]
                 }
             }
+        }
 
         k8s.patch_custom_resource(reference, update_data)
         time.sleep(MODIFY_WAIT_AFTER_SECONDS)
         assert k8s.wait_on_condition(reference, "ACK.ResourceSynced", "True", wait_periods=10)
 
-        
         updated_cr = k8s.get_resource(reference)       
         assert updated_cr["spec"]["approvedPatches"] == update_data["spec"]["approvedPatches"]
-        assert updated_cr["spec"]["patchRules"] == update_data["spec"]["patchRules"]
+        assert updated_cr["spec"]["approvalRules"] == update_data["spec"]["approvalRules"]

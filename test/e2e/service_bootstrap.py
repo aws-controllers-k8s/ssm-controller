@@ -15,15 +15,48 @@
 import logging
 
 from acktest.bootstrapping import Resources, BootstrapFailureException
-
+from acktest.bootstrapping.s3 import Bucket
 from e2e import bootstrap_directory
 from e2e.bootstrap_resources import BootstrapResources
+
+
+BUCKET_POLICY_FOR_SSM_RESOURCE_DATA_SYNC = """{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "SSMBucketPermissionsCheck",
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "ssm.amazonaws.com"
+            },
+            "Action": "s3:GetBucketAcl",
+            "Resource": "arn:aws:s3:::$NAME"
+        },
+        {
+            "Sid": "SSMBucketDelivery",
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "ssm.amazonaws.com"
+            },
+            "Action": "s3:PutObject",
+            "Resource": "arn:aws:s3:::$NAME/*",
+            "Condition": {
+                "StringEquals": {
+                    "s3:x-amz-acl": "bucket-owner-full-control"
+                }
+            }
+        }
+    ]
+}"""
 
 def service_bootstrap() -> Resources:
     logging.getLogger().setLevel(logging.INFO)
 
     resources = BootstrapResources(
-        # TODO: Add bootstrapping when you have defined the resources
+        ResourceSyncBucket = Bucket(
+            "ack-test-bucket",
+            policy=BUCKET_POLICY_FOR_SSM_RESOURCE_DATA_SYNC,
+        )
     )
 
     try:

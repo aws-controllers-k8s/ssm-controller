@@ -6,7 +6,7 @@ spec:
   syncName: test-sync
   syncType: SyncToDestination
   s3Destination:
-    bucketName: test-bucket
+    bucketName: $BUCKET_NAME
     syncFormat: JsonSerDe
     region: us-west-2
     prefix: "sync-prefix"

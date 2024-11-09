@@ -20,6 +20,7 @@ def resourcedatasync():
     logging.debug(resources)
 
     replacements = REPLACEMENT_VALUES.copy()
+    replacements["BUCKET_NAME"] = get_bootstrap_resources().ResourceSyncBucket.name
     resource_data = load_ssm_resource("resourcedatasync", additional_replacements=replacements)
 
     reference = k8s.CustomResourceReference(
