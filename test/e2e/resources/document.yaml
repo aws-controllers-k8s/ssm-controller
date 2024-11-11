@@ -6,7 +6,7 @@ spec:
   name: test-document
   content: |
     {
-      "schemaVersion": "1.2",
+      "schemaVersion": "2.2",
       "description": "Sample SSM Document",
       "mainSteps": [
         {
