@@ -4,7 +4,7 @@ import time
 from acktest.resources import random_suffix_name
 from acktest.k8s import resource as k8s
 from e2e.bootstrap_resources import get_bootstrap_resources
-from e2e import service_marker, load_ssm_file, CRD_GROUP, CRD_VERSION
+from e2e import service_marker, load_ssm_resource, CRD_GROUP, CRD_VERSION
 from e2e.replacement_values import REPLACEMENT_VALUES
 
 RESOURCE_PLURAL = "documents"
@@ -21,7 +21,7 @@ def document():
     logging.debug(resources)
 
     replacements = REPLACEMENT_VALUES.copy()
-    resource_data = load_ssm_file("document", additional_replacements=replacements,)
+    resource_data = load_ssm_resource("document", additional_replacements=replacements,)
 
     reference = k8s.CustomResourceReference(
         CRD_GROUP,
