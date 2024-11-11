@@ -8,9 +8,9 @@ from e2e import service_marker, load_ssm_resource, CRD_GROUP, CRD_VERSION
 from e2e.replacement_values import REPLACEMENT_VALUES
 
 RESOURCE_PLURAL = "patchbaselines"
-CREATE_WAIT_AFTER_SECONDS = 60
-DELETE_WAIT_AFTER_SECONDS = 20
-MODIFY_WAIT_AFTER_SECONDS = 20
+CREATE_WAIT_AFTER_SECONDS = 10
+DELETE_WAIT_AFTER_SECONDS = 10
+MODIFY_WAIT_AFTER_SECONDS = 10
 
 @pytest.fixture(scope="module")
 def patchbaseline():
@@ -31,7 +31,6 @@ def patchbaseline():
     )
 
     k8s.create_custom_resource(reference, resource_data)
-    time.sleep(CREATE_WAIT_AFTER_SECONDS)
     cr = k8s.wait_resource_consumed_by_controller(reference)
 
     assert cr is not None
@@ -45,6 +44,7 @@ def patchbaseline():
 class TestPatchBaseline:
     def test_create_delete(self, patchbaseline):
         (reference, _) = patchbaseline
+        time.sleep(CREATE_WAIT_AFTER_SECONDS)
 
         assert k8s.wait_on_condition(reference, "ACK.ResourceSynced", "True", wait_periods=10)
 
