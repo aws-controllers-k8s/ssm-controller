@@ -73,4 +73,4 @@ class TestResourceDataSync:
         updated_cr = k8s.get_resource(reference)
         assert updated_cr is not None
         assert 'sourceRegions' in updated_cr["spec"]["syncSource"]
-        assert set(updated_cr["spec"]["syncSource"]["sourceRegions"]) == set(["us-west-2", "us-east-1"])
+        assert updated_cr["spec"]["syncSource"]["sourceRegions"] == update_data["spec"]["syncSource"]["sourceRegions"]
