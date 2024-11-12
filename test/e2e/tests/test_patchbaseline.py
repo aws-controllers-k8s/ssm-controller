@@ -14,7 +14,7 @@ MODIFY_WAIT_AFTER_SECONDS = 10
 
 @pytest.fixture(scope="module")
 def patchbaseline():
-    RESOURCE_NAME = random_suffix_name("patchbaseline", 12)
+    RESOURCE_NAME = random_suffix_name("patchbaseline", 24)
 
     resources = get_bootstrap_resources()
     logging.debug(resources)
