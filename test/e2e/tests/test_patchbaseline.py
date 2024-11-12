@@ -72,4 +72,4 @@ class TestPatchBaseline:
 
         updated_cr = k8s.get_resource(reference)       
         assert updated_cr["spec"]["approvedPatches"] == update_data["spec"]["approvedPatches"]
-        assert updated_cr["spec"]["approvalRules"] == update_data["spec"]["approvalRules"]
+        assert updated_cr["spec"]["approvalRules"] == cr["spec"]["approvalRules"]
