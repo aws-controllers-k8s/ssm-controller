@@ -61,22 +61,7 @@ class TestPatchBaseline:
 
         update_data = {
             "spec": {
-                "approvedPatches": {
-                    "patchRules": [
-                        {
-                            "patchFilterGroup": {
-                                "patchFilters": [
-                                    {
-                                        "key": "PRODUCT",
-                                        "values": ["WindowsServer2019"]
-                                    }
-                                ]
-                            },
-                            "approveAfterDays": 7,
-                            "complianceLevel": "CRITICAL"
-                        }
-                    ]
-                }
+                "approvedPatches": ["KB5029928"]
             }
         }
 

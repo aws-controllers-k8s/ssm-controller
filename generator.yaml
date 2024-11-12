@@ -11,6 +11,12 @@ resources:
       Name:
         is_primary_key: true
   ResourceDataSync:
+    renames:
+      operations:
+        CreateResourceDataSync:
+          input_fields:
+            SyncName: Name
+        
     fields:
       SyncName:
         is_primary_key: true
