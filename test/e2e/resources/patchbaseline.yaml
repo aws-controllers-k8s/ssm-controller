@@ -1,9 +1,9 @@
 apiVersion: ssm.services.k8s.aws/v1alpha1
 kind: PatchBaseline
 metadata:
-  name: test-patchbaseline
+  name: $NAME
 spec:
-  name: test-patchbaseline
+  name: $NAME
   operatingSystem: WINDOWS
   approvedPatches:
     - KB123456

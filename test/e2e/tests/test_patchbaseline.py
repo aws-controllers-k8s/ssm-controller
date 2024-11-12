@@ -20,7 +20,10 @@ def patchbaseline():
     logging.debug(resources)
 
     replacements = REPLACEMENT_VALUES.copy()
-    resource_data = load_ssm_resource("patchbaseline", additional_replacements=replacements)
+    replacements["NAME"] = RESOURCE_NAME
+    resource_data = load_ssm_resource("patchbaseline", additional_replacements=replacements,)
+
+    logging.debug(resource_data)
 
     reference = k8s.CustomResourceReference(
         CRD_GROUP,
