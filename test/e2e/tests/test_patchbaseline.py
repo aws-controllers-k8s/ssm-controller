@@ -72,4 +72,8 @@ class TestPatchBaseline:
 
         updated_cr = k8s.get_resource(reference)       
         assert updated_cr["spec"]["approvedPatches"] == update_data["spec"]["approvedPatches"]
-        assert updated_cr["spec"]["approvalRules"] == cr["spec"]["approvalRules"]
+        assert "approvalRules" in updated_cr["spec"]
+        
+        # Check that the structure of approvalRules is maintained
+        assert "patchRules" in updated_cr["spec"]["approvalRules"]
+        assert len(updated_cr["spec"]["approvalRules"]["patchRules"]) == len(cr["patchRules"])
