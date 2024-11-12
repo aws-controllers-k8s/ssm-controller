@@ -76,4 +76,4 @@ class TestPatchBaseline:
         
         # Check that the structure of approvalRules is maintained
         assert "patchRules" in updated_cr["spec"]["approvalRules"]
-        assert len(updated_cr["spec"]["approvalRules"]["patchRules"]) == len(cr["patchRules"])
+        assert len(updated_cr["spec"]["approvalRules"]["patchRules"]) == len(cr["spec"]["approvalRules"]["patchRules"])
