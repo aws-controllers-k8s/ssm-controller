@@ -20,7 +20,6 @@ def resourcedatasync():
     logging.debug(f"Bootstrap resources: {resources}")
 
     replacements = REPLACEMENT_VALUES.copy()
-    replacements["BUCKET_NAME"] = resources.ResourceSyncBucket.name
     resource_data = load_ssm_resource("resourcedatasync", additional_replacements=replacements)
 
     reference = k8s.CustomResourceReference(
@@ -31,22 +30,7 @@ def resourcedatasync():
         namespace='default',
     )
 
-    try:
-        k8s.create_custom_resource(reference, resource_data)
-    except Exception as e:
-        logging.error(f"Failed to create ResourceDataSync: {e}")
-        raise
-
-    max_attempts = 10
-    for attempt in range(max_attempts):
-        time.sleep(5)  # Wait for 5 seconds between checks
-        if k8s.get_resource_exists(reference):
-            logging.info(f"ResourceDataSync created successfully after {attempt + 1} attempts")
-            break
-        logging.warning(f"ResourceDataSync not found, attempt {attempt + 1}/{max_attempts}")
-    else:
-        raise TimeoutError("ResourceDataSync was not created within the expected time")
-
+    k8s.create_custom_resource(reference, resource_data)
     assert k8s.wait_on_condition(reference, "ACK.ResourceSynced", "True", wait_periods=20)
     
     cr = k8s.get_resource(reference)
@@ -55,7 +39,6 @@ def resourcedatasync():
 
     yield reference, cr
 
-    # Cleanup
     k8s.delete_custom_resource(reference)
     time.sleep(DELETE_WAIT_AFTER_SECONDS)
 
@@ -70,19 +53,16 @@ class TestResourceDataSync:
         cr = k8s.get_resource(reference)
         assert cr is not None
         assert 'spec' in cr
-        assert 'syncName' in cr["spec"]
-        assert 'syncType' in cr["spec"]
-        assert 's3Destination' in cr["spec"]
-        assert 'bucketName' in cr["spec"]["s3Destination"]
-        assert 'syncFormat' in cr["spec"]["s3Destination"]
-        assert 'region' in cr["spec"]["s3Destination"]
-        assert 'prefix' in cr["spec"]["s3Destination"]
+        assert cr["spec"]["syncType"] == "SyncFromSource"
+        assert 'syncSource' in cr["spec"]
+        assert 'sourceType' in cr["spec"]["syncSource"]
+        assert cr["spec"]["syncSource"]["sourceType"] == "SingleAccountMultiRegions"
+        assert 'sourceRegions' in cr["spec"]["syncSource"]
 
-        # Update test
         update_data = {
             "spec": {
-                "s3Destination": {
-                    "prefix": "updated-sync-prefix"
+                "syncSource": {
+                    "sourceRegions": ["us-west-2", "us-east-1"]
                 }
             }
         }
@@ -91,5 +71,7 @@ class TestResourceDataSync:
         time.sleep(MODIFY_WAIT_AFTER_SECONDS)
         assert k8s.wait_on_condition(reference, "ACK.ResourceSynced", "True", wait_periods=10)
 
-        updated_cr = k8s.get_resource(reference)       
-        assert updated_cr["spec"]["s3Destination"]["prefix"] == update_data["spec"]["s3Destination"]["prefix"]
+        updated_cr = k8s.get_resource(reference)
+        assert updated_cr is not None
+        assert 'sourceRegions' in updated_cr["spec"]["syncSource"]
+        assert set(updated_cr["spec"]["syncSource"]["sourceRegions"]) == set(["us-west-2", "us-east-1"])

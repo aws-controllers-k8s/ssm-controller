@@ -4,10 +4,13 @@ metadata:
   name: test-document
 spec:
   name: test-document
+  documentType: Command
+  documentFormat: JSON
   content: |
     {
       "schemaVersion": "2.2",
       "description": "Sample SSM Document",
+      "parameters": {},
       "mainSteps": [
         {
           "action": "aws:runShellScript",
@@ -18,4 +21,4 @@ spec:
         }
       ]
     }
-  documentType: "Command"
+

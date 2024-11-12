@@ -4,9 +4,8 @@ metadata:
   name: test-resourcedatasync
 spec:
   syncName: test-sync
-  syncType: SyncToDestination
-  s3Destination:
-    bucketName: $BUCKET_NAME
-    syncFormat: JsonSerDe
-    region: us-west-2
-    prefix: "sync-prefix"
+  syncType: SyncFromSource
+  syncSource:
+    sourceType: SingleAccountMultiRegions
+    sourceRegions:
+      - us-west-2

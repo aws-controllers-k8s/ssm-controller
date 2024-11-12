@@ -86,11 +86,7 @@ type AssociationVersionInfo struct {
 
 // A structure that includes attributes that describe a document attachment.
 type AttachmentContent struct {
-	Hash     *string `json:"hash,omitempty"`
-	HashType *string `json:"hashType,omitempty"`
-	Name     *string `json:"name,omitempty"`
-	Size     *int64  `json:"size,omitempty"`
-	URL      *string `json:"url,omitempty"`
+	Name *string `json:"name,omitempty"`
 }
 
 // An attribute of an attachment, such as the attachment name.

@@ -2,3 +2,6 @@ __pycache__/
 *.py[cod]
 **/bootstrap.yaml
 **/bootstrap.pkl
+
+test_document.py
+test_patchbaseline.py

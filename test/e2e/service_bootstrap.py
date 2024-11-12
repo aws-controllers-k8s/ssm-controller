@@ -20,34 +20,39 @@ from e2e import bootstrap_directory
 from e2e.bootstrap_resources import BootstrapResources
 
 
-BUCKET_POLICY_FOR_SSM_RESOURCE_DATA_SYNC = """{
+BUCKET_POLICY_FOR_SSM_RESOURCE_DATA_SYNC = """
+{
     "Version": "2012-10-17",
     "Statement": [
         {
-            "Sid": "SSMBucketPermissionsCheck",
+            "Sid": "AllowSSMBucketAccess",
             "Effect": "Allow",
             "Principal": {
                 "Service": "ssm.amazonaws.com"
             },
-            "Action": "s3:GetBucketAcl",
+            "Action": [
+                "s3:GetBucketLocation",
+                "s3:ListBucket",
+                "s3:GetEncryptionConfiguration"
+            ],
             "Resource": "arn:aws:s3:::$NAME"
         },
         {
-            "Sid": "SSMBucketDelivery",
+            "Sid": "AllowSSMObjectAccess",
             "Effect": "Allow",
             "Principal": {
                 "Service": "ssm.amazonaws.com"
             },
-            "Action": "s3:PutObject",
-            "Resource": "arn:aws:s3:::$NAME/*",
-            "Condition": {
-                "StringEquals": {
-                    "s3:x-amz-acl": "bucket-owner-full-control"
-                }
-            }
+            "Action": [
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:DeleteObject"
+            ],
+            "Resource": "arn:aws:s3:::$NAME/*"
         }
     ]
-}"""
+}
+"""
 
 def service_bootstrap() -> Resources:
     logging.getLogger().setLevel(logging.INFO)

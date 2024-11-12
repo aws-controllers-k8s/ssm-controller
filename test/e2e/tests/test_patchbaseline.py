@@ -59,22 +59,15 @@ class TestPatchBaseline:
         # Update test
         update_data = {
             "spec": {
-                "approvedPatches": ["KB345678"],
                 "approvalRules": {
                     "patchRules": [
                         {
-                            "approveAfterDays": 10,
-                            "complianceLevel": "HIGH",
                             "patchFilterGroup": {
                                 "patchFilters": [
                                     {
                                         "key": "PRODUCT",
                                         "values": ["WindowsServer2019"]
                                     },
-                                    {
-                                        "key": "CLASSIFICATION",
-                                        "values": ["CriticalUpdates"]
-                                    }
                                 ]
                             }
                         }
