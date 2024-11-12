@@ -1,9 +1,9 @@
 apiVersion: ssm.services.k8s.aws/v1alpha1
 kind: Document
 metadata:
-  name: test-document
+  name: $NAME
 spec:
-  name: test-document
+  name: $NAME
   documentType: Command
   documentFormat: JSON
   content: |

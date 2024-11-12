@@ -1,9 +1,9 @@
 apiVersion: ssm.services.k8s.aws/v1alpha1
 kind: ResourceDataSync
 metadata:
-  name: test-resourcedatasync
+  name: $NAME
 spec:
-  syncName: test-sync
+  syncName: $NAME
   syncType: SyncFromSource
   syncSource:
     sourceType: SingleAccountMultiRegions

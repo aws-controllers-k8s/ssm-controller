@@ -59,10 +59,9 @@ class TestPatchBaseline:
         assert 'approvedPatches' in cr["spec"]
         assert 'approvalRules' in cr["spec"]
 
-        # Update test
         update_data = {
             "spec": {
-                "approvalRules": {
+                "approvedPatches": {
                     "patchRules": [
                         {
                             "patchFilterGroup": {
@@ -70,14 +69,17 @@ class TestPatchBaseline:
                                     {
                                         "key": "PRODUCT",
                                         "values": ["WindowsServer2019"]
-                                    },
+                                    }
                                 ]
-                            }
+                            },
+                            "approveAfterDays": 7,
+                            "complianceLevel": "CRITICAL"
                         }
                     ]
                 }
             }
         }
+
 
         k8s.patch_custom_resource(reference, update_data)
         time.sleep(MODIFY_WAIT_AFTER_SECONDS)
