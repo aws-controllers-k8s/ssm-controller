@@ -1,5 +1,6 @@
 import pytest
 import logging
+import json
 import time
 from acktest.resources import random_suffix_name
 from acktest.k8s import resource as k8s
@@ -61,23 +62,23 @@ class TestDocument:
 
         # Update test
         update_data = {
-                "spec": {
-                    "content": 
+            "spec": {
+                "content": json.dumps({
+                    "schemaVersion": "2.2",
+                    "description": "Sample SSM Document",
+                    "mainSteps": [
                         {
-                        "schemaVersion": "2.2",
-                        "description": "Sample SSM Document",
-                        "mainSteps": [
-                            {
                             "action": "aws:runShellScript",
                             "name": "example",
                             "inputs": {
                                 "runCommand": ["echo Update Hello, World!"]
                             }
-                            }
-                        ]
-                    }
+                        }
+                    ]
+                })
             }
         }
+
         k8s.patch_custom_resource(reference, update_data)
         time.sleep(MODIFY_WAIT_AFTER_SECONDS)
         assert k8s.wait_on_condition(reference, "ACK.ResourceSynced", "True", wait_periods=10)
