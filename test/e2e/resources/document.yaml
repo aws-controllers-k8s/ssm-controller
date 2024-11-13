@@ -10,7 +10,6 @@ spec:
     {
       "schemaVersion": "2.2",
       "description": "Sample SSM Document",
-      "parameters": {},
       "mainSteps": [
         {
           "action": "aws:runShellScript",

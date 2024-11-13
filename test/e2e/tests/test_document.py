@@ -63,21 +63,21 @@ class TestDocument:
         update_data = {
                 "spec": {
                     "content": 
-                    {
-                        "schemaVersion": "1.2",
-                        "description": "Updated SSM Document",
+                        {
+                        "schemaVersion": "2.2",
+                        "description": "Sample SSM Document",
                         "mainSteps": [
                             {
-                                "action": "aws:runShellScript",
-                                "name": "example",
-                                "inputs": {
-                                    "runCommand": ["echo Updated content"]
-                                    }
-                                }
-                            ]
-                        },
-                    },
-                }
+                            "action": "aws:runShellScript",
+                            "name": "example",
+                            "inputs": {
+                                "runCommand": ["echo Update Hello, World!"]
+                            }
+                            }
+                        ]
+                    }
+            }
+        }
         k8s.patch_custom_resource(reference, update_data)
         time.sleep(MODIFY_WAIT_AFTER_SECONDS)
         assert k8s.wait_on_condition(reference, "ACK.ResourceSynced", "True", wait_periods=10)

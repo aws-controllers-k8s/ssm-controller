@@ -6,6 +6,11 @@ ignore:
       - MaintenanceWindow
       - OpsItem
 resources:
+  Document:
+    exceptions:
+      errors:
+        404:
+          code: InvalidDocument
   PatchBaseline:
     fields:
       Name:
