@@ -3,8 +3,21 @@ ignore:
       - Activation
       - Association
       - AssociationBatch
-      - Document
       - MaintenanceWindow
       - OpsItem
-      - PatchBaseline
-      - ResourceDataSync
+resources:
+  Document:
+    exceptions:
+      errors:
+        404:
+          code: InvalidDocument
+  PatchBaseline:
+    fields:
+      Name:
+        is_primary_key: true
+  ResourceDataSync:
+    fields:
+      SyncName:
+        is_primary_key: true
+    tags:
+      ignore: true

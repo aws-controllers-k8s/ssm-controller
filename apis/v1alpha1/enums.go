@@ -306,14 +306,14 @@ const (
 	DocumentReviewCommentType_Comment DocumentReviewCommentType = "Comment"
 )
 
-type DocumentStatus string
+type DocumentStatus_SDK string
 
 const (
-	DocumentStatus_Creating DocumentStatus = "Creating"
-	DocumentStatus_Active   DocumentStatus = "Active"
-	DocumentStatus_Updating DocumentStatus = "Updating"
-	DocumentStatus_Deleting DocumentStatus = "Deleting"
-	DocumentStatus_Failed   DocumentStatus = "Failed"
+	DocumentStatus_SDK_Creating DocumentStatus_SDK = "Creating"
+	DocumentStatus_SDK_Active   DocumentStatus_SDK = "Active"
+	DocumentStatus_SDK_Updating DocumentStatus_SDK = "Updating"
+	DocumentStatus_SDK_Deleting DocumentStatus_SDK = "Deleting"
+	DocumentStatus_SDK_Failed   DocumentStatus_SDK = "Failed"
 )
 
 type DocumentType string
