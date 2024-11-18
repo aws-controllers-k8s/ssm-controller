@@ -15,3 +15,10 @@ resources:
       errors:
         404:
           code: InvalidDocument
+
+operations:
+  DescribeDocument:
+    operation_type:
+    - Get
+    resource_name:
+      Document

@@ -73,9 +73,9 @@ func (rm *resourceManager) sdkFind(
 		return nil, err
 	}
 
-	var resp *svcsdk.GetDocumentOutput
-	resp, err = rm.sdkapi.GetDocumentWithContext(ctx, input)
-	rm.metrics.RecordAPICall("READ_ONE", "GetDocument", err)
+	var resp *svcsdk.DescribeDocumentOutput
+	resp, err = rm.sdkapi.DescribeDocumentWithContext(ctx, input)
+	rm.metrics.RecordAPICall("READ_ONE", "DescribeDocument", err)
 	if err != nil {
 		if reqErr, ok := ackerr.AWSRequestFailure(err); ok && reqErr.StatusCode() == 404 {
 			return nil, ackerr.NotFound
@@ -90,80 +90,238 @@ func (rm *resourceManager) sdkFind(
 	// the original Kubernetes object we passed to the function
 	ko := r.ko.DeepCopy()
 
-	if resp.Content != nil {
-		ko.Spec.Content = resp.Content
+	if resp.Document.ApprovedVersion != nil {
+		ko.Status.ApprovedVersion = resp.Document.ApprovedVersion
 	} else {
-		ko.Spec.Content = nil
+		ko.Status.ApprovedVersion = nil
 	}
-	if resp.CreatedDate != nil {
-		ko.Status.CreatedDate = &metav1.Time{*resp.CreatedDate}
+	if resp.Document.AttachmentsInformation != nil {
+		f1 := []*svcapitypes.AttachmentInformation{}
+		for _, f1iter := range resp.Document.AttachmentsInformation {
+			f1elem := &svcapitypes.AttachmentInformation{}
+			if f1iter.Name != nil {
+				f1elem.Name = f1iter.Name
+			}
+			f1 = append(f1, f1elem)
+		}
+		ko.Status.AttachmentsInformation = f1
+	} else {
+		ko.Status.AttachmentsInformation = nil
+	}
+	if resp.Document.Author != nil {
+		ko.Status.Author = resp.Document.Author
+	} else {
+		ko.Status.Author = nil
+	}
+	if resp.Document.Category != nil {
+		f3 := []*string{}
+		for _, f3iter := range resp.Document.Category {
+			var f3elem string
+			f3elem = *f3iter
+			f3 = append(f3, &f3elem)
+		}
+		ko.Status.Category = f3
+	} else {
+		ko.Status.Category = nil
+	}
+	if resp.Document.CategoryEnum != nil {
+		f4 := []*string{}
+		for _, f4iter := range resp.Document.CategoryEnum {
+			var f4elem string
+			f4elem = *f4iter
+			f4 = append(f4, &f4elem)
+		}
+		ko.Status.CategoryEnum = f4
+	} else {
+		ko.Status.CategoryEnum = nil
+	}
+	if resp.Document.CreatedDate != nil {
+		ko.Status.CreatedDate = &metav1.Time{*resp.Document.CreatedDate}
 	} else {
 		ko.Status.CreatedDate = nil
 	}
-	if resp.DisplayName != nil {
-		ko.Spec.DisplayName = resp.DisplayName
+	if resp.Document.DefaultVersion != nil {
+		ko.Status.DefaultVersion = resp.Document.DefaultVersion
+	} else {
+		ko.Status.DefaultVersion = nil
+	}
+	if resp.Document.Description != nil {
+		ko.Status.Description = resp.Document.Description
+	} else {
+		ko.Status.Description = nil
+	}
+	if resp.Document.DisplayName != nil {
+		ko.Spec.DisplayName = resp.Document.DisplayName
 	} else {
 		ko.Spec.DisplayName = nil
 	}
-	if resp.DocumentFormat != nil {
-		ko.Spec.DocumentFormat = resp.DocumentFormat
+	if resp.Document.DocumentFormat != nil {
+		ko.Spec.DocumentFormat = resp.Document.DocumentFormat
 	} else {
 		ko.Spec.DocumentFormat = nil
 	}
-	if resp.DocumentType != nil {
-		ko.Spec.DocumentType = resp.DocumentType
+	if resp.Document.DocumentType != nil {
+		ko.Spec.DocumentType = resp.Document.DocumentType
 	} else {
 		ko.Spec.DocumentType = nil
 	}
-	if resp.DocumentVersion != nil {
-		ko.Status.DocumentVersion = resp.DocumentVersion
+	if resp.Document.DocumentVersion != nil {
+		ko.Status.DocumentVersion = resp.Document.DocumentVersion
 	} else {
 		ko.Status.DocumentVersion = nil
 	}
-	if resp.Name != nil {
-		ko.Spec.Name = resp.Name
+	if resp.Document.Hash != nil {
+		ko.Status.Hash = resp.Document.Hash
+	} else {
+		ko.Status.Hash = nil
+	}
+	if resp.Document.HashType != nil {
+		ko.Status.HashType = resp.Document.HashType
+	} else {
+		ko.Status.HashType = nil
+	}
+	if resp.Document.LatestVersion != nil {
+		ko.Status.LatestVersion = resp.Document.LatestVersion
+	} else {
+		ko.Status.LatestVersion = nil
+	}
+	if resp.Document.Name != nil {
+		ko.Spec.Name = resp.Document.Name
 	} else {
 		ko.Spec.Name = nil
 	}
-	if resp.Requires != nil {
-		f8 := []*svcapitypes.DocumentRequires{}
-		for _, f8iter := range resp.Requires {
-			f8elem := &svcapitypes.DocumentRequires{}
-			if f8iter.Name != nil {
-				f8elem.Name = f8iter.Name
+	if resp.Document.Owner != nil {
+		ko.Status.Owner = resp.Document.Owner
+	} else {
+		ko.Status.Owner = nil
+	}
+	if resp.Document.Parameters != nil {
+		f17 := []*svcapitypes.DocumentParameter{}
+		for _, f17iter := range resp.Document.Parameters {
+			f17elem := &svcapitypes.DocumentParameter{}
+			if f17iter.DefaultValue != nil {
+				f17elem.DefaultValue = f17iter.DefaultValue
 			}
-			if f8iter.RequireType != nil {
-				f8elem.RequireType = f8iter.RequireType
+			if f17iter.Description != nil {
+				f17elem.Description = f17iter.Description
 			}
-			if f8iter.Version != nil {
-				f8elem.Version = f8iter.Version
+			if f17iter.Name != nil {
+				f17elem.Name = f17iter.Name
 			}
-			if f8iter.VersionName != nil {
-				f8elem.VersionName = f8iter.VersionName
+			if f17iter.Type != nil {
+				f17elem.Type = f17iter.Type
 			}
-			f8 = append(f8, f8elem)
+			f17 = append(f17, f17elem)
 		}
-		ko.Spec.Requires = f8
+		ko.Status.Parameters = f17
+	} else {
+		ko.Status.Parameters = nil
+	}
+	if resp.Document.PendingReviewVersion != nil {
+		ko.Status.PendingReviewVersion = resp.Document.PendingReviewVersion
+	} else {
+		ko.Status.PendingReviewVersion = nil
+	}
+	if resp.Document.PlatformTypes != nil {
+		f19 := []*string{}
+		for _, f19iter := range resp.Document.PlatformTypes {
+			var f19elem string
+			f19elem = *f19iter
+			f19 = append(f19, &f19elem)
+		}
+		ko.Status.PlatformTypes = f19
+	} else {
+		ko.Status.PlatformTypes = nil
+	}
+	if resp.Document.Requires != nil {
+		f20 := []*svcapitypes.DocumentRequires{}
+		for _, f20iter := range resp.Document.Requires {
+			f20elem := &svcapitypes.DocumentRequires{}
+			if f20iter.Name != nil {
+				f20elem.Name = f20iter.Name
+			}
+			if f20iter.RequireType != nil {
+				f20elem.RequireType = f20iter.RequireType
+			}
+			if f20iter.Version != nil {
+				f20elem.Version = f20iter.Version
+			}
+			if f20iter.VersionName != nil {
+				f20elem.VersionName = f20iter.VersionName
+			}
+			f20 = append(f20, f20elem)
+		}
+		ko.Spec.Requires = f20
 	} else {
 		ko.Spec.Requires = nil
 	}
-	if resp.ReviewStatus != nil {
-		ko.Status.ReviewStatus = resp.ReviewStatus
+	if resp.Document.ReviewInformation != nil {
+		f21 := []*svcapitypes.ReviewInformation{}
+		for _, f21iter := range resp.Document.ReviewInformation {
+			f21elem := &svcapitypes.ReviewInformation{}
+			if f21iter.ReviewedTime != nil {
+				f21elem.ReviewedTime = &metav1.Time{*f21iter.ReviewedTime}
+			}
+			if f21iter.Reviewer != nil {
+				f21elem.Reviewer = f21iter.Reviewer
+			}
+			if f21iter.Status != nil {
+				f21elem.Status = f21iter.Status
+			}
+			f21 = append(f21, f21elem)
+		}
+		ko.Status.ReviewInformation = f21
+	} else {
+		ko.Status.ReviewInformation = nil
+	}
+	if resp.Document.ReviewStatus != nil {
+		ko.Status.ReviewStatus = resp.Document.ReviewStatus
 	} else {
 		ko.Status.ReviewStatus = nil
 	}
-	if resp.Status != nil {
-		ko.Status.Status = resp.Status
+	if resp.Document.SchemaVersion != nil {
+		ko.Status.SchemaVersion = resp.Document.SchemaVersion
+	} else {
+		ko.Status.SchemaVersion = nil
+	}
+	if resp.Document.Sha1 != nil {
+		ko.Status.Sha1 = resp.Document.Sha1
+	} else {
+		ko.Status.Sha1 = nil
+	}
+	if resp.Document.Status != nil {
+		ko.Status.Status = resp.Document.Status
 	} else {
 		ko.Status.Status = nil
 	}
-	if resp.StatusInformation != nil {
-		ko.Status.StatusInformation = resp.StatusInformation
+	if resp.Document.StatusInformation != nil {
+		ko.Status.StatusInformation = resp.Document.StatusInformation
 	} else {
 		ko.Status.StatusInformation = nil
 	}
-	if resp.VersionName != nil {
-		ko.Spec.VersionName = resp.VersionName
+	if resp.Document.Tags != nil {
+		f27 := []*svcapitypes.Tag{}
+		for _, f27iter := range resp.Document.Tags {
+			f27elem := &svcapitypes.Tag{}
+			if f27iter.Key != nil {
+				f27elem.Key = f27iter.Key
+			}
+			if f27iter.Value != nil {
+				f27elem.Value = f27iter.Value
+			}
+			f27 = append(f27, f27elem)
+		}
+		ko.Spec.Tags = f27
+	} else {
+		ko.Spec.Tags = nil
+	}
+	if resp.Document.TargetType != nil {
+		ko.Spec.TargetType = resp.Document.TargetType
+	} else {
+		ko.Spec.TargetType = nil
+	}
+	if resp.Document.VersionName != nil {
+		ko.Spec.VersionName = resp.Document.VersionName
 	} else {
 		ko.Spec.VersionName = nil
 	}
@@ -186,12 +344,9 @@ func (rm *resourceManager) requiredFieldsMissingFromReadOneInput(
 // payload of the Describe API call for the resource
 func (rm *resourceManager) newDescribeRequestPayload(
 	r *resource,
-) (*svcsdk.GetDocumentInput, error) {
-	res := &svcsdk.GetDocumentInput{}
+) (*svcsdk.DescribeDocumentInput, error) {
+	res := &svcsdk.DescribeDocumentInput{}
 
-	if r.ko.Spec.DocumentFormat != nil {
-		res.SetDocumentFormat(*r.ko.Spec.DocumentFormat)
-	}
 	if r.ko.Status.DocumentVersion != nil {
 		res.SetDocumentVersion(*r.ko.Status.DocumentVersion)
 	}
