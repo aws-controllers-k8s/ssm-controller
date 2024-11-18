@@ -3,8 +3,22 @@ ignore:
       - Activation
       - Association
       - AssociationBatch
-      - Document
+      # - Document
       - MaintenanceWindow
       - OpsItem
       - PatchBaseline
       - ResourceDataSync
+
+resources:
+  Document:
+    exceptions:
+      errors:
+        404:
+          code: InvalidDocument
+
+operations:
+  DescribeDocument:
+    operation_type:
+    - Get
+    resource_name:
+      Document

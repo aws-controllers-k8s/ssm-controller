@@ -1,0 +1,23 @@
+apiVersion: ssm.services.k8s.aws/v1alpha1
+kind: Document
+metadata:
+  name: $NAME
+spec:
+  name: $NAME
+  documentType: Command
+  documentFormat: JSON
+  content: |
+    {
+      "schemaVersion": "2.2",
+      "description": "Sample SSM Document",
+      "mainSteps": [
+        {
+          "action": "aws:runShellScript",
+          "name": "example",
+          "inputs": {
+            "runCommand": ["echo Hello, World!"]
+          }
+        }
+      ]
+    }
+

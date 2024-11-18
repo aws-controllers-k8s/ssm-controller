@@ -39,6 +39,8 @@ import (
 	svcresource "github.com/aws-controllers-k8s/ssm-controller/pkg/resource"
 	svcsdk "github.com/aws/aws-sdk-go/service/ssm"
 
+	_ "github.com/aws-controllers-k8s/ssm-controller/pkg/resource/document"
+
 	"github.com/aws-controllers-k8s/ssm-controller/pkg/version"
 )
 

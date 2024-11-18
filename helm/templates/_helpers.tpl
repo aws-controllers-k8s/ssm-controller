@@ -91,6 +91,26 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - ssm.services.k8s.aws
+  resources:
+  - documents
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ssm.services.k8s.aws
+  resources:
+  - documents/status
+  verbs:
+  - get
+  - patch
+  - update
 {{- end }}
 
 {{/* Convert k/v map to string like: "key1=value1,key2=value2,..." */}}
