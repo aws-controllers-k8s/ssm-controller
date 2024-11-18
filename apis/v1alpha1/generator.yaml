@@ -11,9 +11,6 @@ ignore:
 
 resources:
   Document:
-    fields:
-      DocumentDescription.DocumentParameter.Type:
-        go_tag: json:"type,omitempty"
     exceptions:
       errors:
         404:
