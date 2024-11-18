@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
   - common
   - bases/ssm.services.k8s.aws_documents.yaml
+  - bases/ssm.services.k8s.aws_resourcedatasyncs.yaml

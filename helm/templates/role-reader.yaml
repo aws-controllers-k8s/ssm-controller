@@ -10,6 +10,7 @@ rules:
   - ssm.services.k8s.aws
   resources:
   - documents
+  - resourcedatasyncs
   verbs:
   - get
   - list

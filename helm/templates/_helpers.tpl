@@ -95,6 +95,7 @@ rules:
   - ssm.services.k8s.aws
   resources:
   - documents
+  - resourcedatasyncs
   verbs:
   - create
   - delete
@@ -107,6 +108,7 @@ rules:
   - ssm.services.k8s.aws
   resources:
   - documents/status
+  - resourcedatasyncs/status
   verbs:
   - get
   - patch

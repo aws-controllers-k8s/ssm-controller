@@ -526,6 +526,114 @@ type ResolvedTargets struct {
 	Truncated *bool `json:"truncated,omitempty"`
 }
 
+// Information about the AwsOrganizationsSource resource data sync source. A
+// sync source of this type can synchronize data from Organizations or, if an
+// Amazon Web Services organization isn't present, from multiple Amazon Web
+// Services Regions.
+type ResourceDataSyncAWSOrganizationsSource struct {
+	OrganizationSourceType *string                               `json:"organizationSourceType,omitempty"`
+	OrganizationalUnits    []*ResourceDataSyncOrganizationalUnit `json:"organizationalUnits,omitempty"`
+}
+
+// Synchronize Amazon Web Services Systems Manager Inventory data from multiple
+// Amazon Web Services accounts defined in Organizations to a centralized Amazon
+// S3 bucket. Data is synchronized to individual key prefixes in the central
+// bucket. Each key prefix represents a different Amazon Web Services account
+// ID.
+type ResourceDataSyncDestinationDataSharing struct {
+	DestinationDataSharingType *string `json:"destinationDataSharingType,omitempty"`
+}
+
+// Information about a resource data sync configuration, including its current
+// status and last successful sync.
+type ResourceDataSyncItem struct {
+	LastStatus             *string      `json:"lastStatus,omitempty"`
+	LastSuccessfulSyncTime *metav1.Time `json:"lastSuccessfulSyncTime,omitempty"`
+	LastSyncStatusMessage  *string      `json:"lastSyncStatusMessage,omitempty"`
+	LastSyncTime           *metav1.Time `json:"lastSyncTime,omitempty"`
+	// Information about the target S3 bucket for the resource data sync.
+	S3Destination        *ResourceDataSyncS3Destination `json:"s3Destination,omitempty"`
+	SyncCreatedTime      *metav1.Time                   `json:"syncCreatedTime,omitempty"`
+	SyncLastModifiedTime *metav1.Time                   `json:"syncLastModifiedTime,omitempty"`
+	SyncName             *string                        `json:"syncName,omitempty"`
+	// The data type name for including resource data sync state. There are four
+	// sync states:
+	//
+	// OrganizationNotExists (Your organization doesn't exist)
+	//
+	// NoPermissions (The system can't locate the service-linked role. This role
+	// is automatically created when a user creates a resource data sync in Amazon
+	// Web Services Systems Manager Explorer.)
+	//
+	// InvalidOrganizationalUnit (You specified or selected an invalid unit in the
+	// resource data sync configuration.)
+	//
+	// TrustedAccessDisabled (You disabled Systems Manager access in the organization
+	// in Organizations.)
+	SyncSource *ResourceDataSyncSourceWithState `json:"syncSource,omitempty"`
+	SyncType   *string                          `json:"syncType,omitempty"`
+}
+
+// The Organizations organizational unit data source for the sync.
+type ResourceDataSyncOrganizationalUnit struct {
+	OrganizationalUnitID *string `json:"organizationalUnitID,omitempty"`
+}
+
+// Information about the target S3 bucket for the resource data sync.
+type ResourceDataSyncS3Destination struct {
+	AWSKMSKeyARN *string `json:"awsKMSKeyARN,omitempty"`
+	BucketName   *string `json:"bucketName,omitempty"`
+	// Synchronize Amazon Web Services Systems Manager Inventory data from multiple
+	// Amazon Web Services accounts defined in Organizations to a centralized Amazon
+	// S3 bucket. Data is synchronized to individual key prefixes in the central
+	// bucket. Each key prefix represents a different Amazon Web Services account
+	// ID.
+	DestinationDataSharing *ResourceDataSyncDestinationDataSharing `json:"destinationDataSharing,omitempty"`
+	Prefix                 *string                                 `json:"prefix,omitempty"`
+	Region                 *string                                 `json:"region,omitempty"`
+	SyncFormat             *string                                 `json:"syncFormat,omitempty"`
+}
+
+// Information about the source of the data included in the resource data sync.
+type ResourceDataSyncSource struct {
+	// Information about the AwsOrganizationsSource resource data sync source. A
+	// sync source of this type can synchronize data from Organizations or, if an
+	// Amazon Web Services organization isn't present, from multiple Amazon Web
+	// Services Regions.
+	AWSOrganizationsSource  *ResourceDataSyncAWSOrganizationsSource `json:"awsOrganizationsSource,omitempty"`
+	EnableAllOpsDataSources *bool                                   `json:"enableAllOpsDataSources,omitempty"`
+	IncludeFutureRegions    *bool                                   `json:"includeFutureRegions,omitempty"`
+	SourceRegions           []*string                               `json:"sourceRegions,omitempty"`
+	SourceType              *string                                 `json:"sourceType,omitempty"`
+}
+
+// The data type name for including resource data sync state. There are four
+// sync states:
+//
+// OrganizationNotExists (Your organization doesn't exist)
+//
+// NoPermissions (The system can't locate the service-linked role. This role
+// is automatically created when a user creates a resource data sync in Amazon
+// Web Services Systems Manager Explorer.)
+//
+// InvalidOrganizationalUnit (You specified or selected an invalid unit in the
+// resource data sync configuration.)
+//
+// TrustedAccessDisabled (You disabled Systems Manager access in the organization
+// in Organizations.)
+type ResourceDataSyncSourceWithState struct {
+	// Information about the AwsOrganizationsSource resource data sync source. A
+	// sync source of this type can synchronize data from Organizations or, if an
+	// Amazon Web Services organization isn't present, from multiple Amazon Web
+	// Services Regions.
+	AWSOrganizationsSource  *ResourceDataSyncAWSOrganizationsSource `json:"awsOrganizationsSource,omitempty"`
+	EnableAllOpsDataSources *bool                                   `json:"enableAllOpsDataSources,omitempty"`
+	IncludeFutureRegions    *bool                                   `json:"includeFutureRegions,omitempty"`
+	SourceRegions           []*string                               `json:"sourceRegions,omitempty"`
+	SourceType              *string                                 `json:"sourceType,omitempty"`
+	State                   *string                                 `json:"state,omitempty"`
+}
+
 // Information about the result of a document review request.
 type ReviewInformation struct {
 	ReviewedTime *metav1.Time `json:"reviewedTime,omitempty"`
