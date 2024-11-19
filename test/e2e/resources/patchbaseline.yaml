@@ -1,0 +1,23 @@
+apiVersion: ssm.services.k8s.aws/v1alpha1
+kind: PatchBaseline
+metadata:
+  name: $NAME
+spec:
+  name: $NAME
+  operatingSystem: WINDOWS
+  approvedPatches:
+    - KB123456
+    - KB789012
+  approvalRules:
+    patchRules:
+      - approveAfterDays: 7
+        complianceLevel: CRITICAL
+        patchFilterGroup:
+          patchFilters:
+            - key: PRODUCT
+              values:
+                - WindowsServer2016
+            - key: CLASSIFICATION
+              values:
+                - CriticalUpdates
+                - SecurityUpdates

@@ -6,7 +6,7 @@ ignore:
       # - Document
       - MaintenanceWindow
       - OpsItem
-      - PatchBaseline
+      # - PatchBaseline
       # - ResourceDataSync
 
 resources:
@@ -22,6 +22,11 @@ resources:
         is_primary_key: true
     tags:
       ignore: true
+
+  PatchBaseline:
+    fields:
+      Name:
+        is_primary_key: true
 
 operations:
   DescribeDocument:
