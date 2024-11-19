@@ -27,7 +27,7 @@ resources:
     fields:
       Name:
         is_primary_key: true
-
+        
 operations:
   DescribeDocument:
     operation_type:
