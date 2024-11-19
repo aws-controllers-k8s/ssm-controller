@@ -82,7 +82,7 @@ class TestResourceDataSync:
         paginator = ssm_client.get_paginator('list_resource_data_sync')
         sync_aws = None
         
-        for page in paginator.paginate():
+        for page in paginator.paginate(SyncType='SyncFromSource'):
             for sync in page['ResourceDataSyncItems']:
                 if sync['SyncName'] == cr['spec']['syncName']:
                     sync_aws = sync
@@ -91,7 +91,7 @@ class TestResourceDataSync:
                 break
 
         assert sync_aws is not None
-        assert sync_aws['SyncName'] == cr['spec']['syncName']
-        assert sync_aws['SyncType'] == cr['spec']['syncType']
-        assert sync_aws['SyncSource']['SourceType'] == cr['spec']['syncSource']['sourceType']
-        assert sync_aws['SyncSource']['SourceRegions'] == cr['spec']['syncSource']['sourceRegions']
+        assert sync_aws['SyncName'] == updated_cr['spec']['syncName']
+        assert sync_aws['SyncType'] == updated_cr['spec']['syncType']
+        assert sync_aws['SyncSource']['SourceType'] == updated_cr['spec']['syncSource']['sourceType']
+        assert sync_aws['SyncSource']['SourceRegions'] == updated_cr['spec']['syncSource']['sourceRegions']

@@ -526,6 +526,7 @@ type ResolvedTargets struct {
 	Truncated *bool `json:"truncated,omitempty"`
 }
 
+
 // Information about the AwsOrganizationsSource resource data sync source. A
 // sync source of this type can synchronize data from Organizations or, if an
 // Amazon Web Services organization isn't present, from multiple Amazon Web
