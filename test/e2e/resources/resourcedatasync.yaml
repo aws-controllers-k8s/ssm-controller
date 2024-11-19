@@ -1,0 +1,11 @@
+apiVersion: ssm.services.k8s.aws/v1alpha1
+kind: ResourceDataSync
+metadata:
+  name: $NAME
+spec:
+  syncName: $NAME
+  syncType: SyncFromSource
+  syncSource:
+    sourceType: SingleAccountMultiRegions
+    sourceRegions:
+      - us-west-2

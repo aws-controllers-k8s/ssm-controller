@@ -7,7 +7,7 @@ ignore:
       - MaintenanceWindow
       - OpsItem
       - PatchBaseline
-      - ResourceDataSync
+      # - ResourceDataSync
 
 resources:
   Document:
@@ -15,6 +15,13 @@ resources:
       errors:
         404:
           code: InvalidDocument
+
+  ResourceDataSync:
+    fields:
+      SyncName:
+        is_primary_key: true
+    tags:
+      ignore: true
 
 operations:
   DescribeDocument:
