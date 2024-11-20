@@ -27,7 +27,17 @@ resources:
     fields:
       Name:
         is_primary_key: true
-        
+      Tags:
+        compare:
+          is_ignored: true
+    hooks:
+      delta_pre_compare:
+       code: compareTags(delta, a, b)
+      sdk_read_one_post_set_output:
+        template_path: hooks/patchbaseline/sdk_read_one_post_set_output.go.tpl
+      sdk_update_pre_build_request:
+        template_path: hooks/patchbaseline/sdk_update_pre_build_request.go.tpl
+
 operations:
   DescribeDocument:
     operation_type:

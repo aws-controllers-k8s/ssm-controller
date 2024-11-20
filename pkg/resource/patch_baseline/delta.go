@@ -42,6 +42,7 @@ func newResourceDelta(
 		delta.Add("", a, b)
 		return delta
 	}
+	compareTags(delta, a, b)
 
 	if ackcompare.HasNilDifference(a.ko.Spec.ApprovalRules, b.ko.Spec.ApprovalRules) {
 		delta.Add("Spec.ApprovalRules", a.ko.Spec.ApprovalRules, b.ko.Spec.ApprovalRules)
@@ -134,9 +135,6 @@ func newResourceDelta(
 		if !reflect.DeepEqual(a.ko.Spec.Sources, b.ko.Spec.Sources) {
 			delta.Add("Spec.Sources", a.ko.Spec.Sources, b.ko.Spec.Sources)
 		}
-	}
-	if !ackcompare.MapStringStringEqual(ToACKTags(a.ko.Spec.Tags), ToACKTags(b.ko.Spec.Tags)) {
-		delta.Add("Spec.Tags", a.ko.Spec.Tags, b.ko.Spec.Tags)
 	}
 
 	return delta

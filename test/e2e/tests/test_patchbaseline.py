@@ -6,6 +6,7 @@ from acktest.k8s import resource as k8s
 from e2e.bootstrap_resources import get_bootstrap_resources
 from e2e import service_marker, load_ssm_resource, CRD_GROUP, CRD_VERSION
 from e2e.replacement_values import REPLACEMENT_VALUES
+from acktest.tags import to_dict, clean, assert_ack_system_tags, assert_equal_without_ack_tags
 
 RESOURCE_PLURAL = "patchbaselines"
 CREATE_WAIT_AFTER_SECONDS = 10
@@ -65,15 +66,13 @@ class TestPatchBaseline:
             }
         }
 
-
         k8s.patch_custom_resource(reference, update_data)
         time.sleep(MODIFY_WAIT_AFTER_SECONDS)
         assert k8s.wait_on_condition(reference, "ACK.ResourceSynced", "True", wait_periods=10)
 
-        updated_cr = k8s.get_resource(reference)       
+        updated_cr = k8s.get_resource(reference)
         assert updated_cr["spec"]["approvedPatches"] == update_data["spec"]["approvedPatches"]
         assert "approvalRules" in updated_cr["spec"]
-        
         assert "patchRules" in updated_cr["spec"]["approvalRules"]
         assert len(updated_cr["spec"]["approvalRules"]["patchRules"]) == len(cr["spec"]["approvalRules"]["patchRules"])
 
@@ -91,14 +90,74 @@ class TestPatchBaseline:
         # Check approval rules
         assert "ApprovalRules" in patch_aws
         assert "PatchRules" in patch_aws["ApprovalRules"]
-
         for aws_rule, cr_rule in zip(patch_aws["ApprovalRules"]["PatchRules"], updated_cr["spec"]["approvalRules"]["patchRules"]):
             assert aws_rule["ApproveAfterDays"] == cr_rule["approveAfterDays"]
             assert aws_rule["ComplianceLevel"] == cr_rule["complianceLevel"]
-            
             aws_filters = aws_rule["PatchFilterGroup"]["PatchFilters"]
             cr_filters = cr_rule["patchFilterGroup"]["patchFilters"]
-            
             for aws_filter, cr_filter in zip(aws_filters, cr_filters):
                 assert aws_filter["Key"] == cr_filter["key"]
                 assert set(aws_filter["Values"]) == set(cr_filter["values"])
+
+        # Check Tags
+        tag_data = {
+            "spec": {
+                "tags": [
+                    {"key": "Environment", "value": "Production"},
+                    {"key": "Team", "value": "DevOps"}
+                ]
+            }
+        }
+
+        k8s.patch_custom_resource(reference, tag_data)
+        time.sleep(MODIFY_WAIT_AFTER_SECONDS)
+        assert k8s.wait_on_condition(reference, "ACK.ResourceSynced", "True", wait_periods=10)
+        
+        updated_cr = k8s.get_resource(reference)
+        assert "tags" in updated_cr["spec"]
+        assert updated_cr["spec"]["tags"] == tag_data["spec"]["tags"]
+
+        tags_aws = ssm_client.list_tags_for_resource(
+            ResourceType="PatchBaseline",
+            ResourceId=baselineID
+        )["TagList"]
+
+        tags_aws_dict = to_dict(tags=tags_aws, key_member_name='Key', value_member_name='Value')
+        expected_tags = [
+            {"Key": tag["key"], "Value": tag["value"]} for tag in tag_data["spec"]["tags"]
+        ]
+
+        expected_tags_dict = to_dict(tags=expected_tags, key_member_name='Key', value_member_name='Value')
+        
+        # Ignore ACK system tags
+        clean_tags_aws = clean(tags=tags_aws, key_member_name='Key')
+        clean_expected_tags = clean(tags=expected_tags, key_member_name='Key')
+
+        assert_equal_without_ack_tags(
+            expected=clean_expected_tags,
+            actual=clean_tags_aws,
+            key_member_name='Key',
+            value_member_name='Value'
+        )
+
+        # Remove tags
+        remove_tag_data = {
+            "spec": {
+                "tags": []
+            }
+        }
+
+        k8s.patch_custom_resource(reference, remove_tag_data)
+        time.sleep(MODIFY_WAIT_AFTER_SECONDS)
+        assert k8s.wait_on_condition(reference, "ACK.ResourceSynced", "True", wait_periods=10)
+    
+        updated_cr = k8s.get_resource(reference)
+        assert "tags" in updated_cr["spec"]
+        assert updated_cr["spec"]["tags"] == []
+
+        tags_aws = ssm_client.list_tags_for_resource(
+            ResourceType="PatchBaseline",
+            ResourceId=baselineID
+        )["TagList"]
+
+        assert_ack_system_tags(tags=tags_aws, key_member_name='Key', value_member_name='Value')
