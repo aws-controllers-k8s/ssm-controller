@@ -95,6 +95,7 @@ rules:
   - ssm.services.k8s.aws
   resources:
   - documents
+  - patchbaselines
   - resourcedatasyncs
   verbs:
   - create
@@ -108,6 +109,7 @@ rules:
   - ssm.services.k8s.aws
   resources:
   - documents/status
+  - patchbaselines/status
   - resourcedatasyncs/status
   verbs:
   - get

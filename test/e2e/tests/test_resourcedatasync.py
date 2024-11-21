@@ -1,5 +1,4 @@
 import pytest
-import boto3
 import logging
 import time
 from acktest.resources import random_suffix_name
@@ -47,7 +46,7 @@ def resourcedatasync():
 
 @service_marker
 class TestResourceDataSync:
-    def test_create_delete(self, resourcedatasync):
+    def test_create_delete(self, resourcedatasync, ssm_client):
         (reference, _) = resourcedatasync
 
         cr = k8s.get_resource(reference)
@@ -76,9 +75,7 @@ class TestResourceDataSync:
         assert 'sourceRegions' in updated_cr["spec"]["syncSource"]
         assert updated_cr["spec"]["syncSource"]["sourceRegions"] == update_data["spec"]["syncSource"]["sourceRegions"]
 
-
-        ssm_client = boto3.client('ssm')
-    
+        # check aws api
         paginator = ssm_client.get_paginator('list_resource_data_sync')
         sync_aws = None
         
