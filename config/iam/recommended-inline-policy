@@ -1,0 +1,27 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
+                "ssm:CreateDocument",
+                "ssm:UpdateDocument",
+                "ssm:DeleteDocument",
+                "ssm:DescribeDocument",
+                "ssm:RemoveTagsFromResource",
+                "ssm:AddTagsToResource",
+                "ssm:ListTagsForResource",
+                "ssm:GetPatchBaseline",
+                "ssm:CreatePatchBaseline",
+                "ssm:UpdatePatchBaseline",
+                "ssm:DeletePatchBaseline",
+                "ssm:ListResourceDataSync",
+                "ssm:CreateResourceDataSync",
+                "ssm:UpdateResourceDataSync",
+                "ssm:DeleteResourceDataSync"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
