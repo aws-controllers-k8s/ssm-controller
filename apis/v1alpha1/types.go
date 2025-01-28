@@ -165,7 +165,7 @@ type CommandPlugin struct {
 
 // A summary of the call execution that includes an execution ID, the type of
 // execution (for example, Command), and the date/time of the execution using
-// a datetime object that is saved in the following format: yyyy-MM-dd'T'HH:mm:ss'Z'.
+// a datetime object that is saved in the following format: yyyy-MM-dd'T'HH:mm:ss'Z'
 type ComplianceExecutionSummary struct {
 	ExecutionTime *metav1.Time `json:"executionTime,omitempty"`
 }
@@ -369,6 +369,11 @@ type InstanceAssociationStatusInfo struct {
 	Name            *string      `json:"name,omitempty"`
 }
 
+// Details about a specific managed node.
+type InstanceInfo struct {
+	PlatformType *string `json:"platformType,omitempty"`
+}
+
 // Describes a filter for a specific list of managed nodes.
 type InstanceInformation struct {
 	IsLatestVersion                        *bool        `json:"isLatestVersion,omitempty"`
@@ -389,6 +394,16 @@ type InstancePatchState struct {
 	OperationEndTime                 *metav1.Time `json:"operationEndTime,omitempty"`
 	OperationStartTime               *metav1.Time `json:"operationStartTime,omitempty"`
 	PatchGroup                       *string      `json:"patchGroup,omitempty"`
+}
+
+// An object containing various properties of a managed node.
+type InstanceProperty struct {
+	LastAssociationExecutionDate           *metav1.Time `json:"lastAssociationExecutionDate,omitempty"`
+	LastPingDateTime                       *metav1.Time `json:"lastPingDateTime,omitempty"`
+	LastSuccessfulAssociationExecutionDate *metav1.Time `json:"lastSuccessfulAssociationExecutionDate,omitempty"`
+	LaunchTime                             *metav1.Time `json:"launchTime,omitempty"`
+	PlatformType                           *string      `json:"platformType,omitempty"`
+	RegistrationDate                       *metav1.Time `json:"registrationDate,omitempty"`
 }
 
 // The parameters for an AUTOMATION task type.
@@ -457,7 +472,7 @@ type MaintenanceWindowRunCommandParameters struct {
 // timeline graph. For the Amazon Web Services resource, OpsCenter aggregates
 // information from Config, CloudTrail logs, and EventBridge, so you don't have
 // to navigate across multiple console pages during your investigation. For
-// more information, see OpsCenter (https://docs.aws.amazon.com/systems-manager/latest/userguide/OpsCenter.html)
+// more information, see Amazon Web Services Systems Manager OpsCenter (https://docs.aws.amazon.com/systems-manager/latest/userguide/OpsCenter.html)
 // in the Amazon Web Services Systems Manager User Guide.
 type OpsItem struct {
 	ActualEndTime    *metav1.Time `json:"actualEndTime,omitempty"`
@@ -506,8 +521,9 @@ type ParameterHistory struct {
 	LastModifiedDate *metav1.Time `json:"lastModifiedDate,omitempty"`
 }
 
-// Metadata includes information like the ARN of the last user and the date/time
-// the parameter was last used.
+// Metadata includes information like the Amazon Resource Name (ARN) of the
+// last user to update the parameter and the date and time the parameter was
+// last used.
 type ParameterMetadata struct {
 	LastModifiedDate *metav1.Time `json:"lastModifiedDate,omitempty"`
 }
@@ -787,4 +803,10 @@ type StepExecution struct {
 type Tag struct {
 	Key   *string `json:"key,omitempty"`
 	Value *string `json:"value,omitempty"`
+}
+
+// The combination of Amazon Web Services Regions and Amazon Web Services accounts
+// targeted by the current Automation execution.
+type TargetLocation struct {
+	IncludeChildOrganizationUnits *bool `json:"includeChildOrganizationUnits,omitempty"`
 }

@@ -28,8 +28,10 @@ import (
 	ackerr "github.com/aws-controllers-k8s/runtime/pkg/errors"
 	ackrequeue "github.com/aws-controllers-k8s/runtime/pkg/requeue"
 	ackrtlog "github.com/aws-controllers-k8s/runtime/pkg/runtime/log"
-	"github.com/aws/aws-sdk-go/aws"
-	svcsdk "github.com/aws/aws-sdk-go/service/ssm"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	svcsdk "github.com/aws/aws-sdk-go-v2/service/ssm"
+	svcsdktypes "github.com/aws/aws-sdk-go-v2/service/ssm/types"
+	smithy "github.com/aws/smithy-go"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -40,8 +42,7 @@ import (
 var (
 	_ = &metav1.Time{}
 	_ = strings.ToLower("")
-	_ = &aws.JSONValue{}
-	_ = &svcsdk.SSM{}
+	_ = &svcsdk.Client{}
 	_ = &svcapitypes.ResourceDataSync{}
 	_ = ackv1alpha1.AWSAccountID("")
 	_ = &ackerr.NotFound
@@ -49,6 +50,7 @@ var (
 	_ = &reflect.Value{}
 	_ = fmt.Sprintf("")
 	_ = &ackrequeue.NoRequeue{}
+	_ = &aws.Config{}
 )
 
 // sdkFind returns SDK-specific information about a supplied resource
@@ -73,10 +75,11 @@ func (rm *resourceManager) sdkFind(
 		return nil, err
 	}
 	var resp *svcsdk.ListResourceDataSyncOutput
-	resp, err = rm.sdkapi.ListResourceDataSyncWithContext(ctx, input)
+	resp, err = rm.sdkapi.ListResourceDataSync(ctx, input)
 	rm.metrics.RecordAPICall("READ_MANY", "ListResourceDataSync", err)
 	if err != nil {
-		if awsErr, ok := ackerr.AWSError(err); ok && awsErr.Code() == "UNKNOWN" {
+		var awsErr smithy.APIError
+		if errors.As(err, &awsErr) && awsErr.ErrorCode() == "UNKNOWN" {
 			return nil, ackerr.NotFound
 		}
 		return nil, err
@@ -109,8 +112,8 @@ func (rm *resourceManager) sdkFind(
 			if elem.S3Destination.Region != nil {
 				f4.Region = elem.S3Destination.Region
 			}
-			if elem.S3Destination.SyncFormat != nil {
-				f4.SyncFormat = elem.S3Destination.SyncFormat
+			if elem.S3Destination.SyncFormat != "" {
+				f4.SyncFormat = aws.String(string(elem.S3Destination.SyncFormat))
 			}
 			ko.Spec.S3Destination = f4
 		} else {
@@ -141,20 +144,10 @@ func (rm *resourceManager) sdkFind(
 				}
 				f8.AWSOrganizationsSource = f8f0
 			}
-			if elem.SyncSource.EnableAllOpsDataSources != nil {
-				f8.EnableAllOpsDataSources = elem.SyncSource.EnableAllOpsDataSources
-			}
-			if elem.SyncSource.IncludeFutureRegions != nil {
-				f8.IncludeFutureRegions = elem.SyncSource.IncludeFutureRegions
-			}
+			f8.EnableAllOpsDataSources = &elem.SyncSource.EnableAllOpsDataSources
+			f8.IncludeFutureRegions = &elem.SyncSource.IncludeFutureRegions
 			if elem.SyncSource.SourceRegions != nil {
-				f8f3 := []*string{}
-				for _, f8f3iter := range elem.SyncSource.SourceRegions {
-					var f8f3elem string
-					f8f3elem = *f8f3iter
-					f8f3 = append(f8f3, &f8f3elem)
-				}
-				f8.SourceRegions = f8f3
+				f8.SourceRegions = aws.StringSlice(elem.SyncSource.SourceRegions)
 			}
 			if elem.SyncSource.SourceType != nil {
 				f8.SourceType = elem.SyncSource.SourceType
@@ -196,7 +189,7 @@ func (rm *resourceManager) newListRequestPayload(
 	res := &svcsdk.ListResourceDataSyncInput{}
 
 	if r.ko.Spec.SyncType != nil {
-		res.SetSyncType(*r.ko.Spec.SyncType)
+		res.SyncType = r.ko.Spec.SyncType
 	}
 
 	return res, nil
@@ -221,7 +214,7 @@ func (rm *resourceManager) sdkCreate(
 
 	var resp *svcsdk.CreateResourceDataSyncOutput
 	_ = resp
-	resp, err = rm.sdkapi.CreateResourceDataSyncWithContext(ctx, input)
+	resp, err = rm.sdkapi.CreateResourceDataSync(ctx, input)
 	rm.metrics.RecordAPICall("CREATE", "CreateResourceDataSync", err)
 	if err != nil {
 		return nil, err
@@ -243,76 +236,70 @@ func (rm *resourceManager) newCreateRequestPayload(
 	res := &svcsdk.CreateResourceDataSyncInput{}
 
 	if r.ko.Spec.S3Destination != nil {
-		f0 := &svcsdk.ResourceDataSyncS3Destination{}
+		f0 := &svcsdktypes.ResourceDataSyncS3Destination{}
 		if r.ko.Spec.S3Destination.AWSKMSKeyARN != nil {
-			f0.SetAWSKMSKeyARN(*r.ko.Spec.S3Destination.AWSKMSKeyARN)
+			f0.AWSKMSKeyARN = r.ko.Spec.S3Destination.AWSKMSKeyARN
 		}
 		if r.ko.Spec.S3Destination.BucketName != nil {
-			f0.SetBucketName(*r.ko.Spec.S3Destination.BucketName)
+			f0.BucketName = r.ko.Spec.S3Destination.BucketName
 		}
 		if r.ko.Spec.S3Destination.DestinationDataSharing != nil {
-			f0f2 := &svcsdk.ResourceDataSyncDestinationDataSharing{}
+			f0f2 := &svcsdktypes.ResourceDataSyncDestinationDataSharing{}
 			if r.ko.Spec.S3Destination.DestinationDataSharing.DestinationDataSharingType != nil {
-				f0f2.SetDestinationDataSharingType(*r.ko.Spec.S3Destination.DestinationDataSharing.DestinationDataSharingType)
+				f0f2.DestinationDataSharingType = r.ko.Spec.S3Destination.DestinationDataSharing.DestinationDataSharingType
 			}
-			f0.SetDestinationDataSharing(f0f2)
+			f0.DestinationDataSharing = f0f2
 		}
 		if r.ko.Spec.S3Destination.Prefix != nil {
-			f0.SetPrefix(*r.ko.Spec.S3Destination.Prefix)
+			f0.Prefix = r.ko.Spec.S3Destination.Prefix
 		}
 		if r.ko.Spec.S3Destination.Region != nil {
-			f0.SetRegion(*r.ko.Spec.S3Destination.Region)
+			f0.Region = r.ko.Spec.S3Destination.Region
 		}
 		if r.ko.Spec.S3Destination.SyncFormat != nil {
-			f0.SetSyncFormat(*r.ko.Spec.S3Destination.SyncFormat)
+			f0.SyncFormat = svcsdktypes.ResourceDataSyncS3Format(*r.ko.Spec.S3Destination.SyncFormat)
 		}
-		res.SetS3Destination(f0)
+		res.S3Destination = f0
 	}
 	if r.ko.Spec.SyncName != nil {
-		res.SetSyncName(*r.ko.Spec.SyncName)
+		res.SyncName = r.ko.Spec.SyncName
 	}
 	if r.ko.Spec.SyncSource != nil {
-		f2 := &svcsdk.ResourceDataSyncSource{}
+		f2 := &svcsdktypes.ResourceDataSyncSource{}
 		if r.ko.Spec.SyncSource.AWSOrganizationsSource != nil {
-			f2f0 := &svcsdk.ResourceDataSyncAwsOrganizationsSource{}
+			f2f0 := &svcsdktypes.ResourceDataSyncAwsOrganizationsSource{}
 			if r.ko.Spec.SyncSource.AWSOrganizationsSource.OrganizationSourceType != nil {
-				f2f0.SetOrganizationSourceType(*r.ko.Spec.SyncSource.AWSOrganizationsSource.OrganizationSourceType)
+				f2f0.OrganizationSourceType = r.ko.Spec.SyncSource.AWSOrganizationsSource.OrganizationSourceType
 			}
 			if r.ko.Spec.SyncSource.AWSOrganizationsSource.OrganizationalUnits != nil {
-				f2f0f1 := []*svcsdk.ResourceDataSyncOrganizationalUnit{}
+				f2f0f1 := []svcsdktypes.ResourceDataSyncOrganizationalUnit{}
 				for _, f2f0f1iter := range r.ko.Spec.SyncSource.AWSOrganizationsSource.OrganizationalUnits {
-					f2f0f1elem := &svcsdk.ResourceDataSyncOrganizationalUnit{}
+					f2f0f1elem := &svcsdktypes.ResourceDataSyncOrganizationalUnit{}
 					if f2f0f1iter.OrganizationalUnitID != nil {
-						f2f0f1elem.SetOrganizationalUnitId(*f2f0f1iter.OrganizationalUnitID)
+						f2f0f1elem.OrganizationalUnitId = f2f0f1iter.OrganizationalUnitID
 					}
-					f2f0f1 = append(f2f0f1, f2f0f1elem)
+					f2f0f1 = append(f2f0f1, *f2f0f1elem)
 				}
-				f2f0.SetOrganizationalUnits(f2f0f1)
+				f2f0.OrganizationalUnits = f2f0f1
 			}
-			f2.SetAwsOrganizationsSource(f2f0)
+			f2.AwsOrganizationsSource = f2f0
 		}
 		if r.ko.Spec.SyncSource.EnableAllOpsDataSources != nil {
-			f2.SetEnableAllOpsDataSources(*r.ko.Spec.SyncSource.EnableAllOpsDataSources)
+			f2.EnableAllOpsDataSources = *r.ko.Spec.SyncSource.EnableAllOpsDataSources
 		}
 		if r.ko.Spec.SyncSource.IncludeFutureRegions != nil {
-			f2.SetIncludeFutureRegions(*r.ko.Spec.SyncSource.IncludeFutureRegions)
+			f2.IncludeFutureRegions = *r.ko.Spec.SyncSource.IncludeFutureRegions
 		}
 		if r.ko.Spec.SyncSource.SourceRegions != nil {
-			f2f3 := []*string{}
-			for _, f2f3iter := range r.ko.Spec.SyncSource.SourceRegions {
-				var f2f3elem string
-				f2f3elem = *f2f3iter
-				f2f3 = append(f2f3, &f2f3elem)
-			}
-			f2.SetSourceRegions(f2f3)
+			f2.SourceRegions = aws.ToStringSlice(r.ko.Spec.SyncSource.SourceRegions)
 		}
 		if r.ko.Spec.SyncSource.SourceType != nil {
-			f2.SetSourceType(*r.ko.Spec.SyncSource.SourceType)
+			f2.SourceType = r.ko.Spec.SyncSource.SourceType
 		}
-		res.SetSyncSource(f2)
+		res.SyncSource = f2
 	}
 	if r.ko.Spec.SyncType != nil {
-		res.SetSyncType(*r.ko.Spec.SyncType)
+		res.SyncType = r.ko.Spec.SyncType
 	}
 
 	return res, nil
@@ -338,7 +325,7 @@ func (rm *resourceManager) sdkUpdate(
 
 	var resp *svcsdk.UpdateResourceDataSyncOutput
 	_ = resp
-	resp, err = rm.sdkapi.UpdateResourceDataSyncWithContext(ctx, input)
+	resp, err = rm.sdkapi.UpdateResourceDataSync(ctx, input)
 	rm.metrics.RecordAPICall("UPDATE", "UpdateResourceDataSync", err)
 	if err != nil {
 		return nil, err
@@ -361,50 +348,44 @@ func (rm *resourceManager) newUpdateRequestPayload(
 	res := &svcsdk.UpdateResourceDataSyncInput{}
 
 	if r.ko.Spec.SyncName != nil {
-		res.SetSyncName(*r.ko.Spec.SyncName)
+		res.SyncName = r.ko.Spec.SyncName
 	}
 	if r.ko.Spec.SyncSource != nil {
-		f1 := &svcsdk.ResourceDataSyncSource{}
+		f1 := &svcsdktypes.ResourceDataSyncSource{}
 		if r.ko.Spec.SyncSource.AWSOrganizationsSource != nil {
-			f1f0 := &svcsdk.ResourceDataSyncAwsOrganizationsSource{}
+			f1f0 := &svcsdktypes.ResourceDataSyncAwsOrganizationsSource{}
 			if r.ko.Spec.SyncSource.AWSOrganizationsSource.OrganizationSourceType != nil {
-				f1f0.SetOrganizationSourceType(*r.ko.Spec.SyncSource.AWSOrganizationsSource.OrganizationSourceType)
+				f1f0.OrganizationSourceType = r.ko.Spec.SyncSource.AWSOrganizationsSource.OrganizationSourceType
 			}
 			if r.ko.Spec.SyncSource.AWSOrganizationsSource.OrganizationalUnits != nil {
-				f1f0f1 := []*svcsdk.ResourceDataSyncOrganizationalUnit{}
+				f1f0f1 := []svcsdktypes.ResourceDataSyncOrganizationalUnit{}
 				for _, f1f0f1iter := range r.ko.Spec.SyncSource.AWSOrganizationsSource.OrganizationalUnits {
-					f1f0f1elem := &svcsdk.ResourceDataSyncOrganizationalUnit{}
+					f1f0f1elem := &svcsdktypes.ResourceDataSyncOrganizationalUnit{}
 					if f1f0f1iter.OrganizationalUnitID != nil {
-						f1f0f1elem.SetOrganizationalUnitId(*f1f0f1iter.OrganizationalUnitID)
+						f1f0f1elem.OrganizationalUnitId = f1f0f1iter.OrganizationalUnitID
 					}
-					f1f0f1 = append(f1f0f1, f1f0f1elem)
+					f1f0f1 = append(f1f0f1, *f1f0f1elem)
 				}
-				f1f0.SetOrganizationalUnits(f1f0f1)
+				f1f0.OrganizationalUnits = f1f0f1
 			}
-			f1.SetAwsOrganizationsSource(f1f0)
+			f1.AwsOrganizationsSource = f1f0
 		}
 		if r.ko.Spec.SyncSource.EnableAllOpsDataSources != nil {
-			f1.SetEnableAllOpsDataSources(*r.ko.Spec.SyncSource.EnableAllOpsDataSources)
+			f1.EnableAllOpsDataSources = *r.ko.Spec.SyncSource.EnableAllOpsDataSources
 		}
 		if r.ko.Spec.SyncSource.IncludeFutureRegions != nil {
-			f1.SetIncludeFutureRegions(*r.ko.Spec.SyncSource.IncludeFutureRegions)
+			f1.IncludeFutureRegions = *r.ko.Spec.SyncSource.IncludeFutureRegions
 		}
 		if r.ko.Spec.SyncSource.SourceRegions != nil {
-			f1f3 := []*string{}
-			for _, f1f3iter := range r.ko.Spec.SyncSource.SourceRegions {
-				var f1f3elem string
-				f1f3elem = *f1f3iter
-				f1f3 = append(f1f3, &f1f3elem)
-			}
-			f1.SetSourceRegions(f1f3)
+			f1.SourceRegions = aws.ToStringSlice(r.ko.Spec.SyncSource.SourceRegions)
 		}
 		if r.ko.Spec.SyncSource.SourceType != nil {
-			f1.SetSourceType(*r.ko.Spec.SyncSource.SourceType)
+			f1.SourceType = r.ko.Spec.SyncSource.SourceType
 		}
-		res.SetSyncSource(f1)
+		res.SyncSource = f1
 	}
 	if r.ko.Spec.SyncType != nil {
-		res.SetSyncType(*r.ko.Spec.SyncType)
+		res.SyncType = r.ko.Spec.SyncType
 	}
 
 	return res, nil
@@ -426,7 +407,7 @@ func (rm *resourceManager) sdkDelete(
 	}
 	var resp *svcsdk.DeleteResourceDataSyncOutput
 	_ = resp
-	resp, err = rm.sdkapi.DeleteResourceDataSyncWithContext(ctx, input)
+	resp, err = rm.sdkapi.DeleteResourceDataSync(ctx, input)
 	rm.metrics.RecordAPICall("DELETE", "DeleteResourceDataSync", err)
 	return nil, err
 }
@@ -439,10 +420,10 @@ func (rm *resourceManager) newDeleteRequestPayload(
 	res := &svcsdk.DeleteResourceDataSyncInput{}
 
 	if r.ko.Spec.SyncName != nil {
-		res.SetSyncName(*r.ko.Spec.SyncName)
+		res.SyncName = r.ko.Spec.SyncName
 	}
 	if r.ko.Spec.SyncType != nil {
-		res.SetSyncType(*r.ko.Spec.SyncType)
+		res.SyncType = r.ko.Spec.SyncType
 	}
 
 	return res, nil

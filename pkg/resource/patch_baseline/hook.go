@@ -5,8 +5,9 @@ import (
 
 	ackcompare "github.com/aws-controllers-k8s/runtime/pkg/compare"
 	ackrtlog "github.com/aws-controllers-k8s/runtime/pkg/runtime/log"
-	"github.com/aws/aws-sdk-go/aws"
-	svcsdk "github.com/aws/aws-sdk-go/service/ssm"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	svcsdk "github.com/aws/aws-sdk-go-v2/service/ssm"
+	svcsdktypes "github.com/aws/aws-sdk-go-v2/service/ssm/types"
 )
 
 // syncTags used to keep tags in sync by calling Create and Delete API's
@@ -31,17 +32,18 @@ func (rm *resourceManager) syncTags(
 
 	toAdd := FromACKTags(added)
 
-	var toDeleteTagKeys []*string
+	var toDeleteTagKeys []string
 	for k := range removed {
-		toDeleteTagKeys = append(toDeleteTagKeys, &k)
+		toDeleteTagKeys = append(toDeleteTagKeys, k)
 	}
 
 	// Remove tags
 	if len(toDeleteTagKeys) > 0 {
 		rlog.Debug("removing tags from resource", "tags", toDeleteTagKeys)
 		_, err = rm.sdkapi.RemoveTagsFromResource(
+			ctx,
 			&svcsdk.RemoveTagsFromResourceInput{
-				ResourceType: aws.String("PatchBaseline"),
+				ResourceType: svcsdktypes.ResourceTypeForTaggingPatchBaseline,
 				ResourceId:   aws.String(*resourceID),
 				TagKeys:      toDeleteTagKeys,
 			},
@@ -57,8 +59,9 @@ func (rm *resourceManager) syncTags(
 	if len(toAdd) > 0 {
 		rlog.Debug("adding tags to resource", "tags", toAdd)
 		_, err = rm.sdkapi.AddTagsToResource(
+			ctx,
 			&svcsdk.AddTagsToResourceInput{
-				ResourceType: aws.String("PatchBaseline"),
+				ResourceType: svcsdktypes.ResourceTypeForTaggingPatchBaseline,
 				ResourceId:   aws.String(*resourceID),
 				Tags:         rm.sdkTags(added),
 			},
@@ -73,10 +76,10 @@ func (rm *resourceManager) syncTags(
 }
 
 // sdkTags converts *svcapitypes.Tag array to a *svcsdk.Tag array
-func (rm *resourceManager) sdkTags(tags map[string]string) (sdkTags []*svcsdk.Tag) {
+func (rm *resourceManager) sdkTags(tags map[string]string) (sdkTags []svcsdktypes.Tag) {
 
 	for key, value := range tags {
-		sdktag := &svcsdk.Tag{
+		sdktag := svcsdktypes.Tag{
 			Key:   aws.String(key),
 			Value: aws.String(value),
 		}
@@ -105,12 +108,14 @@ func compareTags(
 }
 
 func (rm *resourceManager) fetchCurrentTags(
+	ctx context.Context,
 	resourceID *string,
 ) (map[string]string, error) {
 	output, err := rm.sdkapi.ListTagsForResource(
+		ctx,
 		&svcsdk.ListTagsForResourceInput{
 			ResourceId:   resourceID,
-			ResourceType: aws.String("PatchBaseline"),
+			ResourceType: svcsdktypes.ResourceTypeForTaggingPatchBaseline,
 		},
 	)
 

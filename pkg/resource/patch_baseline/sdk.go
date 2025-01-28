@@ -19,6 +19,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"reflect"
 	"strings"
 
@@ -28,8 +29,10 @@ import (
 	ackerr "github.com/aws-controllers-k8s/runtime/pkg/errors"
 	ackrequeue "github.com/aws-controllers-k8s/runtime/pkg/requeue"
 	ackrtlog "github.com/aws-controllers-k8s/runtime/pkg/runtime/log"
-	"github.com/aws/aws-sdk-go/aws"
-	svcsdk "github.com/aws/aws-sdk-go/service/ssm"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	svcsdk "github.com/aws/aws-sdk-go-v2/service/ssm"
+	svcsdktypes "github.com/aws/aws-sdk-go-v2/service/ssm/types"
+	smithy "github.com/aws/smithy-go"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -40,8 +43,7 @@ import (
 var (
 	_ = &metav1.Time{}
 	_ = strings.ToLower("")
-	_ = &aws.JSONValue{}
-	_ = &svcsdk.SSM{}
+	_ = &svcsdk.Client{}
 	_ = &svcapitypes.PatchBaseline{}
 	_ = ackv1alpha1.AWSAccountID("")
 	_ = &ackerr.NotFound
@@ -49,6 +51,7 @@ var (
 	_ = &reflect.Value{}
 	_ = fmt.Sprintf("")
 	_ = &ackrequeue.NoRequeue{}
+	_ = &aws.Config{}
 )
 
 // sdkFind returns SDK-specific information about a supplied resource
@@ -74,13 +77,11 @@ func (rm *resourceManager) sdkFind(
 	}
 
 	var resp *svcsdk.GetPatchBaselineOutput
-	resp, err = rm.sdkapi.GetPatchBaselineWithContext(ctx, input)
+	resp, err = rm.sdkapi.GetPatchBaseline(ctx, input)
 	rm.metrics.RecordAPICall("READ_ONE", "GetPatchBaseline", err)
 	if err != nil {
-		if reqErr, ok := ackerr.AWSRequestFailure(err); ok && reqErr.StatusCode() == 404 {
-			return nil, ackerr.NotFound
-		}
-		if awsErr, ok := ackerr.AWSError(err); ok && awsErr.Code() == "UNKNOWN" {
+		var awsErr smithy.APIError
+		if errors.As(err, &awsErr) && awsErr.ErrorCode() == "UNKNOWN" {
 			return nil, ackerr.NotFound
 		}
 		return nil, err
@@ -97,13 +98,14 @@ func (rm *resourceManager) sdkFind(
 			for _, f0f0iter := range resp.ApprovalRules.PatchRules {
 				f0f0elem := &svcapitypes.PatchRule{}
 				if f0f0iter.ApproveAfterDays != nil {
-					f0f0elem.ApproveAfterDays = f0f0iter.ApproveAfterDays
+					approveAfterDaysCopy := int64(*f0f0iter.ApproveAfterDays)
+					f0f0elem.ApproveAfterDays = &approveAfterDaysCopy
 				}
 				if f0f0iter.ApproveUntilDate != nil {
 					f0f0elem.ApproveUntilDate = f0f0iter.ApproveUntilDate
 				}
-				if f0f0iter.ComplianceLevel != nil {
-					f0f0elem.ComplianceLevel = f0f0iter.ComplianceLevel
+				if f0f0iter.ComplianceLevel != "" {
+					f0f0elem.ComplianceLevel = aws.String(string(f0f0iter.ComplianceLevel))
 				}
 				if f0f0iter.EnableNonSecurity != nil {
 					f0f0elem.EnableNonSecurity = f0f0iter.EnableNonSecurity
@@ -114,17 +116,11 @@ func (rm *resourceManager) sdkFind(
 						f0f0elemf4f0 := []*svcapitypes.PatchFilter{}
 						for _, f0f0elemf4f0iter := range f0f0iter.PatchFilterGroup.PatchFilters {
 							f0f0elemf4f0elem := &svcapitypes.PatchFilter{}
-							if f0f0elemf4f0iter.Key != nil {
-								f0f0elemf4f0elem.Key = f0f0elemf4f0iter.Key
+							if f0f0elemf4f0iter.Key != "" {
+								f0f0elemf4f0elem.Key = aws.String(string(f0f0elemf4f0iter.Key))
 							}
 							if f0f0elemf4f0iter.Values != nil {
-								f0f0elemf4f0elemf1 := []*string{}
-								for _, f0f0elemf4f0elemf1iter := range f0f0elemf4f0iter.Values {
-									var f0f0elemf4f0elemf1elem string
-									f0f0elemf4f0elemf1elem = *f0f0elemf4f0elemf1iter
-									f0f0elemf4f0elemf1 = append(f0f0elemf4f0elemf1, &f0f0elemf4f0elemf1elem)
-								}
-								f0f0elemf4f0elem.Values = f0f0elemf4f0elemf1
+								f0f0elemf4f0elem.Values = aws.StringSlice(f0f0elemf4f0iter.Values)
 							}
 							f0f0elemf4f0 = append(f0f0elemf4f0, f0f0elemf4f0elem)
 						}
@@ -141,18 +137,12 @@ func (rm *resourceManager) sdkFind(
 		ko.Spec.ApprovalRules = nil
 	}
 	if resp.ApprovedPatches != nil {
-		f1 := []*string{}
-		for _, f1iter := range resp.ApprovedPatches {
-			var f1elem string
-			f1elem = *f1iter
-			f1 = append(f1, &f1elem)
-		}
-		ko.Spec.ApprovedPatches = f1
+		ko.Spec.ApprovedPatches = aws.StringSlice(resp.ApprovedPatches)
 	} else {
 		ko.Spec.ApprovedPatches = nil
 	}
-	if resp.ApprovedPatchesComplianceLevel != nil {
-		ko.Spec.ApprovedPatchesComplianceLevel = resp.ApprovedPatchesComplianceLevel
+	if resp.ApprovedPatchesComplianceLevel != "" {
+		ko.Spec.ApprovedPatchesComplianceLevel = aws.String(string(resp.ApprovedPatchesComplianceLevel))
 	} else {
 		ko.Spec.ApprovedPatchesComplianceLevel = nil
 	}
@@ -177,17 +167,11 @@ func (rm *resourceManager) sdkFind(
 			f7f0 := []*svcapitypes.PatchFilter{}
 			for _, f7f0iter := range resp.GlobalFilters.PatchFilters {
 				f7f0elem := &svcapitypes.PatchFilter{}
-				if f7f0iter.Key != nil {
-					f7f0elem.Key = f7f0iter.Key
+				if f7f0iter.Key != "" {
+					f7f0elem.Key = aws.String(string(f7f0iter.Key))
 				}
 				if f7f0iter.Values != nil {
-					f7f0elemf1 := []*string{}
-					for _, f7f0elemf1iter := range f7f0iter.Values {
-						var f7f0elemf1elem string
-						f7f0elemf1elem = *f7f0elemf1iter
-						f7f0elemf1 = append(f7f0elemf1, &f7f0elemf1elem)
-					}
-					f7f0elem.Values = f7f0elemf1
+					f7f0elem.Values = aws.StringSlice(f7f0iter.Values)
 				}
 				f7f0 = append(f7f0, f7f0elem)
 			}
@@ -202,24 +186,18 @@ func (rm *resourceManager) sdkFind(
 	} else {
 		ko.Spec.Name = nil
 	}
-	if resp.OperatingSystem != nil {
-		ko.Spec.OperatingSystem = resp.OperatingSystem
+	if resp.OperatingSystem != "" {
+		ko.Spec.OperatingSystem = aws.String(string(resp.OperatingSystem))
 	} else {
 		ko.Spec.OperatingSystem = nil
 	}
 	if resp.RejectedPatches != nil {
-		f12 := []*string{}
-		for _, f12iter := range resp.RejectedPatches {
-			var f12elem string
-			f12elem = *f12iter
-			f12 = append(f12, &f12elem)
-		}
-		ko.Spec.RejectedPatches = f12
+		ko.Spec.RejectedPatches = aws.StringSlice(resp.RejectedPatches)
 	} else {
 		ko.Spec.RejectedPatches = nil
 	}
-	if resp.RejectedPatchesAction != nil {
-		ko.Spec.RejectedPatchesAction = resp.RejectedPatchesAction
+	if resp.RejectedPatchesAction != "" {
+		ko.Spec.RejectedPatchesAction = aws.String(string(resp.RejectedPatchesAction))
 	} else {
 		ko.Spec.RejectedPatchesAction = nil
 	}
@@ -234,13 +212,7 @@ func (rm *resourceManager) sdkFind(
 				f14elem.Name = f14iter.Name
 			}
 			if f14iter.Products != nil {
-				f14elemf2 := []*string{}
-				for _, f14elemf2iter := range f14iter.Products {
-					var f14elemf2elem string
-					f14elemf2elem = *f14elemf2iter
-					f14elemf2 = append(f14elemf2, &f14elemf2elem)
-				}
-				f14elem.Products = f14elemf2
+				f14elem.Products = aws.StringSlice(f14iter.Products)
 			}
 			f14 = append(f14, f14elem)
 		}
@@ -251,7 +223,7 @@ func (rm *resourceManager) sdkFind(
 
 	rm.setStatusDefaults(ko)
 	if ko.Status.BaselineID != nil {
-		tags, err := rm.fetchCurrentTags(ko.Status.BaselineID)
+		tags, err := rm.fetchCurrentTags(ctx, ko.Status.BaselineID)
 		if err != nil {
 			return nil, err
 		}
@@ -278,7 +250,7 @@ func (rm *resourceManager) newDescribeRequestPayload(
 	res := &svcsdk.GetPatchBaselineInput{}
 
 	if r.ko.Status.BaselineID != nil {
-		res.SetBaselineId(*r.ko.Status.BaselineID)
+		res.BaselineId = r.ko.Status.BaselineID
 	}
 
 	return res, nil
@@ -303,7 +275,7 @@ func (rm *resourceManager) sdkCreate(
 
 	var resp *svcsdk.CreatePatchBaselineOutput
 	_ = resp
-	resp, err = rm.sdkapi.CreatePatchBaselineWithContext(ctx, input)
+	resp, err = rm.sdkapi.CreatePatchBaseline(ctx, input)
 	rm.metrics.RecordAPICall("CREATE", "CreatePatchBaseline", err)
 	if err != nil {
 		return nil, err
@@ -331,152 +303,127 @@ func (rm *resourceManager) newCreateRequestPayload(
 	res := &svcsdk.CreatePatchBaselineInput{}
 
 	if r.ko.Spec.ApprovalRules != nil {
-		f0 := &svcsdk.PatchRuleGroup{}
+		f0 := &svcsdktypes.PatchRuleGroup{}
 		if r.ko.Spec.ApprovalRules.PatchRules != nil {
-			f0f0 := []*svcsdk.PatchRule{}
+			f0f0 := []svcsdktypes.PatchRule{}
 			for _, f0f0iter := range r.ko.Spec.ApprovalRules.PatchRules {
-				f0f0elem := &svcsdk.PatchRule{}
+				f0f0elem := &svcsdktypes.PatchRule{}
 				if f0f0iter.ApproveAfterDays != nil {
-					f0f0elem.SetApproveAfterDays(*f0f0iter.ApproveAfterDays)
+					approveAfterDaysCopy0 := *f0f0iter.ApproveAfterDays
+					if approveAfterDaysCopy0 > math.MaxInt32 || approveAfterDaysCopy0 < math.MinInt32 {
+						return nil, fmt.Errorf("error: field ApproveAfterDays is of type int32")
+					}
+					approveAfterDaysCopy := int32(approveAfterDaysCopy0)
+					f0f0elem.ApproveAfterDays = &approveAfterDaysCopy
 				}
 				if f0f0iter.ApproveUntilDate != nil {
-					f0f0elem.SetApproveUntilDate(*f0f0iter.ApproveUntilDate)
+					f0f0elem.ApproveUntilDate = f0f0iter.ApproveUntilDate
 				}
 				if f0f0iter.ComplianceLevel != nil {
-					f0f0elem.SetComplianceLevel(*f0f0iter.ComplianceLevel)
+					f0f0elem.ComplianceLevel = svcsdktypes.PatchComplianceLevel(*f0f0iter.ComplianceLevel)
 				}
 				if f0f0iter.EnableNonSecurity != nil {
-					f0f0elem.SetEnableNonSecurity(*f0f0iter.EnableNonSecurity)
+					f0f0elem.EnableNonSecurity = f0f0iter.EnableNonSecurity
 				}
 				if f0f0iter.PatchFilterGroup != nil {
-					f0f0elemf4 := &svcsdk.PatchFilterGroup{}
+					f0f0elemf4 := &svcsdktypes.PatchFilterGroup{}
 					if f0f0iter.PatchFilterGroup.PatchFilters != nil {
-						f0f0elemf4f0 := []*svcsdk.PatchFilter{}
+						f0f0elemf4f0 := []svcsdktypes.PatchFilter{}
 						for _, f0f0elemf4f0iter := range f0f0iter.PatchFilterGroup.PatchFilters {
-							f0f0elemf4f0elem := &svcsdk.PatchFilter{}
+							f0f0elemf4f0elem := &svcsdktypes.PatchFilter{}
 							if f0f0elemf4f0iter.Key != nil {
-								f0f0elemf4f0elem.SetKey(*f0f0elemf4f0iter.Key)
+								f0f0elemf4f0elem.Key = svcsdktypes.PatchFilterKey(*f0f0elemf4f0iter.Key)
 							}
 							if f0f0elemf4f0iter.Values != nil {
-								f0f0elemf4f0elemf1 := []*string{}
-								for _, f0f0elemf4f0elemf1iter := range f0f0elemf4f0iter.Values {
-									var f0f0elemf4f0elemf1elem string
-									f0f0elemf4f0elemf1elem = *f0f0elemf4f0elemf1iter
-									f0f0elemf4f0elemf1 = append(f0f0elemf4f0elemf1, &f0f0elemf4f0elemf1elem)
-								}
-								f0f0elemf4f0elem.SetValues(f0f0elemf4f0elemf1)
+								f0f0elemf4f0elem.Values = aws.ToStringSlice(f0f0elemf4f0iter.Values)
 							}
-							f0f0elemf4f0 = append(f0f0elemf4f0, f0f0elemf4f0elem)
+							f0f0elemf4f0 = append(f0f0elemf4f0, *f0f0elemf4f0elem)
 						}
-						f0f0elemf4.SetPatchFilters(f0f0elemf4f0)
+						f0f0elemf4.PatchFilters = f0f0elemf4f0
 					}
-					f0f0elem.SetPatchFilterGroup(f0f0elemf4)
+					f0f0elem.PatchFilterGroup = f0f0elemf4
 				}
-				f0f0 = append(f0f0, f0f0elem)
+				f0f0 = append(f0f0, *f0f0elem)
 			}
-			f0.SetPatchRules(f0f0)
+			f0.PatchRules = f0f0
 		}
-		res.SetApprovalRules(f0)
+		res.ApprovalRules = f0
 	}
 	if r.ko.Spec.ApprovedPatches != nil {
-		f1 := []*string{}
-		for _, f1iter := range r.ko.Spec.ApprovedPatches {
-			var f1elem string
-			f1elem = *f1iter
-			f1 = append(f1, &f1elem)
-		}
-		res.SetApprovedPatches(f1)
+		res.ApprovedPatches = aws.ToStringSlice(r.ko.Spec.ApprovedPatches)
 	}
 	if r.ko.Spec.ApprovedPatchesComplianceLevel != nil {
-		res.SetApprovedPatchesComplianceLevel(*r.ko.Spec.ApprovedPatchesComplianceLevel)
+		res.ApprovedPatchesComplianceLevel = svcsdktypes.PatchComplianceLevel(*r.ko.Spec.ApprovedPatchesComplianceLevel)
 	}
 	if r.ko.Spec.ApprovedPatchesEnableNonSecurity != nil {
-		res.SetApprovedPatchesEnableNonSecurity(*r.ko.Spec.ApprovedPatchesEnableNonSecurity)
+		res.ApprovedPatchesEnableNonSecurity = r.ko.Spec.ApprovedPatchesEnableNonSecurity
 	}
 	if r.ko.Spec.ClientToken != nil {
-		res.SetClientToken(*r.ko.Spec.ClientToken)
+		res.ClientToken = r.ko.Spec.ClientToken
 	}
 	if r.ko.Spec.Description != nil {
-		res.SetDescription(*r.ko.Spec.Description)
+		res.Description = r.ko.Spec.Description
 	}
 	if r.ko.Spec.GlobalFilters != nil {
-		f6 := &svcsdk.PatchFilterGroup{}
+		f6 := &svcsdktypes.PatchFilterGroup{}
 		if r.ko.Spec.GlobalFilters.PatchFilters != nil {
-			f6f0 := []*svcsdk.PatchFilter{}
+			f6f0 := []svcsdktypes.PatchFilter{}
 			for _, f6f0iter := range r.ko.Spec.GlobalFilters.PatchFilters {
-				f6f0elem := &svcsdk.PatchFilter{}
+				f6f0elem := &svcsdktypes.PatchFilter{}
 				if f6f0iter.Key != nil {
-					f6f0elem.SetKey(*f6f0iter.Key)
+					f6f0elem.Key = svcsdktypes.PatchFilterKey(*f6f0iter.Key)
 				}
 				if f6f0iter.Values != nil {
-					f6f0elemf1 := []*string{}
-					for _, f6f0elemf1iter := range f6f0iter.Values {
-						var f6f0elemf1elem string
-						f6f0elemf1elem = *f6f0elemf1iter
-						f6f0elemf1 = append(f6f0elemf1, &f6f0elemf1elem)
-					}
-					f6f0elem.SetValues(f6f0elemf1)
+					f6f0elem.Values = aws.ToStringSlice(f6f0iter.Values)
 				}
-				f6f0 = append(f6f0, f6f0elem)
+				f6f0 = append(f6f0, *f6f0elem)
 			}
-			f6.SetPatchFilters(f6f0)
+			f6.PatchFilters = f6f0
 		}
-		res.SetGlobalFilters(f6)
+		res.GlobalFilters = f6
 	}
 	if r.ko.Spec.Name != nil {
-		res.SetName(*r.ko.Spec.Name)
+		res.Name = r.ko.Spec.Name
 	}
 	if r.ko.Spec.OperatingSystem != nil {
-		res.SetOperatingSystem(*r.ko.Spec.OperatingSystem)
+		res.OperatingSystem = svcsdktypes.OperatingSystem(*r.ko.Spec.OperatingSystem)
 	}
 	if r.ko.Spec.RejectedPatches != nil {
-		f9 := []*string{}
-		for _, f9iter := range r.ko.Spec.RejectedPatches {
-			var f9elem string
-			f9elem = *f9iter
-			f9 = append(f9, &f9elem)
-		}
-		res.SetRejectedPatches(f9)
+		res.RejectedPatches = aws.ToStringSlice(r.ko.Spec.RejectedPatches)
 	}
 	if r.ko.Spec.RejectedPatchesAction != nil {
-		res.SetRejectedPatchesAction(*r.ko.Spec.RejectedPatchesAction)
+		res.RejectedPatchesAction = svcsdktypes.PatchAction(*r.ko.Spec.RejectedPatchesAction)
 	}
 	if r.ko.Spec.Sources != nil {
-		f11 := []*svcsdk.PatchSource{}
+		f11 := []svcsdktypes.PatchSource{}
 		for _, f11iter := range r.ko.Spec.Sources {
-			f11elem := &svcsdk.PatchSource{}
+			f11elem := &svcsdktypes.PatchSource{}
 			if f11iter.Configuration != nil {
-				f11elem.SetConfiguration(*f11iter.Configuration)
+				f11elem.Configuration = f11iter.Configuration
 			}
 			if f11iter.Name != nil {
-				f11elem.SetName(*f11iter.Name)
+				f11elem.Name = f11iter.Name
 			}
 			if f11iter.Products != nil {
-				f11elemf2 := []*string{}
-				for _, f11elemf2iter := range f11iter.Products {
-					var f11elemf2elem string
-					f11elemf2elem = *f11elemf2iter
-					f11elemf2 = append(f11elemf2, &f11elemf2elem)
-				}
-				f11elem.SetProducts(f11elemf2)
+				f11elem.Products = aws.ToStringSlice(f11iter.Products)
 			}
-			f11 = append(f11, f11elem)
+			f11 = append(f11, *f11elem)
 		}
-		res.SetSources(f11)
+		res.Sources = f11
 	}
 	if r.ko.Spec.Tags != nil {
-		f12 := []*svcsdk.Tag{}
+		f12 := []svcsdktypes.Tag{}
 		for _, f12iter := range r.ko.Spec.Tags {
-			f12elem := &svcsdk.Tag{}
+			f12elem := &svcsdktypes.Tag{}
 			if f12iter.Key != nil {
-				f12elem.SetKey(*f12iter.Key)
+				f12elem.Key = f12iter.Key
 			}
 			if f12iter.Value != nil {
-				f12elem.SetValue(*f12iter.Value)
+				f12elem.Value = f12iter.Value
 			}
-			f12 = append(f12, f12elem)
+			f12 = append(f12, *f12elem)
 		}
-		res.SetTags(f12)
+		res.Tags = f12
 	}
 
 	return res, nil
@@ -512,7 +459,7 @@ func (rm *resourceManager) sdkUpdate(
 
 	var resp *svcsdk.UpdatePatchBaselineOutput
 	_ = resp
-	resp, err = rm.sdkapi.UpdatePatchBaselineWithContext(ctx, input)
+	resp, err = rm.sdkapi.UpdatePatchBaseline(ctx, input)
 	rm.metrics.RecordAPICall("UPDATE", "UpdatePatchBaseline", err)
 	if err != nil {
 		return nil, err
@@ -528,13 +475,14 @@ func (rm *resourceManager) sdkUpdate(
 			for _, f0f0iter := range resp.ApprovalRules.PatchRules {
 				f0f0elem := &svcapitypes.PatchRule{}
 				if f0f0iter.ApproveAfterDays != nil {
-					f0f0elem.ApproveAfterDays = f0f0iter.ApproveAfterDays
+					approveAfterDaysCopy := int64(*f0f0iter.ApproveAfterDays)
+					f0f0elem.ApproveAfterDays = &approveAfterDaysCopy
 				}
 				if f0f0iter.ApproveUntilDate != nil {
 					f0f0elem.ApproveUntilDate = f0f0iter.ApproveUntilDate
 				}
-				if f0f0iter.ComplianceLevel != nil {
-					f0f0elem.ComplianceLevel = f0f0iter.ComplianceLevel
+				if f0f0iter.ComplianceLevel != "" {
+					f0f0elem.ComplianceLevel = aws.String(string(f0f0iter.ComplianceLevel))
 				}
 				if f0f0iter.EnableNonSecurity != nil {
 					f0f0elem.EnableNonSecurity = f0f0iter.EnableNonSecurity
@@ -545,17 +493,11 @@ func (rm *resourceManager) sdkUpdate(
 						f0f0elemf4f0 := []*svcapitypes.PatchFilter{}
 						for _, f0f0elemf4f0iter := range f0f0iter.PatchFilterGroup.PatchFilters {
 							f0f0elemf4f0elem := &svcapitypes.PatchFilter{}
-							if f0f0elemf4f0iter.Key != nil {
-								f0f0elemf4f0elem.Key = f0f0elemf4f0iter.Key
+							if f0f0elemf4f0iter.Key != "" {
+								f0f0elemf4f0elem.Key = aws.String(string(f0f0elemf4f0iter.Key))
 							}
 							if f0f0elemf4f0iter.Values != nil {
-								f0f0elemf4f0elemf1 := []*string{}
-								for _, f0f0elemf4f0elemf1iter := range f0f0elemf4f0iter.Values {
-									var f0f0elemf4f0elemf1elem string
-									f0f0elemf4f0elemf1elem = *f0f0elemf4f0elemf1iter
-									f0f0elemf4f0elemf1 = append(f0f0elemf4f0elemf1, &f0f0elemf4f0elemf1elem)
-								}
-								f0f0elemf4f0elem.Values = f0f0elemf4f0elemf1
+								f0f0elemf4f0elem.Values = aws.StringSlice(f0f0elemf4f0iter.Values)
 							}
 							f0f0elemf4f0 = append(f0f0elemf4f0, f0f0elemf4f0elem)
 						}
@@ -572,18 +514,12 @@ func (rm *resourceManager) sdkUpdate(
 		ko.Spec.ApprovalRules = nil
 	}
 	if resp.ApprovedPatches != nil {
-		f1 := []*string{}
-		for _, f1iter := range resp.ApprovedPatches {
-			var f1elem string
-			f1elem = *f1iter
-			f1 = append(f1, &f1elem)
-		}
-		ko.Spec.ApprovedPatches = f1
+		ko.Spec.ApprovedPatches = aws.StringSlice(resp.ApprovedPatches)
 	} else {
 		ko.Spec.ApprovedPatches = nil
 	}
-	if resp.ApprovedPatchesComplianceLevel != nil {
-		ko.Spec.ApprovedPatchesComplianceLevel = resp.ApprovedPatchesComplianceLevel
+	if resp.ApprovedPatchesComplianceLevel != "" {
+		ko.Spec.ApprovedPatchesComplianceLevel = aws.String(string(resp.ApprovedPatchesComplianceLevel))
 	} else {
 		ko.Spec.ApprovedPatchesComplianceLevel = nil
 	}
@@ -608,17 +544,11 @@ func (rm *resourceManager) sdkUpdate(
 			f7f0 := []*svcapitypes.PatchFilter{}
 			for _, f7f0iter := range resp.GlobalFilters.PatchFilters {
 				f7f0elem := &svcapitypes.PatchFilter{}
-				if f7f0iter.Key != nil {
-					f7f0elem.Key = f7f0iter.Key
+				if f7f0iter.Key != "" {
+					f7f0elem.Key = aws.String(string(f7f0iter.Key))
 				}
 				if f7f0iter.Values != nil {
-					f7f0elemf1 := []*string{}
-					for _, f7f0elemf1iter := range f7f0iter.Values {
-						var f7f0elemf1elem string
-						f7f0elemf1elem = *f7f0elemf1iter
-						f7f0elemf1 = append(f7f0elemf1, &f7f0elemf1elem)
-					}
-					f7f0elem.Values = f7f0elemf1
+					f7f0elem.Values = aws.StringSlice(f7f0iter.Values)
 				}
 				f7f0 = append(f7f0, f7f0elem)
 			}
@@ -633,24 +563,18 @@ func (rm *resourceManager) sdkUpdate(
 	} else {
 		ko.Spec.Name = nil
 	}
-	if resp.OperatingSystem != nil {
-		ko.Spec.OperatingSystem = resp.OperatingSystem
+	if resp.OperatingSystem != "" {
+		ko.Spec.OperatingSystem = aws.String(string(resp.OperatingSystem))
 	} else {
 		ko.Spec.OperatingSystem = nil
 	}
 	if resp.RejectedPatches != nil {
-		f11 := []*string{}
-		for _, f11iter := range resp.RejectedPatches {
-			var f11elem string
-			f11elem = *f11iter
-			f11 = append(f11, &f11elem)
-		}
-		ko.Spec.RejectedPatches = f11
+		ko.Spec.RejectedPatches = aws.StringSlice(resp.RejectedPatches)
 	} else {
 		ko.Spec.RejectedPatches = nil
 	}
-	if resp.RejectedPatchesAction != nil {
-		ko.Spec.RejectedPatchesAction = resp.RejectedPatchesAction
+	if resp.RejectedPatchesAction != "" {
+		ko.Spec.RejectedPatchesAction = aws.String(string(resp.RejectedPatchesAction))
 	} else {
 		ko.Spec.RejectedPatchesAction = nil
 	}
@@ -665,13 +589,7 @@ func (rm *resourceManager) sdkUpdate(
 				f13elem.Name = f13iter.Name
 			}
 			if f13iter.Products != nil {
-				f13elemf2 := []*string{}
-				for _, f13elemf2iter := range f13iter.Products {
-					var f13elemf2elem string
-					f13elemf2elem = *f13elemf2iter
-					f13elemf2 = append(f13elemf2, &f13elemf2elem)
-				}
-				f13elem.Products = f13elemf2
+				f13elem.Products = aws.StringSlice(f13iter.Products)
 			}
 			f13 = append(f13, f13elem)
 		}
@@ -694,135 +612,110 @@ func (rm *resourceManager) newUpdateRequestPayload(
 	res := &svcsdk.UpdatePatchBaselineInput{}
 
 	if r.ko.Spec.ApprovalRules != nil {
-		f0 := &svcsdk.PatchRuleGroup{}
+		f0 := &svcsdktypes.PatchRuleGroup{}
 		if r.ko.Spec.ApprovalRules.PatchRules != nil {
-			f0f0 := []*svcsdk.PatchRule{}
+			f0f0 := []svcsdktypes.PatchRule{}
 			for _, f0f0iter := range r.ko.Spec.ApprovalRules.PatchRules {
-				f0f0elem := &svcsdk.PatchRule{}
+				f0f0elem := &svcsdktypes.PatchRule{}
 				if f0f0iter.ApproveAfterDays != nil {
-					f0f0elem.SetApproveAfterDays(*f0f0iter.ApproveAfterDays)
+					approveAfterDaysCopy0 := *f0f0iter.ApproveAfterDays
+					if approveAfterDaysCopy0 > math.MaxInt32 || approveAfterDaysCopy0 < math.MinInt32 {
+						return nil, fmt.Errorf("error: field ApproveAfterDays is of type int32")
+					}
+					approveAfterDaysCopy := int32(approveAfterDaysCopy0)
+					f0f0elem.ApproveAfterDays = &approveAfterDaysCopy
 				}
 				if f0f0iter.ApproveUntilDate != nil {
-					f0f0elem.SetApproveUntilDate(*f0f0iter.ApproveUntilDate)
+					f0f0elem.ApproveUntilDate = f0f0iter.ApproveUntilDate
 				}
 				if f0f0iter.ComplianceLevel != nil {
-					f0f0elem.SetComplianceLevel(*f0f0iter.ComplianceLevel)
+					f0f0elem.ComplianceLevel = svcsdktypes.PatchComplianceLevel(*f0f0iter.ComplianceLevel)
 				}
 				if f0f0iter.EnableNonSecurity != nil {
-					f0f0elem.SetEnableNonSecurity(*f0f0iter.EnableNonSecurity)
+					f0f0elem.EnableNonSecurity = f0f0iter.EnableNonSecurity
 				}
 				if f0f0iter.PatchFilterGroup != nil {
-					f0f0elemf4 := &svcsdk.PatchFilterGroup{}
+					f0f0elemf4 := &svcsdktypes.PatchFilterGroup{}
 					if f0f0iter.PatchFilterGroup.PatchFilters != nil {
-						f0f0elemf4f0 := []*svcsdk.PatchFilter{}
+						f0f0elemf4f0 := []svcsdktypes.PatchFilter{}
 						for _, f0f0elemf4f0iter := range f0f0iter.PatchFilterGroup.PatchFilters {
-							f0f0elemf4f0elem := &svcsdk.PatchFilter{}
+							f0f0elemf4f0elem := &svcsdktypes.PatchFilter{}
 							if f0f0elemf4f0iter.Key != nil {
-								f0f0elemf4f0elem.SetKey(*f0f0elemf4f0iter.Key)
+								f0f0elemf4f0elem.Key = svcsdktypes.PatchFilterKey(*f0f0elemf4f0iter.Key)
 							}
 							if f0f0elemf4f0iter.Values != nil {
-								f0f0elemf4f0elemf1 := []*string{}
-								for _, f0f0elemf4f0elemf1iter := range f0f0elemf4f0iter.Values {
-									var f0f0elemf4f0elemf1elem string
-									f0f0elemf4f0elemf1elem = *f0f0elemf4f0elemf1iter
-									f0f0elemf4f0elemf1 = append(f0f0elemf4f0elemf1, &f0f0elemf4f0elemf1elem)
-								}
-								f0f0elemf4f0elem.SetValues(f0f0elemf4f0elemf1)
+								f0f0elemf4f0elem.Values = aws.ToStringSlice(f0f0elemf4f0iter.Values)
 							}
-							f0f0elemf4f0 = append(f0f0elemf4f0, f0f0elemf4f0elem)
+							f0f0elemf4f0 = append(f0f0elemf4f0, *f0f0elemf4f0elem)
 						}
-						f0f0elemf4.SetPatchFilters(f0f0elemf4f0)
+						f0f0elemf4.PatchFilters = f0f0elemf4f0
 					}
-					f0f0elem.SetPatchFilterGroup(f0f0elemf4)
+					f0f0elem.PatchFilterGroup = f0f0elemf4
 				}
-				f0f0 = append(f0f0, f0f0elem)
+				f0f0 = append(f0f0, *f0f0elem)
 			}
-			f0.SetPatchRules(f0f0)
+			f0.PatchRules = f0f0
 		}
-		res.SetApprovalRules(f0)
+		res.ApprovalRules = f0
 	}
 	if r.ko.Spec.ApprovedPatches != nil {
-		f1 := []*string{}
-		for _, f1iter := range r.ko.Spec.ApprovedPatches {
-			var f1elem string
-			f1elem = *f1iter
-			f1 = append(f1, &f1elem)
-		}
-		res.SetApprovedPatches(f1)
+		res.ApprovedPatches = aws.ToStringSlice(r.ko.Spec.ApprovedPatches)
 	}
 	if r.ko.Spec.ApprovedPatchesComplianceLevel != nil {
-		res.SetApprovedPatchesComplianceLevel(*r.ko.Spec.ApprovedPatchesComplianceLevel)
+		res.ApprovedPatchesComplianceLevel = svcsdktypes.PatchComplianceLevel(*r.ko.Spec.ApprovedPatchesComplianceLevel)
 	}
 	if r.ko.Spec.ApprovedPatchesEnableNonSecurity != nil {
-		res.SetApprovedPatchesEnableNonSecurity(*r.ko.Spec.ApprovedPatchesEnableNonSecurity)
+		res.ApprovedPatchesEnableNonSecurity = r.ko.Spec.ApprovedPatchesEnableNonSecurity
 	}
 	if r.ko.Status.BaselineID != nil {
-		res.SetBaselineId(*r.ko.Status.BaselineID)
+		res.BaselineId = r.ko.Status.BaselineID
 	}
 	if r.ko.Spec.Description != nil {
-		res.SetDescription(*r.ko.Spec.Description)
+		res.Description = r.ko.Spec.Description
 	}
 	if r.ko.Spec.GlobalFilters != nil {
-		f6 := &svcsdk.PatchFilterGroup{}
+		f6 := &svcsdktypes.PatchFilterGroup{}
 		if r.ko.Spec.GlobalFilters.PatchFilters != nil {
-			f6f0 := []*svcsdk.PatchFilter{}
+			f6f0 := []svcsdktypes.PatchFilter{}
 			for _, f6f0iter := range r.ko.Spec.GlobalFilters.PatchFilters {
-				f6f0elem := &svcsdk.PatchFilter{}
+				f6f0elem := &svcsdktypes.PatchFilter{}
 				if f6f0iter.Key != nil {
-					f6f0elem.SetKey(*f6f0iter.Key)
+					f6f0elem.Key = svcsdktypes.PatchFilterKey(*f6f0iter.Key)
 				}
 				if f6f0iter.Values != nil {
-					f6f0elemf1 := []*string{}
-					for _, f6f0elemf1iter := range f6f0iter.Values {
-						var f6f0elemf1elem string
-						f6f0elemf1elem = *f6f0elemf1iter
-						f6f0elemf1 = append(f6f0elemf1, &f6f0elemf1elem)
-					}
-					f6f0elem.SetValues(f6f0elemf1)
+					f6f0elem.Values = aws.ToStringSlice(f6f0iter.Values)
 				}
-				f6f0 = append(f6f0, f6f0elem)
+				f6f0 = append(f6f0, *f6f0elem)
 			}
-			f6.SetPatchFilters(f6f0)
+			f6.PatchFilters = f6f0
 		}
-		res.SetGlobalFilters(f6)
+		res.GlobalFilters = f6
 	}
 	if r.ko.Spec.Name != nil {
-		res.SetName(*r.ko.Spec.Name)
+		res.Name = r.ko.Spec.Name
 	}
 	if r.ko.Spec.RejectedPatches != nil {
-		f8 := []*string{}
-		for _, f8iter := range r.ko.Spec.RejectedPatches {
-			var f8elem string
-			f8elem = *f8iter
-			f8 = append(f8, &f8elem)
-		}
-		res.SetRejectedPatches(f8)
+		res.RejectedPatches = aws.ToStringSlice(r.ko.Spec.RejectedPatches)
 	}
 	if r.ko.Spec.RejectedPatchesAction != nil {
-		res.SetRejectedPatchesAction(*r.ko.Spec.RejectedPatchesAction)
+		res.RejectedPatchesAction = svcsdktypes.PatchAction(*r.ko.Spec.RejectedPatchesAction)
 	}
 	if r.ko.Spec.Sources != nil {
-		f11 := []*svcsdk.PatchSource{}
+		f11 := []svcsdktypes.PatchSource{}
 		for _, f11iter := range r.ko.Spec.Sources {
-			f11elem := &svcsdk.PatchSource{}
+			f11elem := &svcsdktypes.PatchSource{}
 			if f11iter.Configuration != nil {
-				f11elem.SetConfiguration(*f11iter.Configuration)
+				f11elem.Configuration = f11iter.Configuration
 			}
 			if f11iter.Name != nil {
-				f11elem.SetName(*f11iter.Name)
+				f11elem.Name = f11iter.Name
 			}
 			if f11iter.Products != nil {
-				f11elemf2 := []*string{}
-				for _, f11elemf2iter := range f11iter.Products {
-					var f11elemf2elem string
-					f11elemf2elem = *f11elemf2iter
-					f11elemf2 = append(f11elemf2, &f11elemf2elem)
-				}
-				f11elem.SetProducts(f11elemf2)
+				f11elem.Products = aws.ToStringSlice(f11iter.Products)
 			}
-			f11 = append(f11, f11elem)
+			f11 = append(f11, *f11elem)
 		}
-		res.SetSources(f11)
+		res.Sources = f11
 	}
 
 	return res, nil
@@ -844,7 +737,7 @@ func (rm *resourceManager) sdkDelete(
 	}
 	var resp *svcsdk.DeletePatchBaselineOutput
 	_ = resp
-	resp, err = rm.sdkapi.DeletePatchBaselineWithContext(ctx, input)
+	resp, err = rm.sdkapi.DeletePatchBaseline(ctx, input)
 	rm.metrics.RecordAPICall("DELETE", "DeletePatchBaseline", err)
 	return nil, err
 }
@@ -857,7 +750,7 @@ func (rm *resourceManager) newDeleteRequestPayload(
 	res := &svcsdk.DeletePatchBaselineInput{}
 
 	if r.ko.Status.BaselineID != nil {
-		res.SetBaselineId(*r.ko.Status.BaselineID)
+		res.BaselineId = r.ko.Status.BaselineID
 	}
 
 	return res, nil
