@@ -34,11 +34,11 @@ type DocumentSpec struct {
 	// For examples, see the following topics in the Amazon Web Services Systems
 	// Manager User Guide.
 	//
-	//   - Create an SSM document (Amazon Web Services API) (https://docs.aws.amazon.com/systems-manager/latest/userguide/create-ssm-document-api.html)
+	//   - Create an SSM document (console) (https://docs.aws.amazon.com/systems-manager/latest/userguide/documents-using.html#create-ssm-console)
 	//
-	//   - Create an SSM document (Amazon Web Services CLI) (https://docs.aws.amazon.com/systems-manager/latest/userguide/create-ssm-document-cli.html)
+	//   - Create an SSM document (command line) (https://docs.aws.amazon.com/systems-manager/latest/userguide/documents-using.html#create-ssm-document-cli)
 	//
-	//   - Create an SSM document (API) (https://docs.aws.amazon.com/systems-manager/latest/userguide/create-ssm-document-api.html)
+	//   - Create an SSM document (API) (https://docs.aws.amazon.com/systems-manager/latest/userguide/documents-using.html#create-ssm-document-api)
 	//
 	// +kubebuilder:validation:Required
 	Content *string `json:"content"`
@@ -64,6 +64,12 @@ type DocumentSpec struct {
 	//   - amazon
 	//
 	//   - amzn
+	//
+	//   - AWSEC2
+	//
+	//   - AWSConfigRemediation
+	//
+	//   - AWSSupport
 	//
 	// +kubebuilder:validation:Required
 	Name *string `json:"name"`

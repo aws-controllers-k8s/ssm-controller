@@ -28,8 +28,10 @@ import (
 	ackerr "github.com/aws-controllers-k8s/runtime/pkg/errors"
 	ackrequeue "github.com/aws-controllers-k8s/runtime/pkg/requeue"
 	ackrtlog "github.com/aws-controllers-k8s/runtime/pkg/runtime/log"
-	"github.com/aws/aws-sdk-go/aws"
-	svcsdk "github.com/aws/aws-sdk-go/service/ssm"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	svcsdk "github.com/aws/aws-sdk-go-v2/service/ssm"
+	svcsdktypes "github.com/aws/aws-sdk-go-v2/service/ssm/types"
+	smithy "github.com/aws/smithy-go"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -40,8 +42,7 @@ import (
 var (
 	_ = &metav1.Time{}
 	_ = strings.ToLower("")
-	_ = &aws.JSONValue{}
-	_ = &svcsdk.SSM{}
+	_ = &svcsdk.Client{}
 	_ = &svcapitypes.Document{}
 	_ = ackv1alpha1.AWSAccountID("")
 	_ = &ackerr.NotFound
@@ -49,6 +50,7 @@ var (
 	_ = &reflect.Value{}
 	_ = fmt.Sprintf("")
 	_ = &ackrequeue.NoRequeue{}
+	_ = &aws.Config{}
 )
 
 // sdkFind returns SDK-specific information about a supplied resource
@@ -74,13 +76,11 @@ func (rm *resourceManager) sdkFind(
 	}
 
 	var resp *svcsdk.DescribeDocumentOutput
-	resp, err = rm.sdkapi.DescribeDocumentWithContext(ctx, input)
+	resp, err = rm.sdkapi.DescribeDocument(ctx, input)
 	rm.metrics.RecordAPICall("READ_ONE", "DescribeDocument", err)
 	if err != nil {
-		if reqErr, ok := ackerr.AWSRequestFailure(err); ok && reqErr.StatusCode() == 404 {
-			return nil, ackerr.NotFound
-		}
-		if awsErr, ok := ackerr.AWSError(err); ok && awsErr.Code() == "InvalidDocument" {
+		var awsErr smithy.APIError
+		if errors.As(err, &awsErr) && awsErr.ErrorCode() == "InvalidDocument" {
 			return nil, ackerr.NotFound
 		}
 		return nil, err
@@ -114,24 +114,12 @@ func (rm *resourceManager) sdkFind(
 		ko.Status.Author = nil
 	}
 	if resp.Document.Category != nil {
-		f3 := []*string{}
-		for _, f3iter := range resp.Document.Category {
-			var f3elem string
-			f3elem = *f3iter
-			f3 = append(f3, &f3elem)
-		}
-		ko.Status.Category = f3
+		ko.Status.Category = aws.StringSlice(resp.Document.Category)
 	} else {
 		ko.Status.Category = nil
 	}
 	if resp.Document.CategoryEnum != nil {
-		f4 := []*string{}
-		for _, f4iter := range resp.Document.CategoryEnum {
-			var f4elem string
-			f4elem = *f4iter
-			f4 = append(f4, &f4elem)
-		}
-		ko.Status.CategoryEnum = f4
+		ko.Status.CategoryEnum = aws.StringSlice(resp.Document.CategoryEnum)
 	} else {
 		ko.Status.CategoryEnum = nil
 	}
@@ -155,13 +143,13 @@ func (rm *resourceManager) sdkFind(
 	} else {
 		ko.Spec.DisplayName = nil
 	}
-	if resp.Document.DocumentFormat != nil {
-		ko.Spec.DocumentFormat = resp.Document.DocumentFormat
+	if resp.Document.DocumentFormat != "" {
+		ko.Spec.DocumentFormat = aws.String(string(resp.Document.DocumentFormat))
 	} else {
 		ko.Spec.DocumentFormat = nil
 	}
-	if resp.Document.DocumentType != nil {
-		ko.Spec.DocumentType = resp.Document.DocumentType
+	if resp.Document.DocumentType != "" {
+		ko.Spec.DocumentType = aws.String(string(resp.Document.DocumentType))
 	} else {
 		ko.Spec.DocumentType = nil
 	}
@@ -175,8 +163,8 @@ func (rm *resourceManager) sdkFind(
 	} else {
 		ko.Status.Hash = nil
 	}
-	if resp.Document.HashType != nil {
-		ko.Status.HashType = resp.Document.HashType
+	if resp.Document.HashType != "" {
+		ko.Status.HashType = aws.String(string(resp.Document.HashType))
 	} else {
 		ko.Status.HashType = nil
 	}
@@ -208,8 +196,8 @@ func (rm *resourceManager) sdkFind(
 			if f17iter.Name != nil {
 				f17elem.Name = f17iter.Name
 			}
-			if f17iter.Type != nil {
-				f17elem.Type = f17iter.Type
+			if f17iter.Type != "" {
+				f17elem.Type = aws.String(string(f17iter.Type))
 			}
 			f17 = append(f17, f17elem)
 		}
@@ -225,9 +213,9 @@ func (rm *resourceManager) sdkFind(
 	if resp.Document.PlatformTypes != nil {
 		f19 := []*string{}
 		for _, f19iter := range resp.Document.PlatformTypes {
-			var f19elem string
-			f19elem = *f19iter
-			f19 = append(f19, &f19elem)
+			var f19elem *string
+			f19elem = aws.String(string(f19iter))
+			f19 = append(f19, f19elem)
 		}
 		ko.Status.PlatformTypes = f19
 	} else {
@@ -265,8 +253,8 @@ func (rm *resourceManager) sdkFind(
 			if f21iter.Reviewer != nil {
 				f21elem.Reviewer = f21iter.Reviewer
 			}
-			if f21iter.Status != nil {
-				f21elem.Status = f21iter.Status
+			if f21iter.Status != "" {
+				f21elem.Status = aws.String(string(f21iter.Status))
 			}
 			f21 = append(f21, f21elem)
 		}
@@ -274,8 +262,8 @@ func (rm *resourceManager) sdkFind(
 	} else {
 		ko.Status.ReviewInformation = nil
 	}
-	if resp.Document.ReviewStatus != nil {
-		ko.Status.ReviewStatus = resp.Document.ReviewStatus
+	if resp.Document.ReviewStatus != "" {
+		ko.Status.ReviewStatus = aws.String(string(resp.Document.ReviewStatus))
 	} else {
 		ko.Status.ReviewStatus = nil
 	}
@@ -289,8 +277,8 @@ func (rm *resourceManager) sdkFind(
 	} else {
 		ko.Status.Sha1 = nil
 	}
-	if resp.Document.Status != nil {
-		ko.Status.Status = resp.Document.Status
+	if resp.Document.Status != "" {
+		ko.Status.Status = aws.String(string(resp.Document.Status))
 	} else {
 		ko.Status.Status = nil
 	}
@@ -348,13 +336,13 @@ func (rm *resourceManager) newDescribeRequestPayload(
 	res := &svcsdk.DescribeDocumentInput{}
 
 	if r.ko.Status.DocumentVersion != nil {
-		res.SetDocumentVersion(*r.ko.Status.DocumentVersion)
+		res.DocumentVersion = r.ko.Status.DocumentVersion
 	}
 	if r.ko.Spec.Name != nil {
-		res.SetName(*r.ko.Spec.Name)
+		res.Name = r.ko.Spec.Name
 	}
 	if r.ko.Spec.VersionName != nil {
-		res.SetVersionName(*r.ko.Spec.VersionName)
+		res.VersionName = r.ko.Spec.VersionName
 	}
 
 	return res, nil
@@ -379,7 +367,7 @@ func (rm *resourceManager) sdkCreate(
 
 	var resp *svcsdk.CreateDocumentOutput
 	_ = resp
-	resp, err = rm.sdkapi.CreateDocumentWithContext(ctx, input)
+	resp, err = rm.sdkapi.CreateDocument(ctx, input)
 	rm.metrics.RecordAPICall("CREATE", "CreateDocument", err)
 	if err != nil {
 		return nil, err
@@ -412,24 +400,12 @@ func (rm *resourceManager) sdkCreate(
 		ko.Status.Author = nil
 	}
 	if resp.DocumentDescription.Category != nil {
-		f3 := []*string{}
-		for _, f3iter := range resp.DocumentDescription.Category {
-			var f3elem string
-			f3elem = *f3iter
-			f3 = append(f3, &f3elem)
-		}
-		ko.Status.Category = f3
+		ko.Status.Category = aws.StringSlice(resp.DocumentDescription.Category)
 	} else {
 		ko.Status.Category = nil
 	}
 	if resp.DocumentDescription.CategoryEnum != nil {
-		f4 := []*string{}
-		for _, f4iter := range resp.DocumentDescription.CategoryEnum {
-			var f4elem string
-			f4elem = *f4iter
-			f4 = append(f4, &f4elem)
-		}
-		ko.Status.CategoryEnum = f4
+		ko.Status.CategoryEnum = aws.StringSlice(resp.DocumentDescription.CategoryEnum)
 	} else {
 		ko.Status.CategoryEnum = nil
 	}
@@ -453,13 +429,13 @@ func (rm *resourceManager) sdkCreate(
 	} else {
 		ko.Spec.DisplayName = nil
 	}
-	if resp.DocumentDescription.DocumentFormat != nil {
-		ko.Spec.DocumentFormat = resp.DocumentDescription.DocumentFormat
+	if resp.DocumentDescription.DocumentFormat != "" {
+		ko.Spec.DocumentFormat = aws.String(string(resp.DocumentDescription.DocumentFormat))
 	} else {
 		ko.Spec.DocumentFormat = nil
 	}
-	if resp.DocumentDescription.DocumentType != nil {
-		ko.Spec.DocumentType = resp.DocumentDescription.DocumentType
+	if resp.DocumentDescription.DocumentType != "" {
+		ko.Spec.DocumentType = aws.String(string(resp.DocumentDescription.DocumentType))
 	} else {
 		ko.Spec.DocumentType = nil
 	}
@@ -473,8 +449,8 @@ func (rm *resourceManager) sdkCreate(
 	} else {
 		ko.Status.Hash = nil
 	}
-	if resp.DocumentDescription.HashType != nil {
-		ko.Status.HashType = resp.DocumentDescription.HashType
+	if resp.DocumentDescription.HashType != "" {
+		ko.Status.HashType = aws.String(string(resp.DocumentDescription.HashType))
 	} else {
 		ko.Status.HashType = nil
 	}
@@ -506,8 +482,8 @@ func (rm *resourceManager) sdkCreate(
 			if f17iter.Name != nil {
 				f17elem.Name = f17iter.Name
 			}
-			if f17iter.Type != nil {
-				f17elem.Type = f17iter.Type
+			if f17iter.Type != "" {
+				f17elem.Type = aws.String(string(f17iter.Type))
 			}
 			f17 = append(f17, f17elem)
 		}
@@ -523,9 +499,9 @@ func (rm *resourceManager) sdkCreate(
 	if resp.DocumentDescription.PlatformTypes != nil {
 		f19 := []*string{}
 		for _, f19iter := range resp.DocumentDescription.PlatformTypes {
-			var f19elem string
-			f19elem = *f19iter
-			f19 = append(f19, &f19elem)
+			var f19elem *string
+			f19elem = aws.String(string(f19iter))
+			f19 = append(f19, f19elem)
 		}
 		ko.Status.PlatformTypes = f19
 	} else {
@@ -563,8 +539,8 @@ func (rm *resourceManager) sdkCreate(
 			if f21iter.Reviewer != nil {
 				f21elem.Reviewer = f21iter.Reviewer
 			}
-			if f21iter.Status != nil {
-				f21elem.Status = f21iter.Status
+			if f21iter.Status != "" {
+				f21elem.Status = aws.String(string(f21iter.Status))
 			}
 			f21 = append(f21, f21elem)
 		}
@@ -572,8 +548,8 @@ func (rm *resourceManager) sdkCreate(
 	} else {
 		ko.Status.ReviewInformation = nil
 	}
-	if resp.DocumentDescription.ReviewStatus != nil {
-		ko.Status.ReviewStatus = resp.DocumentDescription.ReviewStatus
+	if resp.DocumentDescription.ReviewStatus != "" {
+		ko.Status.ReviewStatus = aws.String(string(resp.DocumentDescription.ReviewStatus))
 	} else {
 		ko.Status.ReviewStatus = nil
 	}
@@ -587,8 +563,8 @@ func (rm *resourceManager) sdkCreate(
 	} else {
 		ko.Status.Sha1 = nil
 	}
-	if resp.DocumentDescription.Status != nil {
-		ko.Status.Status = resp.DocumentDescription.Status
+	if resp.DocumentDescription.Status != "" {
+		ko.Status.Status = aws.String(string(resp.DocumentDescription.Status))
 	} else {
 		ko.Status.Status = nil
 	}
@@ -637,82 +613,76 @@ func (rm *resourceManager) newCreateRequestPayload(
 	res := &svcsdk.CreateDocumentInput{}
 
 	if r.ko.Spec.Attachments != nil {
-		f0 := []*svcsdk.AttachmentsSource{}
+		f0 := []svcsdktypes.AttachmentsSource{}
 		for _, f0iter := range r.ko.Spec.Attachments {
-			f0elem := &svcsdk.AttachmentsSource{}
+			f0elem := &svcsdktypes.AttachmentsSource{}
 			if f0iter.Key != nil {
-				f0elem.SetKey(*f0iter.Key)
+				f0elem.Key = svcsdktypes.AttachmentsSourceKey(*f0iter.Key)
 			}
 			if f0iter.Name != nil {
-				f0elem.SetName(*f0iter.Name)
+				f0elem.Name = f0iter.Name
 			}
 			if f0iter.Values != nil {
-				f0elemf2 := []*string{}
-				for _, f0elemf2iter := range f0iter.Values {
-					var f0elemf2elem string
-					f0elemf2elem = *f0elemf2iter
-					f0elemf2 = append(f0elemf2, &f0elemf2elem)
-				}
-				f0elem.SetValues(f0elemf2)
+				f0elem.Values = aws.ToStringSlice(f0iter.Values)
 			}
-			f0 = append(f0, f0elem)
+			f0 = append(f0, *f0elem)
 		}
-		res.SetAttachments(f0)
+		res.Attachments = f0
 	}
 	if r.ko.Spec.Content != nil {
-		res.SetContent(*r.ko.Spec.Content)
+		res.Content = r.ko.Spec.Content
 	}
 	if r.ko.Spec.DisplayName != nil {
-		res.SetDisplayName(*r.ko.Spec.DisplayName)
+		res.DisplayName = r.ko.Spec.DisplayName
 	}
 	if r.ko.Spec.DocumentFormat != nil {
-		res.SetDocumentFormat(*r.ko.Spec.DocumentFormat)
+		res.DocumentFormat = svcsdktypes.DocumentFormat(*r.ko.Spec.DocumentFormat)
 	}
 	if r.ko.Spec.DocumentType != nil {
-		res.SetDocumentType(*r.ko.Spec.DocumentType)
+		res.DocumentType = svcsdktypes.DocumentType(*r.ko.Spec.DocumentType)
 	}
 	if r.ko.Spec.Name != nil {
-		res.SetName(*r.ko.Spec.Name)
+		res.Name = r.ko.Spec.Name
 	}
 	if r.ko.Spec.Requires != nil {
-		f6 := []*svcsdk.DocumentRequires{}
+		f6 := []svcsdktypes.DocumentRequires{}
 		for _, f6iter := range r.ko.Spec.Requires {
-			f6elem := &svcsdk.DocumentRequires{}
+			f6elem := &svcsdktypes.DocumentRequires{}
 			if f6iter.Name != nil {
-				f6elem.SetName(*f6iter.Name)
+				f6elem.Name = f6iter.Name
 			}
 			if f6iter.RequireType != nil {
-				f6elem.SetRequireType(*f6iter.RequireType)
+				f6elem.RequireType = f6iter.RequireType
 			}
 			if f6iter.Version != nil {
-				f6elem.SetVersion(*f6iter.Version)
+				f6elem.Version = f6iter.Version
 			}
 			if f6iter.VersionName != nil {
-				f6elem.SetVersionName(*f6iter.VersionName)
+				f6elem.VersionName = f6iter.VersionName
 			}
-			f6 = append(f6, f6elem)
+			f6 = append(f6, *f6elem)
 		}
-		res.SetRequires(f6)
+		res.Requires = f6
 	}
 	if r.ko.Spec.Tags != nil {
-		f7 := []*svcsdk.Tag{}
+		f7 := []svcsdktypes.Tag{}
 		for _, f7iter := range r.ko.Spec.Tags {
-			f7elem := &svcsdk.Tag{}
+			f7elem := &svcsdktypes.Tag{}
 			if f7iter.Key != nil {
-				f7elem.SetKey(*f7iter.Key)
+				f7elem.Key = f7iter.Key
 			}
 			if f7iter.Value != nil {
-				f7elem.SetValue(*f7iter.Value)
+				f7elem.Value = f7iter.Value
 			}
-			f7 = append(f7, f7elem)
+			f7 = append(f7, *f7elem)
 		}
-		res.SetTags(f7)
+		res.Tags = f7
 	}
 	if r.ko.Spec.TargetType != nil {
-		res.SetTargetType(*r.ko.Spec.TargetType)
+		res.TargetType = r.ko.Spec.TargetType
 	}
 	if r.ko.Spec.VersionName != nil {
-		res.SetVersionName(*r.ko.Spec.VersionName)
+		res.VersionName = r.ko.Spec.VersionName
 	}
 
 	return res, nil
@@ -738,7 +708,7 @@ func (rm *resourceManager) sdkUpdate(
 
 	var resp *svcsdk.UpdateDocumentOutput
 	_ = resp
-	resp, err = rm.sdkapi.UpdateDocumentWithContext(ctx, input)
+	resp, err = rm.sdkapi.UpdateDocument(ctx, input)
 	rm.metrics.RecordAPICall("UPDATE", "UpdateDocument", err)
 	if err != nil {
 		return nil, err
@@ -771,24 +741,12 @@ func (rm *resourceManager) sdkUpdate(
 		ko.Status.Author = nil
 	}
 	if resp.DocumentDescription.Category != nil {
-		f3 := []*string{}
-		for _, f3iter := range resp.DocumentDescription.Category {
-			var f3elem string
-			f3elem = *f3iter
-			f3 = append(f3, &f3elem)
-		}
-		ko.Status.Category = f3
+		ko.Status.Category = aws.StringSlice(resp.DocumentDescription.Category)
 	} else {
 		ko.Status.Category = nil
 	}
 	if resp.DocumentDescription.CategoryEnum != nil {
-		f4 := []*string{}
-		for _, f4iter := range resp.DocumentDescription.CategoryEnum {
-			var f4elem string
-			f4elem = *f4iter
-			f4 = append(f4, &f4elem)
-		}
-		ko.Status.CategoryEnum = f4
+		ko.Status.CategoryEnum = aws.StringSlice(resp.DocumentDescription.CategoryEnum)
 	} else {
 		ko.Status.CategoryEnum = nil
 	}
@@ -812,13 +770,13 @@ func (rm *resourceManager) sdkUpdate(
 	} else {
 		ko.Spec.DisplayName = nil
 	}
-	if resp.DocumentDescription.DocumentFormat != nil {
-		ko.Spec.DocumentFormat = resp.DocumentDescription.DocumentFormat
+	if resp.DocumentDescription.DocumentFormat != "" {
+		ko.Spec.DocumentFormat = aws.String(string(resp.DocumentDescription.DocumentFormat))
 	} else {
 		ko.Spec.DocumentFormat = nil
 	}
-	if resp.DocumentDescription.DocumentType != nil {
-		ko.Spec.DocumentType = resp.DocumentDescription.DocumentType
+	if resp.DocumentDescription.DocumentType != "" {
+		ko.Spec.DocumentType = aws.String(string(resp.DocumentDescription.DocumentType))
 	} else {
 		ko.Spec.DocumentType = nil
 	}
@@ -832,8 +790,8 @@ func (rm *resourceManager) sdkUpdate(
 	} else {
 		ko.Status.Hash = nil
 	}
-	if resp.DocumentDescription.HashType != nil {
-		ko.Status.HashType = resp.DocumentDescription.HashType
+	if resp.DocumentDescription.HashType != "" {
+		ko.Status.HashType = aws.String(string(resp.DocumentDescription.HashType))
 	} else {
 		ko.Status.HashType = nil
 	}
@@ -865,8 +823,8 @@ func (rm *resourceManager) sdkUpdate(
 			if f17iter.Name != nil {
 				f17elem.Name = f17iter.Name
 			}
-			if f17iter.Type != nil {
-				f17elem.Type = f17iter.Type
+			if f17iter.Type != "" {
+				f17elem.Type = aws.String(string(f17iter.Type))
 			}
 			f17 = append(f17, f17elem)
 		}
@@ -882,9 +840,9 @@ func (rm *resourceManager) sdkUpdate(
 	if resp.DocumentDescription.PlatformTypes != nil {
 		f19 := []*string{}
 		for _, f19iter := range resp.DocumentDescription.PlatformTypes {
-			var f19elem string
-			f19elem = *f19iter
-			f19 = append(f19, &f19elem)
+			var f19elem *string
+			f19elem = aws.String(string(f19iter))
+			f19 = append(f19, f19elem)
 		}
 		ko.Status.PlatformTypes = f19
 	} else {
@@ -922,8 +880,8 @@ func (rm *resourceManager) sdkUpdate(
 			if f21iter.Reviewer != nil {
 				f21elem.Reviewer = f21iter.Reviewer
 			}
-			if f21iter.Status != nil {
-				f21elem.Status = f21iter.Status
+			if f21iter.Status != "" {
+				f21elem.Status = aws.String(string(f21iter.Status))
 			}
 			f21 = append(f21, f21elem)
 		}
@@ -931,8 +889,8 @@ func (rm *resourceManager) sdkUpdate(
 	} else {
 		ko.Status.ReviewInformation = nil
 	}
-	if resp.DocumentDescription.ReviewStatus != nil {
-		ko.Status.ReviewStatus = resp.DocumentDescription.ReviewStatus
+	if resp.DocumentDescription.ReviewStatus != "" {
+		ko.Status.ReviewStatus = aws.String(string(resp.DocumentDescription.ReviewStatus))
 	} else {
 		ko.Status.ReviewStatus = nil
 	}
@@ -946,8 +904,8 @@ func (rm *resourceManager) sdkUpdate(
 	} else {
 		ko.Status.Sha1 = nil
 	}
-	if resp.DocumentDescription.Status != nil {
-		ko.Status.Status = resp.DocumentDescription.Status
+	if resp.DocumentDescription.Status != "" {
+		ko.Status.Status = aws.String(string(resp.DocumentDescription.Status))
 	} else {
 		ko.Status.Status = nil
 	}
@@ -997,48 +955,42 @@ func (rm *resourceManager) newUpdateRequestPayload(
 	res := &svcsdk.UpdateDocumentInput{}
 
 	if r.ko.Spec.Attachments != nil {
-		f0 := []*svcsdk.AttachmentsSource{}
+		f0 := []svcsdktypes.AttachmentsSource{}
 		for _, f0iter := range r.ko.Spec.Attachments {
-			f0elem := &svcsdk.AttachmentsSource{}
+			f0elem := &svcsdktypes.AttachmentsSource{}
 			if f0iter.Key != nil {
-				f0elem.SetKey(*f0iter.Key)
+				f0elem.Key = svcsdktypes.AttachmentsSourceKey(*f0iter.Key)
 			}
 			if f0iter.Name != nil {
-				f0elem.SetName(*f0iter.Name)
+				f0elem.Name = f0iter.Name
 			}
 			if f0iter.Values != nil {
-				f0elemf2 := []*string{}
-				for _, f0elemf2iter := range f0iter.Values {
-					var f0elemf2elem string
-					f0elemf2elem = *f0elemf2iter
-					f0elemf2 = append(f0elemf2, &f0elemf2elem)
-				}
-				f0elem.SetValues(f0elemf2)
+				f0elem.Values = aws.ToStringSlice(f0iter.Values)
 			}
-			f0 = append(f0, f0elem)
+			f0 = append(f0, *f0elem)
 		}
-		res.SetAttachments(f0)
+		res.Attachments = f0
 	}
 	if r.ko.Spec.Content != nil {
-		res.SetContent(*r.ko.Spec.Content)
+		res.Content = r.ko.Spec.Content
 	}
 	if r.ko.Spec.DisplayName != nil {
-		res.SetDisplayName(*r.ko.Spec.DisplayName)
+		res.DisplayName = r.ko.Spec.DisplayName
 	}
 	if r.ko.Spec.DocumentFormat != nil {
-		res.SetDocumentFormat(*r.ko.Spec.DocumentFormat)
+		res.DocumentFormat = svcsdktypes.DocumentFormat(*r.ko.Spec.DocumentFormat)
 	}
 	if r.ko.Status.DocumentVersion != nil {
-		res.SetDocumentVersion(*r.ko.Status.DocumentVersion)
+		res.DocumentVersion = r.ko.Status.DocumentVersion
 	}
 	if r.ko.Spec.Name != nil {
-		res.SetName(*r.ko.Spec.Name)
+		res.Name = r.ko.Spec.Name
 	}
 	if r.ko.Spec.TargetType != nil {
-		res.SetTargetType(*r.ko.Spec.TargetType)
+		res.TargetType = r.ko.Spec.TargetType
 	}
 	if r.ko.Spec.VersionName != nil {
-		res.SetVersionName(*r.ko.Spec.VersionName)
+		res.VersionName = r.ko.Spec.VersionName
 	}
 
 	return res, nil
@@ -1060,7 +1012,7 @@ func (rm *resourceManager) sdkDelete(
 	}
 	var resp *svcsdk.DeleteDocumentOutput
 	_ = resp
-	resp, err = rm.sdkapi.DeleteDocumentWithContext(ctx, input)
+	resp, err = rm.sdkapi.DeleteDocument(ctx, input)
 	rm.metrics.RecordAPICall("DELETE", "DeleteDocument", err)
 	return nil, err
 }
@@ -1073,13 +1025,13 @@ func (rm *resourceManager) newDeleteRequestPayload(
 	res := &svcsdk.DeleteDocumentInput{}
 
 	if r.ko.Status.DocumentVersion != nil {
-		res.SetDocumentVersion(*r.ko.Status.DocumentVersion)
+		res.DocumentVersion = r.ko.Status.DocumentVersion
 	}
 	if r.ko.Spec.Name != nil {
-		res.SetName(*r.ko.Spec.Name)
+		res.Name = r.ko.Spec.Name
 	}
 	if r.ko.Spec.VersionName != nil {
-		res.SetVersionName(*r.ko.Spec.VersionName)
+		res.VersionName = r.ko.Spec.VersionName
 	}
 
 	return res, nil

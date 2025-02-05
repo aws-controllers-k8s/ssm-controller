@@ -1,5 +1,5 @@
     if ko.Status.BaselineID != nil {
-        tags, err := rm.fetchCurrentTags(ko.Status.BaselineID)
+        tags, err := rm.fetchCurrentTags(ctx, ko.Status.BaselineID)
         if err != nil {
             return nil, err
         }

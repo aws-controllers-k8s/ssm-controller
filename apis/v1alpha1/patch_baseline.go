@@ -28,8 +28,8 @@ type PatchBaselineSpec struct {
 	// A list of explicitly approved patches for the baseline.
 	//
 	// For information about accepted formats for lists of approved patches and
-	// rejected patches, see About package name formats for approved and rejected
-	// patch lists (https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager-approved-rejected-package-name-formats.html)
+	// rejected patches, see Package name formats for approved and rejected patch
+	// lists (https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager-approved-rejected-package-name-formats.html)
 	// in the Amazon Web Services Systems Manager User Guide.
 	ApprovedPatches []*string `json:"approvedPatches,omitempty"`
 	// Defines the compliance level for approved patches. When an approved patch
@@ -45,6 +45,10 @@ type PatchBaselineSpec struct {
 	// A description of the patch baseline.
 	Description *string `json:"description,omitempty"`
 	// A set of global filters used to include patches in the baseline.
+	//
+	// The GlobalFilters parameter can be configured only by using the CLI or an
+	// Amazon Web Services SDK. It can't be configured from the Patch Manager console,
+	// and its value isn't displayed in the console.
 	GlobalFilters *PatchFilterGroup `json:"globalFilters,omitempty"`
 	// The name of the patch baseline.
 	// +kubebuilder:validation:Required
@@ -55,23 +59,32 @@ type PatchBaselineSpec struct {
 	// A list of explicitly rejected patches for the baseline.
 	//
 	// For information about accepted formats for lists of approved patches and
-	// rejected patches, see About package name formats for approved and rejected
-	// patch lists (https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager-approved-rejected-package-name-formats.html)
+	// rejected patches, see Package name formats for approved and rejected patch
+	// lists (https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager-approved-rejected-package-name-formats.html)
 	// in the Amazon Web Services Systems Manager User Guide.
 	RejectedPatches []*string `json:"rejectedPatches,omitempty"`
 	// The action for Patch Manager to take on patches included in the RejectedPackages
 	// list.
 	//
-	//   - ALLOW_AS_DEPENDENCY : A package in the Rejected patches list is installed
-	//     only if it is a dependency of another package. It is considered compliant
-	//     with the patch baseline, and its status is reported as InstalledOther.
-	//     This is the default action if no option is specified.
+	// ALLOW_AS_DEPENDENCY
 	//
-	//   - BLOCK : Packages in the RejectedPatches list, and packages that include
-	//     them as dependencies, aren't installed under any circumstances. If a package
-	//     was installed before it was added to the Rejected patches list, it is
-	//     considered non-compliant with the patch baseline, and its status is reported
-	//     as InstalledRejected.
+	// Linux and macOS: A package in the rejected patches list is installed only
+	// if it is a dependency of another package. It is considered compliant with
+	// the patch baseline, and its status is reported as INSTALLED_OTHER. This is
+	// the default action if no option is specified.
+	//
+	// Windows Server: Windows Server doesn't support the concept of package dependencies.
+	// If a package in the rejected patches list and already installed on the node,
+	// its status is reported as INSTALLED_OTHER. Any package not already installed
+	// on the node is skipped. This is the default action if no option is specified.
+	//
+	// # BLOCK
+	//
+	// All OSs: Packages in the rejected patches list, and packages that include
+	// them as dependencies, aren't installed by Patch Manager under any circumstances.
+	// If a package was installed before it was added to the rejected patches list,
+	// or is installed outside of Patch Manager afterward, it's considered noncompliant
+	// with the patch baseline and its status is reported as INSTALLED_REJECTED.
 	RejectedPatchesAction *string `json:"rejectedPatchesAction,omitempty"`
 	// Information about the patches to use to update the managed nodes, including
 	// target operating systems and source repositories. Applies to Linux managed

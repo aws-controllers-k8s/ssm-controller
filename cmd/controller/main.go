@@ -16,6 +16,7 @@
 package main
 
 import (
+	"context"
 	"os"
 
 	ackv1alpha1 "github.com/aws-controllers-k8s/runtime/apis/core/v1alpha1"
@@ -37,7 +38,6 @@ import (
 
 	svctypes "github.com/aws-controllers-k8s/ssm-controller/apis/v1alpha1"
 	svcresource "github.com/aws-controllers-k8s/ssm-controller/pkg/resource"
-	svcsdk "github.com/aws/aws-sdk-go/service/ssm"
 
 	_ "github.com/aws-controllers-k8s/ssm-controller/pkg/resource/document"
 	_ "github.com/aws-controllers-k8s/ssm-controller/pkg/resource/patch_baseline"
@@ -47,11 +47,10 @@ import (
 )
 
 var (
-	awsServiceAPIGroup    = "ssm.services.k8s.aws"
-	awsServiceAlias       = "ssm"
-	awsServiceEndpointsID = svcsdk.EndpointsID
-	scheme                = runtime.NewScheme()
-	setupLog              = ctrlrt.Log.WithName("setup")
+	awsServiceAPIGroup = "ssm.services.k8s.aws"
+	awsServiceAlias    = "ssm"
+	scheme             = runtime.NewScheme()
+	setupLog           = ctrlrt.Log.WithName("setup")
 )
 
 func init() {
@@ -73,7 +72,8 @@ func main() {
 		resourceGVKs = append(resourceGVKs, mf.ResourceDescriptor().GroupVersionKind())
 	}
 
-	if err := ackCfg.Validate(ackcfg.WithGVKs(resourceGVKs)); err != nil {
+	ctx := context.Background()
+	if err := ackCfg.Validate(ctx, ackcfg.WithGVKs(resourceGVKs)); err != nil {
 		setupLog.Error(
 			err, "Unable to create controller manager",
 			"aws.service", awsServiceAlias,
@@ -138,7 +138,7 @@ func main() {
 		"aws.service", awsServiceAlias,
 	)
 	sc := ackrt.NewServiceController(
-		awsServiceAlias, awsServiceAPIGroup, awsServiceEndpointsID,
+		awsServiceAlias, awsServiceAPIGroup,
 		acktypes.VersionInfo{
 			version.GitCommit,
 			version.GitVersion,
