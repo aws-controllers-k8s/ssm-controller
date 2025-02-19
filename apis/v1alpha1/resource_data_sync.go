@@ -25,12 +25,16 @@ type ResourceDataSyncSpec struct {
 
 	// Amazon S3 configuration details for the sync. This parameter is required
 	// if the SyncType value is SyncToDestination.
+
 	S3Destination *ResourceDataSyncS3Destination `json:"s3Destination,omitempty"`
 	// A name for the configuration.
+
 	// +kubebuilder:validation:Required
+
 	SyncName *string `json:"syncName"`
 	// Specify information about the data sources to synchronize. This parameter
 	// is required if the SyncType value is SyncFromSource.
+
 	SyncSource *ResourceDataSyncSource `json:"syncSource,omitempty"`
 	// Specify SyncToDestination to create a resource data sync that synchronizes
 	// data to an S3 bucket for Inventory. If you specify SyncToDestination, you
@@ -39,6 +43,7 @@ type ResourceDataSyncSpec struct {
 	// accounts and Amazon Web Services Regions, as listed in Organizations for
 	// Explorer. If you specify SyncFromSource, you must provide a value for SyncSource.
 	// The default value is SyncToDestination.
+
 	SyncType *string `json:"syncType,omitempty"`
 }
 
@@ -49,7 +54,7 @@ type ResourceDataSyncStatus struct {
 	// constructed ARN for the resource
 	// +kubebuilder:validation:Optional
 	ACKResourceMetadata *ackv1alpha1.ResourceMetadata `json:"ackResourceMetadata"`
-	// All CRS managed by ACK have a common `Status.Conditions` member that
+	// All CRs managed by ACK have a common `Status.Conditions` member that
 	// contains a collection of `ackv1alpha1.Condition` objects that describe
 	// the various terminal states of the CR and its backend AWS service API
 	// resource

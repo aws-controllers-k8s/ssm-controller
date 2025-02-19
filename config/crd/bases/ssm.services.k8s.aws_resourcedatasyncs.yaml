@@ -40,9 +40,8 @@ spec:
             description: ResourceDataSyncSpec defines the desired state of ResourceDataSync.
             properties:
               s3Destination:
-                description: |-
-                  Amazon S3 configuration details for the sync. This parameter is required
-                  if the SyncType value is SyncToDestination.
+                description: Information about the target S3 bucket for the resource
+                  data sync.
                 properties:
                   awsKMSKeyARN:
                     type: string
@@ -67,12 +66,10 @@ spec:
                     type: string
                 type: object
               syncName:
-                description: A name for the configuration.
                 type: string
               syncSource:
-                description: |-
-                  Specify information about the data sources to synchronize. This parameter
-                  is required if the SyncType value is SyncFromSource.
+                description: Information about the source of the data included in
+                  the resource data sync.
                 properties:
                   awsOrganizationsSource:
                     description: |-
@@ -105,14 +102,6 @@ spec:
                     type: string
                 type: object
               syncType:
-                description: |-
-                  Specify SyncToDestination to create a resource data sync that synchronizes
-                  data to an S3 bucket for Inventory. If you specify SyncToDestination, you
-                  must provide a value for S3Destination. Specify SyncFromSource to synchronize
-                  data from a single account and multiple Regions, or multiple Amazon Web Services
-                  accounts and Amazon Web Services Regions, as listed in Organizations for
-                  Explorer. If you specify SyncFromSource, you must provide a value for SyncSource.
-                  The default value is SyncToDestination.
                 type: string
             required:
             - syncName
@@ -151,7 +140,7 @@ spec:
                 type: object
               conditions:
                 description: |-
-                  All CRS managed by ACK have a common `Status.Conditions` member that
+                  All CRs managed by ACK have a common `Status.Conditions` member that
                   contains a collection of `ackv1alpha1.Condition` objects that describe
                   the various terminal states of the CR and its backend AWS service API
                   resource

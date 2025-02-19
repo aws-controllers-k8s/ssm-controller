@@ -24,6 +24,7 @@ import (
 type DocumentSpec struct {
 
 	// A list of key-value pairs that describe attachments to a version of a document.
+
 	Attachments []*AttachmentsSource `json:"attachments,omitempty"`
 	// The content for the new SSM document in JSON or YAML format. The content
 	// of the document must not exceed 64KB. This quota also includes the content
@@ -34,44 +35,49 @@ type DocumentSpec struct {
 	// For examples, see the following topics in the Amazon Web Services Systems
 	// Manager User Guide.
 	//
-	//   - Create an SSM document (console) (https://docs.aws.amazon.com/systems-manager/latest/userguide/documents-using.html#create-ssm-console)
+	//    * Create an SSM document (console) (https://docs.aws.amazon.com/systems-manager/latest/userguide/documents-using.html#create-ssm-console)
 	//
-	//   - Create an SSM document (command line) (https://docs.aws.amazon.com/systems-manager/latest/userguide/documents-using.html#create-ssm-document-cli)
+	//    * Create an SSM document (command line) (https://docs.aws.amazon.com/systems-manager/latest/userguide/documents-using.html#create-ssm-document-cli)
 	//
-	//   - Create an SSM document (API) (https://docs.aws.amazon.com/systems-manager/latest/userguide/documents-using.html#create-ssm-document-api)
-	//
+	//    * Create an SSM document (API) (https://docs.aws.amazon.com/systems-manager/latest/userguide/documents-using.html#create-ssm-document-api)
+
 	// +kubebuilder:validation:Required
+
 	Content *string `json:"content"`
 	// An optional field where you can specify a friendly name for the SSM document.
 	// This value can differ for each version of the document. You can update this
 	// value at a later time using the UpdateDocument operation.
+
 	DisplayName *string `json:"displayName,omitempty"`
 	// Specify the document format for the request. The document format can be JSON,
 	// YAML, or TEXT. JSON is the default format.
+
 	DocumentFormat *string `json:"documentFormat,omitempty"`
 	// The type of document to create.
 	//
 	// The DeploymentStrategy document type is an internal-use-only document type
 	// reserved for AppConfig.
+
 	DocumentType *string `json:"documentType,omitempty"`
 	// A name for the SSM document.
 	//
 	// You can't use the following strings as document name prefixes. These are
 	// reserved by Amazon Web Services for use as document name prefixes:
 	//
-	//   - aws
+	//    * aws
 	//
-	//   - amazon
+	//    * amazon
 	//
-	//   - amzn
+	//    * amzn
 	//
-	//   - AWSEC2
+	//    * AWSEC2
 	//
-	//   - AWSConfigRemediation
+	//    * AWSConfigRemediation
 	//
-	//   - AWSSupport
-	//
+	//    * AWSSupport
+
 	// +kubebuilder:validation:Required
+
 	Name *string `json:"name"`
 	// A list of SSM documents required by a document. This parameter is used exclusively
 	// by AppConfig. When a user creates an AppConfig configuration in an SSM document,
@@ -80,6 +86,7 @@ type DocumentSpec struct {
 	// document for validation purposes. For more information, see What is AppConfig?
 	// (https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html)
 	// in the AppConfig User Guide.
+
 	Requires []*DocumentRequires `json:"requires,omitempty"`
 	// Optional metadata that you assign to a resource. Tags enable you to categorize
 	// a resource in different ways, such as by purpose, owner, or environment.
@@ -87,11 +94,12 @@ type DocumentSpec struct {
 	// of targets or the environment where it will run. In this case, you could
 	// specify the following key-value pairs:
 	//
-	//   - Key=OS,Value=Windows
+	//    * Key=OS,Value=Windows
 	//
-	//   - Key=Environment,Value=Production
+	//    * Key=Environment,Value=Production
 	//
 	// To add tags to an existing SSM document, use the AddTagsToResource operation.
+
 	Tags []*Tag `json:"tags,omitempty"`
 	// Specify a target type to define the kinds of resources the document can run
 	// on. For example, to run a document on EC2 instances, specify the following
@@ -100,10 +108,12 @@ type DocumentSpec struct {
 	// can't run on any resources. For a list of valid resource types, see Amazon
 	// Web Services resource and property types reference (https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-template-resource-type-ref.html)
 	// in the CloudFormation User Guide.
+
 	TargetType *string `json:"targetType,omitempty"`
 	// An optional field specifying the version of the artifact you are creating
 	// with the document. For example, Release12.1. This value is unique across
 	// all versions of a document, and can't be changed.
+
 	VersionName *string `json:"versionName,omitempty"`
 }
 
@@ -114,7 +124,7 @@ type DocumentStatus struct {
 	// constructed ARN for the resource
 	// +kubebuilder:validation:Optional
 	ACKResourceMetadata *ackv1alpha1.ResourceMetadata `json:"ackResourceMetadata"`
-	// All CRS managed by ACK have a common `Status.Conditions` member that
+	// All CRs managed by ACK have a common `Status.Conditions` member that
 	// contains a collection of `ackv1alpha1.Condition` objects that describe
 	// the various terminal states of the CR and its backend AWS service API
 	// resource
