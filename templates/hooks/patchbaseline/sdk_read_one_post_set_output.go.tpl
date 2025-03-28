@@ -3,5 +3,5 @@
         if err != nil {
             return nil, err
         }
-        ko.Spec.Tags = FromACKTags(tags)
+        ko.Spec.Tags = fromACKTags(tags, nil)
     }

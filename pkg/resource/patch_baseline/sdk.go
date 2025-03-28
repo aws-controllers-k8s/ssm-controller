@@ -227,7 +227,7 @@ func (rm *resourceManager) sdkFind(
 		if err != nil {
 			return nil, err
 		}
-		ko.Spec.Tags = FromACKTags(tags)
+		ko.Spec.Tags = fromACKTags(tags, nil)
 	}
 	return &resource{ko}, nil
 }
