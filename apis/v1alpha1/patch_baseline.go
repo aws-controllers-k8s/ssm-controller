@@ -51,6 +51,8 @@ type PatchBaselineSpec struct {
 	// and its value isn't displayed in the console.
 	GlobalFilters *PatchFilterGroup `json:"globalFilters,omitempty"`
 	// The name of the patch baseline.
+	//
+	// Regex Pattern: `^[a-zA-Z0-9_\-.]{3,128}$`
 	// +kubebuilder:validation:Required
 	Name *string `json:"name"`
 	// Defines the operating system the patch baseline applies to. The default value
@@ -118,6 +120,8 @@ type PatchBaselineStatus struct {
 	// +kubebuilder:validation:Optional
 	Conditions []*ackv1alpha1.Condition `json:"conditions"`
 	// The ID of the created patch baseline.
+	//
+	// Regex Pattern: `^[a-zA-Z0-9_\-:/]{20,128}$`
 	// +kubebuilder:validation:Optional
 	BaselineID *string `json:"baselineID,omitempty"`
 }

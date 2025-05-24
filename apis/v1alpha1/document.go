@@ -45,6 +45,8 @@ type DocumentSpec struct {
 	// An optional field where you can specify a friendly name for the SSM document.
 	// This value can differ for each version of the document. You can update this
 	// value at a later time using the UpdateDocument operation.
+	//
+	// Regex Pattern: `^[\w\.\-\:\/ ]*$`
 	DisplayName *string `json:"displayName,omitempty"`
 	// Specify the document format for the request. The document format can be JSON,
 	// YAML, or TEXT. JSON is the default format.
@@ -71,6 +73,7 @@ type DocumentSpec struct {
 	//
 	//   - AWSSupport
 	//
+	// Regex Pattern: `^[a-zA-Z0-9_\-.]{3,128}$`
 	// +kubebuilder:validation:Required
 	Name *string `json:"name"`
 	// A list of SSM documents required by a document. This parameter is used exclusively
@@ -100,10 +103,14 @@ type DocumentSpec struct {
 	// can't run on any resources. For a list of valid resource types, see Amazon
 	// Web Services resource and property types reference (https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-template-resource-type-ref.html)
 	// in the CloudFormation User Guide.
+	//
+	// Regex Pattern: `^\/[\w\.\-\:\/]*$`
 	TargetType *string `json:"targetType,omitempty"`
 	// An optional field specifying the version of the artifact you are creating
 	// with the document. For example, Release12.1. This value is unique across
 	// all versions of a document, and can't be changed.
+	//
+	// Regex Pattern: `^[a-zA-Z0-9_\-.]{1,128}$`
 	VersionName *string `json:"versionName,omitempty"`
 }
 
@@ -121,6 +128,8 @@ type DocumentStatus struct {
 	// +kubebuilder:validation:Optional
 	Conditions []*ackv1alpha1.Condition `json:"conditions"`
 	// The version of the document currently approved for use in the organization.
+	//
+	// Regex Pattern: `^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$`
 	// +kubebuilder:validation:Optional
 	ApprovedVersion *string `json:"approvedVersion,omitempty"`
 	// Details about the document attachments, including names, locations, sizes,
@@ -141,12 +150,16 @@ type DocumentStatus struct {
 	// +kubebuilder:validation:Optional
 	CreatedDate *metav1.Time `json:"createdDate,omitempty"`
 	// The default version.
+	//
+	// Regex Pattern: `^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$`
 	// +kubebuilder:validation:Optional
 	DefaultVersion *string `json:"defaultVersion,omitempty"`
 	// A description of the document.
 	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty"`
 	// The document version.
+	//
+	// Regex Pattern: `^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$`
 	// +kubebuilder:validation:Optional
 	DocumentVersion *string `json:"documentVersion,omitempty"`
 	// The Sha256 or Sha1 hash created by the system when the document was created.
@@ -160,6 +173,8 @@ type DocumentStatus struct {
 	// +kubebuilder:validation:Optional
 	HashType *string `json:"hashType,omitempty"`
 	// The latest version of the document.
+	//
+	// Regex Pattern: `^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$`
 	// +kubebuilder:validation:Optional
 	LatestVersion *string `json:"latestVersion,omitempty"`
 	// The Amazon Web Services user that created the document.
@@ -169,6 +184,8 @@ type DocumentStatus struct {
 	// +kubebuilder:validation:Optional
 	Parameters []*DocumentParameter `json:"parameters,omitempty"`
 	// The version of the document that is currently under review.
+	//
+	// Regex Pattern: `^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$`
 	// +kubebuilder:validation:Optional
 	PendingReviewVersion *string `json:"pendingReviewVersion,omitempty"`
 	// The list of operating system (OS) platforms compatible with this SSM document.
@@ -181,6 +198,8 @@ type DocumentStatus struct {
 	// +kubebuilder:validation:Optional
 	ReviewStatus *string `json:"reviewStatus,omitempty"`
 	// The schema version.
+	//
+	// Regex Pattern: `^([0-9]+)\.([0-9]+)$`
 	// +kubebuilder:validation:Optional
 	SchemaVersion *string `json:"schemaVersion,omitempty"`
 	// The SHA1 hash of the document, which you can use for verification.
