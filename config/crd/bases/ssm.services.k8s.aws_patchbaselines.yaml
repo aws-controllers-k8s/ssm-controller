@@ -158,7 +158,10 @@ spec:
                     type: array
                 type: object
               name:
-                description: The name of the patch baseline.
+                description: |-
+                  The name of the patch baseline.
+
+                  Regex Pattern: `^[a-zA-Z0-9_\-.]{3,128}$`
                 type: string
               operatingSystem:
                 description: |-
@@ -285,7 +288,10 @@ spec:
                 - region
                 type: object
               baselineID:
-                description: The ID of the created patch baseline.
+                description: |-
+                  The ID of the created patch baseline.
+
+                  Regex Pattern: `^[a-zA-Z0-9_\-:/]{20,128}$`
                 type: string
               conditions:
                 description: |-

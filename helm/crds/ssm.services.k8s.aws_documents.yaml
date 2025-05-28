@@ -79,6 +79,8 @@ spec:
                   An optional field where you can specify a friendly name for the SSM document.
                   This value can differ for each version of the document. You can update this
                   value at a later time using the UpdateDocument operation.
+
+                  Regex Pattern: `^[\w\.\-\:\/ ]*$`
                 type: string
               documentFormat:
                 description: |-
@@ -110,6 +112,8 @@ spec:
                     - AWSConfigRemediation
 
                     - AWSSupport
+
+                  Regex Pattern: `^[a-zA-Z0-9_\-.]{3,128}$`
                 type: string
               requires:
                 description: |-
@@ -169,12 +173,16 @@ spec:
                   can't run on any resources. For a list of valid resource types, see Amazon
                   Web Services resource and property types reference (https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-template-resource-type-ref.html)
                   in the CloudFormation User Guide.
+
+                  Regex Pattern: `^\/[\w\.\-\:\/]*$`
                 type: string
               versionName:
                 description: |-
                   An optional field specifying the version of the artifact you are creating
                   with the document. For example, Release12.1. This value is unique across
                   all versions of a document, and can't be changed.
+
+                  Regex Pattern: `^[a-zA-Z0-9_\-.]{1,128}$`
                 type: string
             required:
             - content
@@ -213,8 +221,10 @@ spec:
                 - region
                 type: object
               approvedVersion:
-                description: The version of the document currently approved for use
-                  in the organization.
+                description: |-
+                  The version of the document currently approved for use in the organization.
+
+                  Regex Pattern: `^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$`
                 type: string
               attachmentsInformation:
                 description: |-
@@ -283,13 +293,19 @@ spec:
                 format: date-time
                 type: string
               defaultVersion:
-                description: The default version.
+                description: |-
+                  The default version.
+
+                  Regex Pattern: `^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$`
                 type: string
               description:
                 description: A description of the document.
                 type: string
               documentVersion:
-                description: The document version.
+                description: |-
+                  The document version.
+
+                  Regex Pattern: `^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$`
                 type: string
               hash:
                 description: |-
@@ -304,7 +320,10 @@ spec:
                   Sha1 hashes have been deprecated.
                 type: string
               latestVersion:
-                description: The latest version of the document.
+                description: |-
+                  The latest version of the document.
+
+                  Regex Pattern: `^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$`
                 type: string
               owner:
                 description: The Amazon Web Services user that created the document.
@@ -327,7 +346,10 @@ spec:
                   type: object
                 type: array
               pendingReviewVersion:
-                description: The version of the document that is currently under review.
+                description: |-
+                  The version of the document that is currently under review.
+
+                  Regex Pattern: `^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$`
                 type: string
               platformTypes:
                 description: The list of operating system (OS) platforms compatible
@@ -353,7 +375,10 @@ spec:
                 description: The current status of the review.
                 type: string
               schemaVersion:
-                description: The schema version.
+                description: |-
+                  The schema version.
+
+                  Regex Pattern: `^([0-9]+)\.([0-9]+)$`
                 type: string
               sha1:
                 description: The SHA1 hash of the document, which you can use for
