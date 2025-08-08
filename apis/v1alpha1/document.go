@@ -23,95 +23,94 @@ import (
 // DocumentSpec defines the desired state of Document.
 type DocumentSpec struct {
 
-	// A list of key-value pairs that describe attachments to a version of a document.
-	Attachments []*AttachmentsSource `json:"attachments,omitempty"`
-	// The content for the new SSM document in JSON or YAML format. The content
-	// of the document must not exceed 64KB. This quota also includes the content
-	// specified for input parameters at runtime. We recommend storing the contents
-	// for your new document in an external JSON or YAML file and referencing the
-	// file in a command.
-	//
-	// For examples, see the following topics in the Amazon Web Services Systems
-	// Manager User Guide.
-	//
-	//   - Create an SSM document (console) (https://docs.aws.amazon.com/systems-manager/latest/userguide/documents-using.html#create-ssm-console)
-	//
-	//   - Create an SSM document (command line) (https://docs.aws.amazon.com/systems-manager/latest/userguide/documents-using.html#create-ssm-document-cli)
-	//
-	//   - Create an SSM document (API) (https://docs.aws.amazon.com/systems-manager/latest/userguide/documents-using.html#create-ssm-document-api)
-	//
-	// +kubebuilder:validation:Required
-	Content *string `json:"content"`
-	// An optional field where you can specify a friendly name for the SSM document.
-	// This value can differ for each version of the document. You can update this
-	// value at a later time using the UpdateDocument operation.
-	//
-	// Regex Pattern: `^[\w\.\-\:\/ ]*$`
-	DisplayName *string `json:"displayName,omitempty"`
-	// Specify the document format for the request. The document format can be JSON,
-	// YAML, or TEXT. JSON is the default format.
-	DocumentFormat *string `json:"documentFormat,omitempty"`
-	// The type of document to create.
-	//
-	// The DeploymentStrategy document type is an internal-use-only document type
-	// reserved for AppConfig.
-	DocumentType *string `json:"documentType,omitempty"`
-	// A name for the SSM document.
-	//
-	// You can't use the following strings as document name prefixes. These are
-	// reserved by Amazon Web Services for use as document name prefixes:
-	//
-	//   - aws
-	//
-	//   - amazon
-	//
-	//   - amzn
-	//
-	//   - AWSEC2
-	//
-	//   - AWSConfigRemediation
-	//
-	//   - AWSSupport
-	//
-	// Regex Pattern: `^[a-zA-Z0-9_\-.]{3,128}$`
-	// +kubebuilder:validation:Required
-	Name *string `json:"name"`
-	// A list of SSM documents required by a document. This parameter is used exclusively
-	// by AppConfig. When a user creates an AppConfig configuration in an SSM document,
-	// the user must also specify a required document for validation purposes. In
-	// this case, an ApplicationConfiguration document requires an ApplicationConfigurationSchema
-	// document for validation purposes. For more information, see What is AppConfig?
-	// (https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html)
-	// in the AppConfig User Guide.
-	Requires []*DocumentRequires `json:"requires,omitempty"`
-	// Optional metadata that you assign to a resource. Tags enable you to categorize
-	// a resource in different ways, such as by purpose, owner, or environment.
-	// For example, you might want to tag an SSM document to identify the types
-	// of targets or the environment where it will run. In this case, you could
-	// specify the following key-value pairs:
-	//
-	//   - Key=OS,Value=Windows
-	//
-	//   - Key=Environment,Value=Production
-	//
-	// To add tags to an existing SSM document, use the AddTagsToResource operation.
-	Tags []*Tag `json:"tags,omitempty"`
-	// Specify a target type to define the kinds of resources the document can run
-	// on. For example, to run a document on EC2 instances, specify the following
-	// value: /AWS::EC2::Instance. If you specify a value of '/' the document can
-	// run on all types of resources. If you don't specify a value, the document
-	// can't run on any resources. For a list of valid resource types, see Amazon
-	// Web Services resource and property types reference (https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-template-resource-type-ref.html)
-	// in the CloudFormation User Guide.
-	//
-	// Regex Pattern: `^\/[\w\.\-\:\/]*$`
-	TargetType *string `json:"targetType,omitempty"`
-	// An optional field specifying the version of the artifact you are creating
-	// with the document. For example, Release12.1. This value is unique across
-	// all versions of a document, and can't be changed.
-	//
-	// Regex Pattern: `^[a-zA-Z0-9_\-.]{1,128}$`
-	VersionName *string `json:"versionName,omitempty"`
+// A list of key-value pairs that describe attachments to a version of a document.
+Attachments []*AttachmentsSource `json:"attachments,omitempty"`
+// The content for the new SSM document in JSON or YAML format. The content
+// of the document must not exceed 64KB. This quota also includes the content
+// specified for input parameters at runtime. We recommend storing the contents
+// for your new document in an external JSON or YAML file and referencing the
+// file in a command.
+// 
+// For examples, see the following topics in the Amazon Web Services Systems
+// Manager User Guide.
+// 
+//    * Create an SSM document (console) (https://docs.aws.amazon.com/systems-manager/latest/userguide/documents-using.html#create-ssm-console)
+// 
+//    * Create an SSM document (command line) (https://docs.aws.amazon.com/systems-manager/latest/userguide/documents-using.html#create-ssm-document-cli)
+// 
+//    * Create an SSM document (API) (https://docs.aws.amazon.com/systems-manager/latest/userguide/documents-using.html#create-ssm-document-api)
+// +kubebuilder:validation:Required
+Content *string `json:"content"`
+// An optional field where you can specify a friendly name for the SSM document.
+// This value can differ for each version of the document. You can update this
+// value at a later time using the UpdateDocument operation.
+//
+// Regex Pattern: `^[\w\.\-\:\/ ]*$`
+DisplayName *string `json:"displayName,omitempty"`
+// Specify the document format for the request. The document format can be JSON,
+// YAML, or TEXT. JSON is the default format.
+DocumentFormat *string `json:"documentFormat,omitempty"`
+// The type of document to create.
+// 
+// The DeploymentStrategy document type is an internal-use-only document type
+// reserved for AppConfig.
+DocumentType *string `json:"documentType,omitempty"`
+// A name for the SSM document.
+// 
+// You can't use the following strings as document name prefixes. These are
+// reserved by Amazon Web Services for use as document name prefixes:
+// 
+//    * aws
+// 
+//    * amazon
+// 
+//    * amzn
+// 
+//    * AWSEC2
+// 
+//    * AWSConfigRemediation
+// 
+//    * AWSSupport
+//
+// Regex Pattern: `^[a-zA-Z0-9_\-.]{3,128}$`
+// +kubebuilder:validation:Required
+Name *string `json:"name"`
+// A list of SSM documents required by a document. This parameter is used exclusively
+// by AppConfig. When a user creates an AppConfig configuration in an SSM document,
+// the user must also specify a required document for validation purposes. In
+// this case, an ApplicationConfiguration document requires an ApplicationConfigurationSchema
+// document for validation purposes. For more information, see What is AppConfig?
+// (https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html)
+// in the AppConfig User Guide.
+Requires []*DocumentRequires `json:"requires,omitempty"`
+// Optional metadata that you assign to a resource. Tags enable you to categorize
+// a resource in different ways, such as by purpose, owner, or environment.
+// For example, you might want to tag an SSM document to identify the types
+// of targets or the environment where it will run. In this case, you could
+// specify the following key-value pairs:
+// 
+//    * Key=OS,Value=Windows
+// 
+//    * Key=Environment,Value=Production
+// 
+// To add tags to an existing SSM document, use the AddTagsToResource operation.
+Tags []*Tag `json:"tags,omitempty"`
+// Specify a target type to define the kinds of resources the document can run
+// on. For example, to run a document on EC2 instances, specify the following
+// value: /AWS::EC2::Instance. If you specify a value of '/' the document can
+// run on all types of resources. If you don't specify a value, the document
+// can't run on any resources. For a list of valid resource types, see Amazon
+// Web Services resource and property types reference (https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-template-resource-type-ref.html)
+// in the CloudFormation User Guide.
+//
+// Regex Pattern: `^\/[\w\.\-\:\/]*$`
+TargetType *string `json:"targetType,omitempty"`
+// An optional field specifying the version of the artifact you are creating
+// with the document. For example, Release12.1. This value is unique across
+// all versions of a document, and can't be changed.
+//
+// Regex Pattern: `^[a-zA-Z0-9_\-.]{1,128}$`
+VersionName *string `json:"versionName,omitempty"`
 }
 
 // DocumentStatus defines the observed state of Document
@@ -128,19 +127,19 @@ type DocumentStatus struct {
 	// +kubebuilder:validation:Optional
 	Conditions []*ackv1alpha1.Condition `json:"conditions"`
 	// The version of the document currently approved for use in the organization.
-	//
-	// Regex Pattern: `^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$`
+//
+// Regex Pattern: `^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$`
 	// +kubebuilder:validation:Optional
 	ApprovedVersion *string `json:"approvedVersion,omitempty"`
 	// Details about the document attachments, including names, locations, sizes,
-	// and so on.
+// and so on.
 	// +kubebuilder:validation:Optional
 	AttachmentsInformation []*AttachmentInformation `json:"attachmentsInformation,omitempty"`
 	// The user in your organization who created the document.
 	// +kubebuilder:validation:Optional
 	Author *string `json:"author,omitempty"`
 	// The classification of a document to help you identify and categorize its
-	// use.
+// use.
 	// +kubebuilder:validation:Optional
 	Category []*string `json:"category,omitempty"`
 	// The value that identifies a document's category.
@@ -150,31 +149,31 @@ type DocumentStatus struct {
 	// +kubebuilder:validation:Optional
 	CreatedDate *metav1.Time `json:"createdDate,omitempty"`
 	// The default version.
-	//
-	// Regex Pattern: `^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$`
+//
+// Regex Pattern: `^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$`
 	// +kubebuilder:validation:Optional
 	DefaultVersion *string `json:"defaultVersion,omitempty"`
 	// A description of the document.
 	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty"`
 	// The document version.
-	//
-	// Regex Pattern: `^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$`
+//
+// Regex Pattern: `^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$`
 	// +kubebuilder:validation:Optional
 	DocumentVersion *string `json:"documentVersion,omitempty"`
 	// The Sha256 or Sha1 hash created by the system when the document was created.
-	//
-	// Sha1 hashes have been deprecated.
+// 
+// Sha1 hashes have been deprecated.
 	// +kubebuilder:validation:Optional
 	Hash *string `json:"hash,omitempty"`
 	// The hash type of the document. Valid values include Sha256 or Sha1.
-	//
-	// Sha1 hashes have been deprecated.
+// 
+// Sha1 hashes have been deprecated.
 	// +kubebuilder:validation:Optional
 	HashType *string `json:"hashType,omitempty"`
 	// The latest version of the document.
-	//
-	// Regex Pattern: `^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$`
+//
+// Regex Pattern: `^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$`
 	// +kubebuilder:validation:Optional
 	LatestVersion *string `json:"latestVersion,omitempty"`
 	// The Amazon Web Services user that created the document.
@@ -184,8 +183,8 @@ type DocumentStatus struct {
 	// +kubebuilder:validation:Optional
 	Parameters []*DocumentParameter `json:"parameters,omitempty"`
 	// The version of the document that is currently under review.
-	//
-	// Regex Pattern: `^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$`
+//
+// Regex Pattern: `^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$`
 	// +kubebuilder:validation:Optional
 	PendingReviewVersion *string `json:"pendingReviewVersion,omitempty"`
 	// The list of operating system (OS) platforms compatible with this SSM document.
@@ -198,8 +197,8 @@ type DocumentStatus struct {
 	// +kubebuilder:validation:Optional
 	ReviewStatus *string `json:"reviewStatus,omitempty"`
 	// The schema version.
-	//
-	// Regex Pattern: `^([0-9]+)\.([0-9]+)$`
+//
+// Regex Pattern: `^([0-9]+)\.([0-9]+)$`
 	// +kubebuilder:validation:Optional
 	SchemaVersion *string `json:"schemaVersion,omitempty"`
 	// The SHA1 hash of the document, which you can use for verification.
@@ -209,9 +208,9 @@ type DocumentStatus struct {
 	// +kubebuilder:validation:Optional
 	Status *string `json:"status,omitempty"`
 	// A message returned by Amazon Web Services Systems Manager that explains the
-	// Status value. For example, a Failed status might be explained by the StatusInformation
-	// message, "The specified S3 bucket doesn't exist. Verify that the URL of the
-	// S3 bucket is correct."
+// Status value. For example, a Failed status might be explained by the StatusInformation
+// message, "The specified S3 bucket doesn't exist. Verify that the URL of the
+// S3 bucket is correct."
 	// +kubebuilder:validation:Optional
 	StatusInformation *string `json:"statusInformation,omitempty"`
 }
@@ -222,8 +221,8 @@ type DocumentStatus struct {
 type Document struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Spec              DocumentSpec   `json:"spec,omitempty"`
-	Status            DocumentStatus `json:"status,omitempty"`
+	Spec   DocumentSpec   `json:"spec,omitempty"`
+	Status DocumentStatus `json:"status,omitempty"`
 }
 
 // DocumentList contains a list of Document
@@ -231,7 +230,7 @@ type Document struct {
 type DocumentList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []Document `json:"items"`
+	Items []Document `json:"items"`
 }
 
 func init() {
