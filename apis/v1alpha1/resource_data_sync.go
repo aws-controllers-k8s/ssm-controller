@@ -23,23 +23,23 @@ import (
 // ResourceDataSyncSpec defines the desired state of ResourceDataSync.
 type ResourceDataSyncSpec struct {
 
-	// Amazon S3 configuration details for the sync. This parameter is required
-	// if the SyncType value is SyncToDestination.
-	S3Destination *ResourceDataSyncS3Destination `json:"s3Destination,omitempty"`
-	// A name for the configuration.
-	// +kubebuilder:validation:Required
-	SyncName *string `json:"syncName"`
-	// Specify information about the data sources to synchronize. This parameter
-	// is required if the SyncType value is SyncFromSource.
-	SyncSource *ResourceDataSyncSource `json:"syncSource,omitempty"`
-	// Specify SyncToDestination to create a resource data sync that synchronizes
-	// data to an S3 bucket for Inventory. If you specify SyncToDestination, you
-	// must provide a value for S3Destination. Specify SyncFromSource to synchronize
-	// data from a single account and multiple Regions, or multiple Amazon Web Services
-	// accounts and Amazon Web Services Regions, as listed in Organizations for
-	// Explorer. If you specify SyncFromSource, you must provide a value for SyncSource.
-	// The default value is SyncToDestination.
-	SyncType *string `json:"syncType,omitempty"`
+// Amazon S3 configuration details for the sync. This parameter is required
+// if the SyncType value is SyncToDestination.
+S3Destination *ResourceDataSyncS3Destination `json:"s3Destination,omitempty"`
+// A name for the configuration.
+// +kubebuilder:validation:Required
+SyncName *string `json:"syncName"`
+// Specify information about the data sources to synchronize. This parameter
+// is required if the SyncType value is SyncFromSource.
+SyncSource *ResourceDataSyncSource `json:"syncSource,omitempty"`
+// Specify SyncToDestination to create a resource data sync that synchronizes
+// data to an S3 bucket for Inventory. If you specify SyncToDestination, you
+// must provide a value for S3Destination. Specify SyncFromSource to synchronize
+// data from a single account and multiple Regions, or multiple Amazon Web Services
+// accounts and Amazon Web Services Regions, as listed in Organizations for
+// Explorer. If you specify SyncFromSource, you must provide a value for SyncSource.
+// The default value is SyncToDestination.
+SyncType *string `json:"syncType,omitempty"`
 }
 
 // ResourceDataSyncStatus defines the observed state of ResourceDataSync
@@ -63,8 +63,8 @@ type ResourceDataSyncStatus struct {
 type ResourceDataSync struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Spec              ResourceDataSyncSpec   `json:"spec,omitempty"`
-	Status            ResourceDataSyncStatus `json:"status,omitempty"`
+	Spec   ResourceDataSyncSpec   `json:"spec,omitempty"`
+	Status ResourceDataSyncStatus `json:"status,omitempty"`
 }
 
 // ResourceDataSyncList contains a list of ResourceDataSync
@@ -72,7 +72,7 @@ type ResourceDataSync struct {
 type ResourceDataSyncList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []ResourceDataSync `json:"items"`
+	Items []ResourceDataSync `json:"items"`
 }
 
 func init() {

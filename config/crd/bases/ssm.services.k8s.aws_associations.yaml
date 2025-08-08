@@ -1,0 +1,611 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.16.2
+  name: associations.ssm.services.k8s.aws
+spec:
+  group: ssm.services.k8s.aws
+  names:
+    kind: Association
+    listKind: AssociationList
+    plural: associations
+    singular: association
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Association is the Schema for the Associations API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: |-
+              AssociationSpec defines the desired state of Association.
+
+              Describes an association of a Amazon Web Services Systems Manager document
+              (SSM document) and a managed node.
+            properties:
+              alarmConfiguration:
+                description: |-
+                  The details for the CloudWatch alarm you want to apply to an automation or
+                  command.
+                properties:
+                  alarms:
+                    items:
+                      description: A CloudWatch alarm you apply to an automation or
+                        command.
+                      properties:
+                        name:
+                          type: string
+                      type: object
+                    type: array
+                  ignorePollAlarmFailure:
+                    type: boolean
+                type: object
+              applyOnlyAtCronInterval:
+                description: |-
+                  By default, when you create a new association, the system runs it immediately
+                  after it is created and then according to the schedule you specified. Specify
+                  this option if you don't want an association to run immediately after you
+                  create it. This parameter isn't supported for rate expressions.
+                type: boolean
+              associationName:
+                description: |-
+                  Specify a descriptive name for the association.
+
+                  Regex Pattern: `^[a-zA-Z0-9_\-.]{3,128}$`
+                type: string
+              automationTargetParameterName:
+                description: |-
+                  Choose the parameter that will define how your automation will branch out.
+                  This target is required for associations that use an Automation runbook and
+                  target resources by using rate controls. Automation is a capability of Amazon
+                  Web Services Systems Manager.
+                type: string
+              calendarNames:
+                description: |-
+                  The names or Amazon Resource Names (ARNs) of the Change Calendar type documents
+                  you want to gate your associations under. The associations only run when
+                  that change calendar is open. For more information, see Amazon Web Services
+                  Systems Manager Change Calendar (https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-change-calendar).
+                items:
+                  type: string
+                type: array
+              complianceSeverity:
+                description: The severity level to assign to the association.
+                type: string
+              documentVersion:
+                description: |-
+                  The document version you want to associate with the targets. Can be a specific
+                  version or the default version.
+
+                  State Manager doesn't support running associations that use a new version
+                  of a document if that document is shared from another account. State Manager
+                  always runs the default version of a document if shared from another account,
+                  even though the Systems Manager console shows that a new version was processed.
+                  If you want to run an association using a new version of a document shared
+                  form another account, you must set the document version to default.
+
+                  Regex Pattern: `^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$`
+                type: string
+              duration:
+                description: |-
+                  The number of hours the association can run before it is canceled. Duration
+                  applies to associations that are currently running, and any pending and in
+                  progress commands on all targets. If a target was taken offline for the association
+                  to run, it is made available again immediately, without a reboot.
+
+                  The Duration parameter applies only when both these conditions are true:
+
+                     * The association for which you specify a duration is cancelable according
+                     to the parameters of the SSM command document or Automation runbook associated
+                     with this execution.
+
+                     * The command specifies the ApplyOnlyAtCronInterval (https://docs.aws.amazon.com/systems-manager/latest/APIReference/API_CreateAssociation.html#systemsmanager-CreateAssociation-request-ApplyOnlyAtCronInterval)
+                     parameter, which means that the association doesn't run immediately after
+                     it is created, but only according to the specified schedule.
+                format: int64
+                type: integer
+              instanceID:
+                description: |-
+                  The managed node ID.
+
+                  InstanceId has been deprecated. To specify a managed node ID for an association,
+                  use the Targets parameter. Requests that include the parameter InstanceID
+                  with Systems Manager documents (SSM documents) that use schema version 2.0
+                  or later will fail. In addition, if you use the parameter InstanceId, you
+                  can't use the parameters AssociationName, DocumentVersion, MaxErrors, MaxConcurrency,
+                  OutputLocation, or ScheduleExpression. To use these parameters, you must
+                  use the Targets parameter.
+
+                  Regex Pattern: `^(^i-(\w{8}|\w{17})$)|(^mi-\w{17}$)$`
+                type: string
+              maxConcurrency:
+                description: |-
+                  The maximum number of targets allowed to run the association at the same
+                  time. You can specify a number, for example 10, or a percentage of the target
+                  set, for example 10%. The default value is 100%, which means all targets
+                  run the association at the same time.
+
+                  If a new managed node starts and attempts to run an association while Systems
+                  Manager is running MaxConcurrency associations, the association is allowed
+                  to run. During the next association interval, the new managed node will process
+                  its association within the limit specified for MaxConcurrency.
+
+                  Regex Pattern: `^([1-9][0-9]*|[1-9][0-9]%|[1-9]%|100%)$`
+                type: string
+              maxErrors:
+                description: |-
+                  The number of errors that are allowed before the system stops sending requests
+                  to run the association on additional targets. You can specify either an absolute
+                  number of errors, for example 10, or a percentage of the target set, for
+                  example 10%. If you specify 3, for example, the system stops sending requests
+                  when the fourth error is received. If you specify 0, then the system stops
+                  sending requests after the first error is returned. If you run an association
+                  on 50 managed nodes and set MaxError to 10%, then the system stops sending
+                  the request when the sixth error is received.
+
+                  Executions that are already running an association when MaxErrors is reached
+                  are allowed to complete, but some of these executions may fail as well. If
+                  you need to ensure that there won't be more than max-errors failed executions,
+                  set MaxConcurrency to 1 so that executions proceed one at a time.
+
+                  Regex Pattern: `^([1-9][0-9]*|[0]|[1-9][0-9]%|[0-9]%|100%)$`
+                type: string
+              name:
+                description: |-
+                  The name of the SSM Command document or Automation runbook that contains
+                  the configuration information for the managed node.
+
+                  You can specify Amazon Web Services-predefined documents, documents you created,
+                  or a document that is shared with you from another Amazon Web Services account.
+
+                  For Systems Manager documents (SSM documents) that are shared with you from
+                  other Amazon Web Services accounts, you must specify the complete SSM document
+                  ARN, in the following format:
+
+                  arn:partition:ssm:region:account-id:document/document-name
+
+                  For example:
+
+                  arn:aws:ssm:us-east-2:12345678912:document/My-Shared-Document
+
+                  For Amazon Web Services-predefined documents and SSM documents you created
+                  in your account, you only need to specify the document name. For example,
+                  AWS-ApplyPatchBaseline or My-Document.
+
+                  Regex Pattern: `^[a-zA-Z0-9_\-.:/]{3,128}$`
+                type: string
+              outputLocation:
+                description: |-
+                  An Amazon Simple Storage Service (Amazon S3) bucket where you want to store
+                  the output details of the request.
+                properties:
+                  s3Location:
+                    description: An S3 bucket where you want to store the results
+                      of this request.
+                    properties:
+                      outputS3BucketName:
+                        type: string
+                      outputS3KeyPrefix:
+                        type: string
+                      outputS3Region:
+                        type: string
+                    type: object
+                type: object
+              parameters:
+                additionalProperties:
+                  items:
+                    type: string
+                  type: array
+                description: The parameters for the runtime configuration of the document.
+                type: object
+              scheduleExpression:
+                description: A cron expression when the association will be applied
+                  to the targets.
+                type: string
+              scheduleOffset:
+                description: |-
+                  Number of days to wait after the scheduled day to run an association. For
+                  example, if you specified a cron schedule of cron(0 0 ? * THU#2 *), you could
+                  specify an offset of 3 to run the association each Sunday after the second
+                  Thursday of the month. For more information about cron schedules for associations,
+                  see Reference: Cron and rate expressions for Systems Manager (https://docs.aws.amazon.com/systems-manager/latest/userguide/reference-cron-and-rate-expressions.html)
+                  in the Amazon Web Services Systems Manager User Guide.
+
+                  To use offsets, you must specify the ApplyOnlyAtCronInterval parameter. This
+                  option tells the system not to run an association immediately after you create
+                  it.
+                format: int64
+                type: integer
+              syncCompliance:
+                description: |-
+                  The mode for generating association compliance. You can specify AUTO or MANUAL.
+                  In AUTO mode, the system uses the status of the association execution to
+                  determine the compliance status. If the association execution runs successfully,
+                  then the association is COMPLIANT. If the association execution doesn't run
+                  successfully, the association is NON-COMPLIANT.
+
+                  In MANUAL mode, you must specify the AssociationId as a parameter for the
+                  PutComplianceItems API operation. In this case, compliance data isn't managed
+                  by State Manager. It is managed by your direct call to the PutComplianceItems
+                  API operation.
+
+                  By default, all associations use AUTO mode.
+                type: string
+              tags:
+                description: |-
+                  Adds or overwrites one or more tags for a State Manager association. Tags
+                  are metadata that you can assign to your Amazon Web Services resources. Tags
+                  enable you to categorize your resources in different ways, for example, by
+                  purpose, owner, or environment. Each tag consists of a key and an optional
+                  value, both of which you define.
+                items:
+                  description: |-
+                    Metadata that you assign to your Amazon Web Services resources. Tags enable
+                    you to categorize your resources in different ways, for example, by purpose,
+                    owner, or environment. In Amazon Web Services Systems Manager, you can apply
+                    tags to Systems Manager documents (SSM documents), managed nodes, maintenance
+                    windows, parameters, patch baselines, OpsItems, and OpsMetadata.
+                  properties:
+                    key:
+                      type: string
+                    value:
+                      type: string
+                  type: object
+                type: array
+              targetLocations:
+                description: |-
+                  A location is a combination of Amazon Web Services Regions and Amazon Web
+                  Services accounts where you want to run the association. Use this action
+                  to create an association in multiple Regions and multiple accounts.
+                items:
+                  description: |-
+                    The combination of Amazon Web Services Regions and Amazon Web Services accounts
+                    targeted by the current Automation execution.
+                  properties:
+                    accounts:
+                      items:
+                        type: string
+                      type: array
+                    excludeAccounts:
+                      items:
+                        type: string
+                      type: array
+                    executionRoleName:
+                      type: string
+                    includeChildOrganizationUnits:
+                      type: boolean
+                    regions:
+                      items:
+                        type: string
+                      type: array
+                    targetLocationAlarmConfiguration:
+                      description: |-
+                        The details for the CloudWatch alarm you want to apply to an automation or
+                        command.
+                      properties:
+                        alarms:
+                          items:
+                            description: A CloudWatch alarm you apply to an automation
+                              or command.
+                            properties:
+                              name:
+                                type: string
+                            type: object
+                          type: array
+                        ignorePollAlarmFailure:
+                          type: boolean
+                      type: object
+                    targetLocationMaxConcurrency:
+                      type: string
+                    targetLocationMaxErrors:
+                      type: string
+                    targets:
+                      items:
+                        description: |-
+                          An array of search criteria that targets managed nodes using a key-value
+                          pair that you specify.
+
+                          One or more targets must be specified for maintenance window Run Command-type
+                          tasks. Depending on the task, targets are optional for other maintenance
+                          window task types (Automation, Lambda, and Step Functions). For more information
+                          about running tasks that don't specify targets, see Registering maintenance
+                          window tasks without targets (https://docs.aws.amazon.com/systems-manager/latest/userguide/maintenance-windows-targetless-tasks.html)
+                          in the Amazon Web Services Systems Manager User Guide.
+
+                          Supported formats include the following.
+
+                          For all Systems Manager capabilities:
+
+                             * Key=tag-key,Values=tag-value-1,tag-value-2
+
+                          For Automation and Change Manager:
+
+                             * Key=tag:tag-key,Values=tag-value
+
+                             * Key=ResourceGroup,Values=resource-group-name
+
+                             * Key=ParameterValues,Values=value-1,value-2,value-3
+
+                             * To target all instances in the Amazon Web Services Region: Key=AWS::EC2::Instance,Values=*
+                             Key=InstanceIds,Values=*
+
+                          For Run Command and Maintenance Windows:
+
+                             * Key=InstanceIds,Values=instance-id-1,instance-id-2,instance-id-3
+
+                             * Key=tag:tag-key,Values=tag-value-1,tag-value-2
+
+                             * Key=resource-groups:Name,Values=resource-group-name
+
+                             * Additionally, Maintenance Windows support targeting resource types:
+                             Key=resource-groups:ResourceTypeFilters,Values=resource-type-1,resource-type-2
+
+                          For State Manager:
+
+                             * Key=InstanceIds,Values=instance-id-1,instance-id-2,instance-id-3
+
+                             * Key=tag:tag-key,Values=tag-value-1,tag-value-2
+
+                             * To target all instances in the Amazon Web Services Region: Key=InstanceIds,Values=*
+
+                          For more information about how to send commands that target managed nodes
+                          using Key,Value parameters, see Targeting multiple managed nodes (https://docs.aws.amazon.com/systems-manager/latest/userguide/send-commands-multiple.html#send-commands-targeting)
+                          in the Amazon Web Services Systems Manager User Guide.
+                        properties:
+                          key:
+                            type: string
+                          values:
+                            items:
+                              type: string
+                            type: array
+                        type: object
+                      type: array
+                    targetsMaxConcurrency:
+                      type: string
+                    targetsMaxErrors:
+                      type: string
+                  type: object
+                type: array
+              targetMaps:
+                description: |-
+                  A key-value mapping of document parameters to target resources. Both Targets
+                  and TargetMaps can't be specified together.
+                items:
+                  additionalProperties:
+                    items:
+                      type: string
+                    type: array
+                  type: object
+                type: array
+              targets:
+                description: |-
+                  The targets for the association. You can target managed nodes by using tags,
+                  Amazon Web Services resource groups, all managed nodes in an Amazon Web Services
+                  account, or individual managed node IDs. You can target all managed nodes
+                  in an Amazon Web Services account by specifying the InstanceIds key with
+                  a value of *. For more information about choosing targets for an association,
+                  see Understanding targets and rate controls in State Manager associations
+                  (https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-state-manager-targets-and-rate-controls.html)
+                  in the Amazon Web Services Systems Manager User Guide.
+                items:
+                  description: |-
+                    An array of search criteria that targets managed nodes using a key-value
+                    pair that you specify.
+
+                    One or more targets must be specified for maintenance window Run Command-type
+                    tasks. Depending on the task, targets are optional for other maintenance
+                    window task types (Automation, Lambda, and Step Functions). For more information
+                    about running tasks that don't specify targets, see Registering maintenance
+                    window tasks without targets (https://docs.aws.amazon.com/systems-manager/latest/userguide/maintenance-windows-targetless-tasks.html)
+                    in the Amazon Web Services Systems Manager User Guide.
+
+                    Supported formats include the following.
+
+                    For all Systems Manager capabilities:
+
+                       * Key=tag-key,Values=tag-value-1,tag-value-2
+
+                    For Automation and Change Manager:
+
+                       * Key=tag:tag-key,Values=tag-value
+
+                       * Key=ResourceGroup,Values=resource-group-name
+
+                       * Key=ParameterValues,Values=value-1,value-2,value-3
+
+                       * To target all instances in the Amazon Web Services Region: Key=AWS::EC2::Instance,Values=*
+                       Key=InstanceIds,Values=*
+
+                    For Run Command and Maintenance Windows:
+
+                       * Key=InstanceIds,Values=instance-id-1,instance-id-2,instance-id-3
+
+                       * Key=tag:tag-key,Values=tag-value-1,tag-value-2
+
+                       * Key=resource-groups:Name,Values=resource-group-name
+
+                       * Additionally, Maintenance Windows support targeting resource types:
+                       Key=resource-groups:ResourceTypeFilters,Values=resource-type-1,resource-type-2
+
+                    For State Manager:
+
+                       * Key=InstanceIds,Values=instance-id-1,instance-id-2,instance-id-3
+
+                       * Key=tag:tag-key,Values=tag-value-1,tag-value-2
+
+                       * To target all instances in the Amazon Web Services Region: Key=InstanceIds,Values=*
+
+                    For more information about how to send commands that target managed nodes
+                    using Key,Value parameters, see Targeting multiple managed nodes (https://docs.aws.amazon.com/systems-manager/latest/userguide/send-commands-multiple.html#send-commands-targeting)
+                    in the Amazon Web Services Systems Manager User Guide.
+                  properties:
+                    key:
+                      type: string
+                    values:
+                      items:
+                        type: string
+                      type: array
+                  type: object
+                type: array
+            required:
+            - name
+            type: object
+          status:
+            description: AssociationStatus defines the observed state of Association
+            properties:
+              ackResourceMetadata:
+                description: |-
+                  All CRs managed by ACK have a common `Status.ACKResourceMetadata` member
+                  that is used to contain resource sync state, account ownership,
+                  constructed ARN for the resource
+                properties:
+                  arn:
+                    description: |-
+                      ARN is the Amazon Resource Name for the resource. This is a
+                      globally-unique identifier and is set only by the ACK service controller
+                      once the controller has orchestrated the creation of the resource OR
+                      when it has verified that an "adopted" resource (a resource where the
+                      ARN annotation was set by the Kubernetes user on the CR) exists and
+                      matches the supplied CR's Spec field values.
+                      https://github.com/aws/aws-controllers-k8s/issues/270
+                    type: string
+                  ownerAccountID:
+                    description: |-
+                      OwnerAccountID is the AWS Account ID of the account that owns the
+                      backend AWS service API resource.
+                    type: string
+                  region:
+                    description: Region is the AWS region in which the resource exists
+                      or will exist.
+                    type: string
+                required:
+                - ownerAccountID
+                - region
+                type: object
+              associationID:
+                description: |-
+                  The association ID.
+
+                  Regex Pattern: `^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`
+                type: string
+              associationVersion:
+                description: |-
+                  The association version.
+
+                  Regex Pattern: `^([$]LATEST)|([1-9][0-9]*)$`
+                type: string
+              conditions:
+                description: |-
+                  All CRs managed by ACK have a common `Status.Conditions` member that
+                  contains a collection of `ackv1alpha1.Condition` objects that describe
+                  the various terminal states of the CR and its backend AWS service API
+                  resource
+                items:
+                  description: |-
+                    Condition is the common struct used by all CRDs managed by ACK service
+                    controllers to indicate terminal states  of the CR and its backend AWS
+                    service API resource
+                  properties:
+                    lastTransitionTime:
+                      description: Last time the condition transitioned from one status
+                        to another.
+                      format: date-time
+                      type: string
+                    message:
+                      description: A human readable message indicating details about
+                        the transition.
+                      type: string
+                    reason:
+                      description: The reason for the condition's last transition.
+                      type: string
+                    status:
+                      description: Status of the condition, one of True, False, Unknown.
+                      type: string
+                    type:
+                      description: Type is the type of the Condition
+                      type: string
+                  required:
+                  - status
+                  - type
+                  type: object
+                type: array
+              date:
+                description: The date when the association was made.
+                format: date-time
+                type: string
+              lastExecutionDate:
+                description: The date on which the association was last run.
+                format: date-time
+                type: string
+              lastSuccessfulExecutionDate:
+                description: The last date on which the association was successfully
+                  run.
+                format: date-time
+                type: string
+              lastUpdateAssociationDate:
+                description: The date when the association was last updated.
+                format: date-time
+                type: string
+              overview:
+                description: Information about the association.
+                properties:
+                  associationStatusAggregatedCount:
+                    additionalProperties:
+                      format: int64
+                      type: integer
+                    type: object
+                  detailedStatus:
+                    type: string
+                  status:
+                    type: string
+                type: object
+              status:
+                description: The association status.
+                properties:
+                  additionalInfo:
+                    type: string
+                  date:
+                    format: date-time
+                    type: string
+                  message:
+                    type: string
+                  name:
+                    type: string
+                type: object
+              triggeredAlarms:
+                description: The CloudWatch alarm that was invoked during the association.
+                items:
+                  description: The details about the state of your CloudWatch alarm.
+                  properties:
+                    name:
+                      type: string
+                    state:
+                      type: string
+                  type: object
+                type: array
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

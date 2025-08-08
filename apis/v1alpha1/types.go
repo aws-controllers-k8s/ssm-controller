@@ -28,122 +28,284 @@ var (
 	_ = ackv1alpha1.AWSAccountID("")
 )
 
+
 // An activation registers one or more on-premises servers or virtual machines
 // (VMs) with Amazon Web Services so that you can configure those servers or
 // VMs using Run Command. A server or VM that has been registered with Amazon
 // Web Services Systems Manager is called a managed node.
 type Activation struct {
-	Expired *bool  `json:"expired,omitempty"`
-	Tags    []*Tag `json:"tags,omitempty"`
+	Expired *bool `json:"expired,omitempty"`
+	Tags []*Tag `json:"tags,omitempty"`
 }
+
+
+// A CloudWatch alarm you apply to an automation or command.
+type Alarm struct {
+	Name *string `json:"name,omitempty"`
+}
+
 
 // The details for the CloudWatch alarm you want to apply to an automation or
 // command.
 type AlarmConfiguration struct {
+	Alarms []*Alarm `json:"alarms,omitempty"`
 	IgnorePollAlarmFailure *bool `json:"ignorePollAlarmFailure,omitempty"`
 }
 
-// Describes an association of a Amazon Web Services Systems Manager document
-// (SSM document) and a managed node.
-type Association struct {
-	DocumentVersion   *string      `json:"documentVersion,omitempty"`
-	LastExecutionDate *metav1.Time `json:"lastExecutionDate,omitempty"`
-	Name              *string      `json:"name,omitempty"`
+
+// The details about the state of your CloudWatch alarm.
+type AlarmStateInformation struct {
+	Name *string `json:"name,omitempty"`
+	State *string `json:"state,omitempty"`
 }
+
 
 // Describes the parameters for a document.
 type AssociationDescription struct {
-	Date                        *metav1.Time `json:"date,omitempty"`
-	DocumentVersion             *string      `json:"documentVersion,omitempty"`
-	LastExecutionDate           *metav1.Time `json:"lastExecutionDate,omitempty"`
+	// The details for the CloudWatch alarm you want to apply to an automation or
+// command.
+	AlarmConfiguration *AlarmConfiguration `json:"alarmConfiguration,omitempty"`
+	ApplyOnlyAtCronInterval *bool `json:"applyOnlyAtCronInterval,omitempty"`
+	AssociationID *string `json:"associationID,omitempty"`
+	AssociationName *string `json:"associationName,omitempty"`
+	AssociationVersion *string `json:"associationVersion,omitempty"`
+	AutomationTargetParameterName *string `json:"automationTargetParameterName,omitempty"`
+	CalendarNames []*string `json:"calendarNames,omitempty"`
+	ComplianceSeverity *string `json:"complianceSeverity,omitempty"`
+	Date *metav1.Time `json:"date,omitempty"`
+	DocumentVersion *string `json:"documentVersion,omitempty"`
+	Duration *int64 `json:"duration,omitempty"`
+	InstanceID *string `json:"instanceID,omitempty"`
+	LastExecutionDate *metav1.Time `json:"lastExecutionDate,omitempty"`
 	LastSuccessfulExecutionDate *metav1.Time `json:"lastSuccessfulExecutionDate,omitempty"`
-	LastUpdateAssociationDate   *metav1.Time `json:"lastUpdateAssociationDate,omitempty"`
-	Name                        *string      `json:"name,omitempty"`
+	LastUpdateAssociationDate *metav1.Time `json:"lastUpdateAssociationDate,omitempty"`
+	MaxConcurrency *string `json:"maxConcurrency,omitempty"`
+	MaxErrors *string `json:"maxErrors,omitempty"`
+	Name *string `json:"name,omitempty"`
+	// An S3 bucket where you want to store the results of this request.
+// 
+// For the minimal permissions required to enable Amazon S3 output for an association,
+// see Create an association (console) (https://docs.aws.amazon.com/systems-manager/latest/userguide/state-manager-associations-creating.html#state-manager-associations-console)
+// in the Systems Manager User Guide.
+	OutputLocation *InstanceAssociationOutputLocation `json:"outputLocation,omitempty"`
+	// Information about the association.
+	Overview *AssociationOverview `json:"overview,omitempty"`
+	Parameters map[string][]*string `json:"parameters,omitempty"`
+	ScheduleExpression *string `json:"scheduleExpression,omitempty"`
+	ScheduleOffset *int64 `json:"scheduleOffset,omitempty"`
+	// Describes an association status.
+	Status *AssociationStatus_SDK `json:"status,omitempty"`
+	SyncCompliance *string `json:"syncCompliance,omitempty"`
+	TargetLocations []*TargetLocation `json:"targetLocations,omitempty"`
+	TargetMaps []map[string][]*string `json:"targetMaps,omitempty"`
+	Targets []*Target `json:"targets,omitempty"`
+	TriggeredAlarms []*AlarmStateInformation `json:"triggeredAlarms,omitempty"`
 }
+
 
 // Includes information about the specified association.
 type AssociationExecution struct {
-	CreatedTime       *metav1.Time `json:"createdTime,omitempty"`
+	// The details for the CloudWatch alarm you want to apply to an automation or
+// command.
+	AlarmConfiguration *AlarmConfiguration `json:"alarmConfiguration,omitempty"`
+	AssociationID *string `json:"associationID,omitempty"`
+	AssociationVersion *string `json:"associationVersion,omitempty"`
+	CreatedTime *metav1.Time `json:"createdTime,omitempty"`
+	DetailedStatus *string `json:"detailedStatus,omitempty"`
 	LastExecutionDate *metav1.Time `json:"lastExecutionDate,omitempty"`
+	Status *string `json:"status,omitempty"`
+	TriggeredAlarms []*AlarmStateInformation `json:"triggeredAlarms,omitempty"`
 }
+
 
 // Includes information about the specified association execution.
 type AssociationExecutionTarget struct {
+	AssociationID *string `json:"associationID,omitempty"`
+	AssociationVersion *string `json:"associationVersion,omitempty"`
+	DetailedStatus *string `json:"detailedStatus,omitempty"`
 	LastExecutionDate *metav1.Time `json:"lastExecutionDate,omitempty"`
+	Status *string `json:"status,omitempty"`
 }
 
-// Describes an association status.
-type AssociationStatus struct {
-	Date *metav1.Time `json:"date,omitempty"`
+
+// Describes a filter.
+type AssociationFilter struct {
+	Key *string `json:"key,omitempty"`
+	Value *string `json:"value,omitempty"`
 }
+
+
+// Information about the association.
+type AssociationOverview struct {
+	AssociationStatusAggregatedCount map[string]*int64 `json:"associationStatusAggregatedCount,omitempty"`
+	DetailedStatus *string `json:"detailedStatus,omitempty"`
+	Status *string `json:"status,omitempty"`
+}
+
+
+// Describes an association status.
+type AssociationStatus_SDK struct {
+	AdditionalInfo *string `json:"additionalInfo,omitempty"`
+	Date *metav1.Time `json:"date,omitempty"`
+	Message *string `json:"message,omitempty"`
+	Name *string `json:"name,omitempty"`
+}
+
 
 // Information about the association version.
 type AssociationVersionInfo struct {
-	CreatedDate     *metav1.Time `json:"createdDate,omitempty"`
-	DocumentVersion *string      `json:"documentVersion,omitempty"`
-	Name            *string      `json:"name,omitempty"`
+	ApplyOnlyAtCronInterval *bool `json:"applyOnlyAtCronInterval,omitempty"`
+	AssociationID *string `json:"associationID,omitempty"`
+	AssociationName *string `json:"associationName,omitempty"`
+	AssociationVersion *string `json:"associationVersion,omitempty"`
+	CalendarNames []*string `json:"calendarNames,omitempty"`
+	ComplianceSeverity *string `json:"complianceSeverity,omitempty"`
+	CreatedDate *metav1.Time `json:"createdDate,omitempty"`
+	DocumentVersion *string `json:"documentVersion,omitempty"`
+	Duration *int64 `json:"duration,omitempty"`
+	MaxConcurrency *string `json:"maxConcurrency,omitempty"`
+	MaxErrors *string `json:"maxErrors,omitempty"`
+	Name *string `json:"name,omitempty"`
+	// An S3 bucket where you want to store the results of this request.
+// 
+// For the minimal permissions required to enable Amazon S3 output for an association,
+// see Create an association (console) (https://docs.aws.amazon.com/systems-manager/latest/userguide/state-manager-associations-creating.html#state-manager-associations-console)
+// in the Systems Manager User Guide.
+	OutputLocation *InstanceAssociationOutputLocation `json:"outputLocation,omitempty"`
+	Parameters map[string][]*string `json:"parameters,omitempty"`
+	ScheduleExpression *string `json:"scheduleExpression,omitempty"`
+	ScheduleOffset *int64 `json:"scheduleOffset,omitempty"`
+	SyncCompliance *string `json:"syncCompliance,omitempty"`
+	TargetLocations []*TargetLocation `json:"targetLocations,omitempty"`
+	TargetMaps []map[string][]*string `json:"targetMaps,omitempty"`
+	Targets []*Target `json:"targets,omitempty"`
 }
+
+
+// Describes an association of a Amazon Web Services Systems Manager document
+// (SSM document) and a managed node.
+type Association_SDK struct {
+	AssociationID *string `json:"associationID,omitempty"`
+	AssociationName *string `json:"associationName,omitempty"`
+	AssociationVersion *string `json:"associationVersion,omitempty"`
+	DocumentVersion *string `json:"documentVersion,omitempty"`
+	Duration *int64 `json:"duration,omitempty"`
+	InstanceID *string `json:"instanceID,omitempty"`
+	LastExecutionDate *metav1.Time `json:"lastExecutionDate,omitempty"`
+	Name *string `json:"name,omitempty"`
+	// Information about the association.
+	Overview *AssociationOverview `json:"overview,omitempty"`
+	ScheduleExpression *string `json:"scheduleExpression,omitempty"`
+	ScheduleOffset *int64 `json:"scheduleOffset,omitempty"`
+	TargetMaps []map[string][]*string `json:"targetMaps,omitempty"`
+	Targets []*Target `json:"targets,omitempty"`
+}
+
 
 // A structure that includes attributes that describe a document attachment.
 type AttachmentContent struct {
 	Name *string `json:"name,omitempty"`
 }
 
+
 // An attribute of an attachment, such as the attachment name.
 type AttachmentInformation struct {
 	Name *string `json:"name,omitempty"`
 }
 
+
 // Identifying information about a document attachment, including the file name
 // and a key-value pair that identifies the location of an attachment to a document.
 type AttachmentsSource struct {
-	Key    *string   `json:"key,omitempty"`
-	Name   *string   `json:"name,omitempty"`
+	Key *string `json:"key,omitempty"`
+	Name *string `json:"name,omitempty"`
 	Values []*string `json:"values,omitempty"`
 }
+
 
 // Detailed information about the current state of an individual Automation
 // execution.
 type AutomationExecution struct {
-	DocumentName            *string      `json:"documentName,omitempty"`
-	DocumentVersion         *string      `json:"documentVersion,omitempty"`
-	ExecutionEndTime        *metav1.Time `json:"executionEndTime,omitempty"`
-	ExecutionStartTime      *metav1.Time `json:"executionStartTime,omitempty"`
-	ScheduledTime           *metav1.Time `json:"scheduledTime,omitempty"`
-	StepExecutionsTruncated *bool        `json:"stepExecutionsTruncated,omitempty"`
+	// The details for the CloudWatch alarm you want to apply to an automation or
+// command.
+	AlarmConfiguration *AlarmConfiguration `json:"alarmConfiguration,omitempty"`
+	DocumentName *string `json:"documentName,omitempty"`
+	DocumentVersion *string `json:"documentVersion,omitempty"`
+	ExecutionEndTime *metav1.Time `json:"executionEndTime,omitempty"`
+	ExecutionStartTime *metav1.Time `json:"executionStartTime,omitempty"`
+	MaxConcurrency *string `json:"maxConcurrency,omitempty"`
+	MaxErrors *string `json:"maxErrors,omitempty"`
+	ScheduledTime *metav1.Time `json:"scheduledTime,omitempty"`
+	StepExecutionsTruncated *bool `json:"stepExecutionsTruncated,omitempty"`
+	TargetLocations []*TargetLocation `json:"targetLocations,omitempty"`
+	TargetMaps []map[string][]*string `json:"targetMaps,omitempty"`
+	Targets []*Target `json:"targets,omitempty"`
+	TriggeredAlarms []*AlarmStateInformation `json:"triggeredAlarms,omitempty"`
 }
+
+
+// Information about the optional inputs that can be specified for an automation
+// execution preview.
+type AutomationExecutionInputs struct {
+	TargetLocations []*TargetLocation `json:"targetLocations,omitempty"`
+	TargetMaps []map[string][]*string `json:"targetMaps,omitempty"`
+	Targets []*Target `json:"targets,omitempty"`
+}
+
 
 // Details about a specific Automation execution.
 type AutomationExecutionMetadata struct {
-	DocumentName       *string      `json:"documentName,omitempty"`
-	DocumentVersion    *string      `json:"documentVersion,omitempty"`
-	ExecutionEndTime   *metav1.Time `json:"executionEndTime,omitempty"`
+	// The details for the CloudWatch alarm you want to apply to an automation or
+// command.
+	AlarmConfiguration *AlarmConfiguration `json:"alarmConfiguration,omitempty"`
+	DocumentName *string `json:"documentName,omitempty"`
+	DocumentVersion *string `json:"documentVersion,omitempty"`
+	ExecutionEndTime *metav1.Time `json:"executionEndTime,omitempty"`
 	ExecutionStartTime *metav1.Time `json:"executionStartTime,omitempty"`
-	ScheduledTime      *metav1.Time `json:"scheduledTime,omitempty"`
+	MaxConcurrency *string `json:"maxConcurrency,omitempty"`
+	MaxErrors *string `json:"maxErrors,omitempty"`
+	ScheduledTime *metav1.Time `json:"scheduledTime,omitempty"`
+	TargetMaps []map[string][]*string `json:"targetMaps,omitempty"`
+	Targets []*Target `json:"targets,omitempty"`
+	TriggeredAlarms []*AlarmStateInformation `json:"triggeredAlarms,omitempty"`
 }
+
 
 // Defines the basic information about a patch baseline override.
 type BaselineOverride struct {
 	// A set of rules defining the approval rules for a patch baseline.
-	ApprovalRules                    *PatchRuleGroup `json:"approvalRules,omitempty"`
-	ApprovedPatches                  []*string       `json:"approvedPatches,omitempty"`
-	ApprovedPatchesComplianceLevel   *string         `json:"approvedPatchesComplianceLevel,omitempty"`
-	ApprovedPatchesEnableNonSecurity *bool           `json:"approvedPatchesEnableNonSecurity,omitempty"`
+	ApprovalRules *PatchRuleGroup `json:"approvalRules,omitempty"`
+	ApprovedPatches []*string `json:"approvedPatches,omitempty"`
+	ApprovedPatchesComplianceLevel *string `json:"approvedPatchesComplianceLevel,omitempty"`
+	ApprovedPatchesEnableNonSecurity *bool `json:"approvedPatchesEnableNonSecurity,omitempty"`
 	// A set of patch filters, typically used for approval rules.
-	GlobalFilters         *PatchFilterGroup `json:"globalFilters,omitempty"`
-	OperatingSystem       *string           `json:"operatingSystem,omitempty"`
-	RejectedPatches       []*string         `json:"rejectedPatches,omitempty"`
-	RejectedPatchesAction *string           `json:"rejectedPatchesAction,omitempty"`
-	Sources               []*PatchSource    `json:"sources,omitempty"`
+	GlobalFilters *PatchFilterGroup `json:"globalFilters,omitempty"`
+	OperatingSystem *string `json:"operatingSystem,omitempty"`
+	RejectedPatches []*string `json:"rejectedPatches,omitempty"`
+	RejectedPatchesAction *string `json:"rejectedPatchesAction,omitempty"`
+	Sources []*PatchSource `json:"sources,omitempty"`
 }
+
 
 // Describes a command request.
 type Command struct {
-	DocumentName      *string      `json:"documentName,omitempty"`
-	DocumentVersion   *string      `json:"documentVersion,omitempty"`
-	ExpiresAfter      *metav1.Time `json:"expiresAfter,omitempty"`
+	// The details for the CloudWatch alarm you want to apply to an automation or
+// command.
+	AlarmConfiguration *AlarmConfiguration `json:"alarmConfiguration,omitempty"`
+	DocumentName *string `json:"documentName,omitempty"`
+	DocumentVersion *string `json:"documentVersion,omitempty"`
+	ExpiresAfter *metav1.Time `json:"expiresAfter,omitempty"`
+	MaxConcurrency *string `json:"maxConcurrency,omitempty"`
+	MaxErrors *string `json:"maxErrors,omitempty"`
+	OutputS3BucketName *string `json:"outputS3BucketName,omitempty"`
+	OutputS3KeyPrefix *string `json:"outputS3KeyPrefix,omitempty"`
+	OutputS3Region *string `json:"outputS3Region,omitempty"`
+	Parameters map[string][]*string `json:"parameters,omitempty"`
 	RequestedDateTime *metav1.Time `json:"requestedDateTime,omitempty"`
+	Targets []*Target `json:"targets,omitempty"`
+	TriggeredAlarms []*AlarmStateInformation `json:"triggeredAlarms,omitempty"`
 }
+
 
 // An invocation is a copy of a command sent to a specific managed node. A command
 // can apply to one or more managed nodes. A command invocation applies to one
@@ -152,16 +314,22 @@ type Command struct {
 // ID. A command invocation returns status and detail information about a command
 // you ran.
 type CommandInvocation struct {
-	DocumentName      *string      `json:"documentName,omitempty"`
-	DocumentVersion   *string      `json:"documentVersion,omitempty"`
+	DocumentName *string `json:"documentName,omitempty"`
+	DocumentVersion *string `json:"documentVersion,omitempty"`
+	InstanceID *string `json:"instanceID,omitempty"`
 	RequestedDateTime *metav1.Time `json:"requestedDateTime,omitempty"`
 }
 
+
 // Describes plugin details.
 type CommandPlugin struct {
+	OutputS3BucketName *string `json:"outputS3BucketName,omitempty"`
+	OutputS3KeyPrefix *string `json:"outputS3KeyPrefix,omitempty"`
+	OutputS3Region *string `json:"outputS3Region,omitempty"`
 	ResponseFinishDateTime *metav1.Time `json:"responseFinishDateTime,omitempty"`
-	ResponseStartDateTime  *metav1.Time `json:"responseStartDateTime,omitempty"`
+	ResponseStartDateTime *metav1.Time `json:"responseStartDateTime,omitempty"`
 }
+
 
 // A summary of the call execution that includes an execution ID, the type of
 // execution (for example, Command), and the date/time of the execution using
@@ -170,290 +338,407 @@ type ComplianceExecutionSummary struct {
 	ExecutionTime *metav1.Time `json:"executionTime,omitempty"`
 }
 
+
 // Describes the association of a Amazon Web Services Systems Manager document
 // (SSM document) and a managed node.
 type CreateAssociationBatchRequestEntry struct {
+	// The details for the CloudWatch alarm you want to apply to an automation or
+// command.
+	AlarmConfiguration *AlarmConfiguration `json:"alarmConfiguration,omitempty"`
+	ApplyOnlyAtCronInterval *bool `json:"applyOnlyAtCronInterval,omitempty"`
+	AssociationName *string `json:"associationName,omitempty"`
+	AutomationTargetParameterName *string `json:"automationTargetParameterName,omitempty"`
+	CalendarNames []*string `json:"calendarNames,omitempty"`
+	ComplianceSeverity *string `json:"complianceSeverity,omitempty"`
 	DocumentVersion *string `json:"documentVersion,omitempty"`
-	Name            *string `json:"name,omitempty"`
+	Duration *int64 `json:"duration,omitempty"`
+	InstanceID *string `json:"instanceID,omitempty"`
+	MaxConcurrency *string `json:"maxConcurrency,omitempty"`
+	MaxErrors *string `json:"maxErrors,omitempty"`
+	Name *string `json:"name,omitempty"`
+	// An S3 bucket where you want to store the results of this request.
+// 
+// For the minimal permissions required to enable Amazon S3 output for an association,
+// see Create an association (console) (https://docs.aws.amazon.com/systems-manager/latest/userguide/state-manager-associations-creating.html#state-manager-associations-console)
+// in the Systems Manager User Guide.
+	OutputLocation *InstanceAssociationOutputLocation `json:"outputLocation,omitempty"`
+	Parameters map[string][]*string `json:"parameters,omitempty"`
+	ScheduleExpression *string `json:"scheduleExpression,omitempty"`
+	ScheduleOffset *int64 `json:"scheduleOffset,omitempty"`
+	SyncCompliance *string `json:"syncCompliance,omitempty"`
+	TargetLocations []*TargetLocation `json:"targetLocations,omitempty"`
+	TargetMaps []map[string][]*string `json:"targetMaps,omitempty"`
+	Targets []*Target `json:"targets,omitempty"`
 }
+
 
 // A default version of a document.
 type DocumentDefaultVersionDescription struct {
-	DefaultVersion     *string `json:"defaultVersion,omitempty"`
+	DefaultVersion *string `json:"defaultVersion,omitempty"`
 	DefaultVersionName *string `json:"defaultVersionName,omitempty"`
-	Name               *string `json:"name,omitempty"`
+	Name *string `json:"name,omitempty"`
 }
+
 
 // Describes an Amazon Web Services Systems Manager document (SSM document).
 type DocumentDescription struct {
-	ApprovedVersion        *string                  `json:"approvedVersion,omitempty"`
+	ApprovedVersion *string `json:"approvedVersion,omitempty"`
 	AttachmentsInformation []*AttachmentInformation `json:"attachmentsInformation,omitempty"`
-	Author                 *string                  `json:"author,omitempty"`
-	Category               []*string                `json:"category,omitempty"`
-	CategoryEnum           []*string                `json:"categoryEnum,omitempty"`
-	CreatedDate            *metav1.Time             `json:"createdDate,omitempty"`
-	DefaultVersion         *string                  `json:"defaultVersion,omitempty"`
-	Description            *string                  `json:"description,omitempty"`
-	DisplayName            *string                  `json:"displayName,omitempty"`
-	DocumentFormat         *string                  `json:"documentFormat,omitempty"`
-	DocumentType           *string                  `json:"documentType,omitempty"`
-	DocumentVersion        *string                  `json:"documentVersion,omitempty"`
-	Hash                   *string                  `json:"hash,omitempty"`
-	HashType               *string                  `json:"hashType,omitempty"`
-	LatestVersion          *string                  `json:"latestVersion,omitempty"`
-	Name                   *string                  `json:"name,omitempty"`
-	Owner                  *string                  `json:"owner,omitempty"`
-	Parameters             []*DocumentParameter     `json:"parameters,omitempty"`
-	PendingReviewVersion   *string                  `json:"pendingReviewVersion,omitempty"`
-	PlatformTypes          []*string                `json:"platformTypes,omitempty"`
-	Requires               []*DocumentRequires      `json:"requires,omitempty"`
-	ReviewInformation      []*ReviewInformation     `json:"reviewInformation,omitempty"`
-	ReviewStatus           *string                  `json:"reviewStatus,omitempty"`
-	SchemaVersion          *string                  `json:"schemaVersion,omitempty"`
-	Sha1                   *string                  `json:"sha1,omitempty"`
+	Author *string `json:"author,omitempty"`
+	Category []*string `json:"category,omitempty"`
+	CategoryEnum []*string `json:"categoryEnum,omitempty"`
+	CreatedDate *metav1.Time `json:"createdDate,omitempty"`
+	DefaultVersion *string `json:"defaultVersion,omitempty"`
+	Description *string `json:"description,omitempty"`
+	DisplayName *string `json:"displayName,omitempty"`
+	DocumentFormat *string `json:"documentFormat,omitempty"`
+	DocumentType *string `json:"documentType,omitempty"`
+	DocumentVersion *string `json:"documentVersion,omitempty"`
+	Hash *string `json:"hash,omitempty"`
+	HashType *string `json:"hashType,omitempty"`
+	LatestVersion *string `json:"latestVersion,omitempty"`
+	Name *string `json:"name,omitempty"`
+	Owner *string `json:"owner,omitempty"`
+	Parameters []*DocumentParameter `json:"parameters,omitempty"`
+	PendingReviewVersion *string `json:"pendingReviewVersion,omitempty"`
+	PlatformTypes []*string `json:"platformTypes,omitempty"`
+	Requires []*DocumentRequires `json:"requires,omitempty"`
+	ReviewInformation []*ReviewInformation `json:"reviewInformation,omitempty"`
+	ReviewStatus *string `json:"reviewStatus,omitempty"`
+	SchemaVersion *string `json:"schemaVersion,omitempty"`
+	Sha1 *string `json:"sha1,omitempty"`
 	// The status of a document.
-	Status            *string `json:"status,omitempty"`
+	Status *string `json:"status,omitempty"`
 	StatusInformation *string `json:"statusInformation,omitempty"`
-	Tags              []*Tag  `json:"tags,omitempty"`
-	TargetType        *string `json:"targetType,omitempty"`
-	VersionName       *string `json:"versionName,omitempty"`
+	Tags []*Tag `json:"tags,omitempty"`
+	TargetType *string `json:"targetType,omitempty"`
+	VersionName *string `json:"versionName,omitempty"`
 }
+
 
 // This data type is deprecated. Instead, use DocumentKeyValuesFilter.
 type DocumentFilter struct {
-	Key   *string `json:"key,omitempty"`
+	Key *string `json:"key,omitempty"`
 	Value *string `json:"value,omitempty"`
 }
 
+
 // Describes the name of a SSM document.
 type DocumentIdentifier struct {
-	Author          *string             `json:"author,omitempty"`
-	CreatedDate     *metav1.Time        `json:"createdDate,omitempty"`
-	DisplayName     *string             `json:"displayName,omitempty"`
-	DocumentFormat  *string             `json:"documentFormat,omitempty"`
-	DocumentType    *string             `json:"documentType,omitempty"`
-	DocumentVersion *string             `json:"documentVersion,omitempty"`
-	Name            *string             `json:"name,omitempty"`
-	Owner           *string             `json:"owner,omitempty"`
-	PlatformTypes   []*string           `json:"platformTypes,omitempty"`
-	Requires        []*DocumentRequires `json:"requires,omitempty"`
-	ReviewStatus    *string             `json:"reviewStatus,omitempty"`
-	SchemaVersion   *string             `json:"schemaVersion,omitempty"`
-	Tags            []*Tag              `json:"tags,omitempty"`
-	TargetType      *string             `json:"targetType,omitempty"`
-	VersionName     *string             `json:"versionName,omitempty"`
+	Author *string `json:"author,omitempty"`
+	CreatedDate *metav1.Time `json:"createdDate,omitempty"`
+	DisplayName *string `json:"displayName,omitempty"`
+	DocumentFormat *string `json:"documentFormat,omitempty"`
+	DocumentType *string `json:"documentType,omitempty"`
+	DocumentVersion *string `json:"documentVersion,omitempty"`
+	Name *string `json:"name,omitempty"`
+	Owner *string `json:"owner,omitempty"`
+	PlatformTypes []*string `json:"platformTypes,omitempty"`
+	Requires []*DocumentRequires `json:"requires,omitempty"`
+	ReviewStatus *string `json:"reviewStatus,omitempty"`
+	SchemaVersion *string `json:"schemaVersion,omitempty"`
+	Tags []*Tag `json:"tags,omitempty"`
+	TargetType *string `json:"targetType,omitempty"`
+	VersionName *string `json:"versionName,omitempty"`
 }
 
+
 // One or more filters. Use a filter to return a more specific list of documents.
-//
+// 
 // For keys, you can specify one or more tags that have been applied to a document.
-//
+// 
 // You can also use Amazon Web Services-provided keys, some of which have specific
 // allowed values. These keys and their associated values are as follows:
-//
+// 
 // DocumentType
-//
-//   - ApplicationConfiguration
-//
-//   - ApplicationConfigurationSchema
-//
-//   - Automation
-//
-//   - ChangeCalendar
-//
-//   - Command
-//
-//   - Package
-//
-//   - Policy
-//
-//   - Session
-//
-// # Owner
-//
+// 
+//    * ApplicationConfiguration
+// 
+//    * ApplicationConfigurationSchema
+// 
+//    * Automation
+// 
+//    * ChangeCalendar
+// 
+//    * Command
+// 
+//    * Package
+// 
+//    * Policy
+// 
+//    * Session
+// 
+// Owner
+// 
 // Note that only one Owner can be specified in a request. For example: Key=Owner,Values=Self.
-//
-//   - Amazon
-//
-//   - Private
-//
-//   - Public
-//
-//   - Self
-//
-//   - ThirdParty
-//
+// 
+//    * Amazon
+// 
+//    * Private
+// 
+//    * Public
+// 
+//    * Self
+// 
+//    * ThirdParty
+// 
 // PlatformTypes
-//
-//   - Linux
-//
-//   - Windows
-//
+// 
+//    * Linux
+// 
+//    * Windows
+// 
 // Name is another Amazon Web Services-provided key. If you use Name as a key,
 // you can use a name prefix to return a list of documents. For example, in
 // the Amazon Web Services CLI, to return a list of all documents that begin
 // with Te, run the following command:
-//
+// 
 // aws ssm list-documents --filters Key=Name,Values=Te
-//
+// 
 // You can also use the TargetType Amazon Web Services-provided key. For a list
 // of valid resource type values that can be used with this key, see Amazon
 // Web Services resource and property types reference (https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-template-resource-type-ref.html)
 // in the CloudFormation User Guide.
-//
+// 
 // If you specify more than two keys, only documents that are identified by
 // all the tags are returned in the results. If you specify more than two values
 // for a key, documents that are identified by any of the values are returned
 // in the results.
-//
+// 
 // To specify a custom key-value pair, use the format Key=tag:tagName,Values=valueName.
-//
+// 
 // For example, if you created a key called region and are using the Amazon
 // Web Services CLI to call the list-documents command:
-//
+// 
 // aws ssm list-documents --filters Key=tag:region,Values=east,west Key=Owner,Values=Self
 type DocumentKeyValuesFilter struct {
-	Key    *string   `json:"key,omitempty"`
+	Key *string `json:"key,omitempty"`
 	Values []*string `json:"values,omitempty"`
 }
+
 
 // Parameters specified in a Systems Manager document that run on the server
 // when the command is run.
 type DocumentParameter struct {
 	DefaultValue *string `json:"defaultValue,omitempty"`
-	Description  *string `json:"description,omitempty"`
-	Name         *string `json:"name,omitempty"`
-	Type         *string `json:"type_,omitempty"`
+	Description *string `json:"description,omitempty"`
+	Name *string `json:"name,omitempty"`
+	Type *string `json:"type_,omitempty"`
 }
+
 
 // An SSM document required by the current document.
 type DocumentRequires struct {
-	Name        *string `json:"name,omitempty"`
+	Name *string `json:"name,omitempty"`
 	RequireType *string `json:"requireType,omitempty"`
-	Version     *string `json:"version,omitempty"`
+	Version *string `json:"version,omitempty"`
 	VersionName *string `json:"versionName,omitempty"`
 }
 
+
 // Information about a reviewer's response to a document review request.
 type DocumentReviewerResponseSource struct {
-	CreateTime   *metav1.Time `json:"createTime,omitempty"`
-	ReviewStatus *string      `json:"reviewStatus,omitempty"`
-	Reviewer     *string      `json:"reviewer,omitempty"`
-	UpdatedTime  *metav1.Time `json:"updatedTime,omitempty"`
+	CreateTime *metav1.Time `json:"createTime,omitempty"`
+	ReviewStatus *string `json:"reviewStatus,omitempty"`
+	Reviewer *string `json:"reviewer,omitempty"`
+	UpdatedTime *metav1.Time `json:"updatedTime,omitempty"`
 }
+
 
 // Version information about the document.
 type DocumentVersionInfo struct {
-	CreatedDate      *metav1.Time `json:"createdDate,omitempty"`
-	DisplayName      *string      `json:"displayName,omitempty"`
-	DocumentFormat   *string      `json:"documentFormat,omitempty"`
-	DocumentVersion  *string      `json:"documentVersion,omitempty"`
-	IsDefaultVersion *bool        `json:"isDefaultVersion,omitempty"`
-	Name             *string      `json:"name,omitempty"`
-	ReviewStatus     *string      `json:"reviewStatus,omitempty"`
+	CreatedDate *metav1.Time `json:"createdDate,omitempty"`
+	DisplayName *string `json:"displayName,omitempty"`
+	DocumentFormat *string `json:"documentFormat,omitempty"`
+	DocumentVersion *string `json:"documentVersion,omitempty"`
+	IsDefaultVersion *bool `json:"isDefaultVersion,omitempty"`
+	Name *string `json:"name,omitempty"`
+	ReviewStatus *string `json:"reviewStatus,omitempty"`
 	// The status of a document.
-	Status            *string `json:"status,omitempty"`
+	Status *string `json:"status,omitempty"`
 	StatusInformation *string `json:"statusInformation,omitempty"`
-	VersionName       *string `json:"versionName,omitempty"`
+	VersionName *string `json:"versionName,omitempty"`
 }
+
+
+// Status information about the aggregated associations.
+type InstanceAggregatedAssociationOverview struct {
+	DetailedStatus *string `json:"detailedStatus,omitempty"`
+}
+
 
 // One or more association documents on the managed node.
 type InstanceAssociation struct {
+	AssociationID *string `json:"associationID,omitempty"`
+	AssociationVersion *string `json:"associationVersion,omitempty"`
 	Content *string `json:"content,omitempty"`
+	InstanceID *string `json:"instanceID,omitempty"`
 }
+
+
+// An S3 bucket where you want to store the results of this request.
+// 
+// For the minimal permissions required to enable Amazon S3 output for an association,
+// see Create an association (console) (https://docs.aws.amazon.com/systems-manager/latest/userguide/state-manager-associations-creating.html#state-manager-associations-console)
+// in the Systems Manager User Guide.
+type InstanceAssociationOutputLocation struct {
+	// An S3 bucket where you want to store the results of this request.
+	S3Location *S3OutputLocation `json:"s3Location,omitempty"`
+}
+
 
 // Status information about the association.
 type InstanceAssociationStatusInfo struct {
-	DocumentVersion *string      `json:"documentVersion,omitempty"`
-	ExecutionDate   *metav1.Time `json:"executionDate,omitempty"`
-	Name            *string      `json:"name,omitempty"`
+	AssociationID *string `json:"associationID,omitempty"`
+	AssociationName *string `json:"associationName,omitempty"`
+	AssociationVersion *string `json:"associationVersion,omitempty"`
+	DetailedStatus *string `json:"detailedStatus,omitempty"`
+	DocumentVersion *string `json:"documentVersion,omitempty"`
+	ExecutionDate *metav1.Time `json:"executionDate,omitempty"`
+	InstanceID *string `json:"instanceID,omitempty"`
+	Name *string `json:"name,omitempty"`
+	Status *string `json:"status,omitempty"`
 }
+
 
 // Details about a specific managed node.
 type InstanceInfo struct {
 	PlatformType *string `json:"platformType,omitempty"`
 }
 
+
 // Describes a filter for a specific list of managed nodes.
 type InstanceInformation struct {
-	IsLatestVersion                        *bool        `json:"isLatestVersion,omitempty"`
-	LastAssociationExecutionDate           *metav1.Time `json:"lastAssociationExecutionDate,omitempty"`
-	LastPingDateTime                       *metav1.Time `json:"lastPingDateTime,omitempty"`
+	AssociationStatus *string `json:"associationStatus,omitempty"`
+	InstanceID *string `json:"instanceID,omitempty"`
+	IsLatestVersion *bool `json:"isLatestVersion,omitempty"`
+	LastAssociationExecutionDate *metav1.Time `json:"lastAssociationExecutionDate,omitempty"`
+	LastPingDateTime *metav1.Time `json:"lastPingDateTime,omitempty"`
 	LastSuccessfulAssociationExecutionDate *metav1.Time `json:"lastSuccessfulAssociationExecutionDate,omitempty"`
-	PlatformType                           *string      `json:"platformType,omitempty"`
-	RegistrationDate                       *metav1.Time `json:"registrationDate,omitempty"`
+	PlatformType *string `json:"platformType,omitempty"`
+	RegistrationDate *metav1.Time `json:"registrationDate,omitempty"`
 }
+
 
 // Defines the high-level patch compliance state for a managed node, providing
 // information about the number of installed, missing, not applicable, and failed
 // patches along with metadata about the operation when this information was
 // gathered for the managed node.
 type InstancePatchState struct {
-	BaselineID                       *string      `json:"baselineID,omitempty"`
+	BaselineID *string `json:"baselineID,omitempty"`
+	InstanceID *string `json:"instanceID,omitempty"`
 	LastNoRebootInstallOperationTime *metav1.Time `json:"lastNoRebootInstallOperationTime,omitempty"`
-	OperationEndTime                 *metav1.Time `json:"operationEndTime,omitempty"`
-	OperationStartTime               *metav1.Time `json:"operationStartTime,omitempty"`
-	PatchGroup                       *string      `json:"patchGroup,omitempty"`
+	OperationEndTime *metav1.Time `json:"operationEndTime,omitempty"`
+	OperationStartTime *metav1.Time `json:"operationStartTime,omitempty"`
+	PatchGroup *string `json:"patchGroup,omitempty"`
 }
+
 
 // An object containing various properties of a managed node.
 type InstanceProperty struct {
-	LastAssociationExecutionDate           *metav1.Time `json:"lastAssociationExecutionDate,omitempty"`
-	LastPingDateTime                       *metav1.Time `json:"lastPingDateTime,omitempty"`
+	AssociationStatus *string `json:"associationStatus,omitempty"`
+	InstanceID *string `json:"instanceID,omitempty"`
+	LastAssociationExecutionDate *metav1.Time `json:"lastAssociationExecutionDate,omitempty"`
+	LastPingDateTime *metav1.Time `json:"lastPingDateTime,omitempty"`
 	LastSuccessfulAssociationExecutionDate *metav1.Time `json:"lastSuccessfulAssociationExecutionDate,omitempty"`
-	LaunchTime                             *metav1.Time `json:"launchTime,omitempty"`
-	PlatformType                           *string      `json:"platformType,omitempty"`
-	RegistrationDate                       *metav1.Time `json:"registrationDate,omitempty"`
+	LaunchTime *metav1.Time `json:"launchTime,omitempty"`
+	PlatformType *string `json:"platformType,omitempty"`
+	RegistrationDate *metav1.Time `json:"registrationDate,omitempty"`
 }
+
+
+// Information about an Amazon Simple Storage Service (Amazon S3) bucket to
+// write managed node-level logs to.
+// 
+// LoggingInfo has been deprecated. To specify an Amazon Simple Storage Service
+// (Amazon S3) bucket to contain logs, instead use the OutputS3BucketName and
+// OutputS3KeyPrefix options in the TaskInvocationParameters structure. For
+// information about how Amazon Web Services Systems Manager handles these options
+// for the supported maintenance window task types, see MaintenanceWindowTaskInvocationParameters.
+type LoggingInfo struct {
+	S3BucketName *string `json:"s3BucketName,omitempty"`
+	S3KeyPrefix *string `json:"s3KeyPrefix,omitempty"`
+	S3Region *string `json:"s3Region,omitempty"`
+}
+
 
 // The parameters for an AUTOMATION task type.
 type MaintenanceWindowAutomationParameters struct {
 	DocumentVersion *string `json:"documentVersion,omitempty"`
 }
 
+
 // Describes the information about an execution of a maintenance window.
 type MaintenanceWindowExecution struct {
-	EndTime   *metav1.Time `json:"endTime,omitempty"`
+	EndTime *metav1.Time `json:"endTime,omitempty"`
 	StartTime *metav1.Time `json:"startTime,omitempty"`
 }
+
 
 // Information about a task execution performed as part of a maintenance window
 // execution.
 type MaintenanceWindowExecutionTaskIdentity struct {
-	EndTime   *metav1.Time `json:"endTime,omitempty"`
+	// The details for the CloudWatch alarm you want to apply to an automation or
+// command.
+	AlarmConfiguration *AlarmConfiguration `json:"alarmConfiguration,omitempty"`
+	EndTime *metav1.Time `json:"endTime,omitempty"`
 	StartTime *metav1.Time `json:"startTime,omitempty"`
+	TriggeredAlarms []*AlarmStateInformation `json:"triggeredAlarms,omitempty"`
 }
+
 
 // Describes the information about a task invocation for a particular target
 // as part of a task execution performed as part of a maintenance window execution.
 type MaintenanceWindowExecutionTaskInvocationIdentity struct {
-	EndTime   *metav1.Time `json:"endTime,omitempty"`
+	EndTime *metav1.Time `json:"endTime,omitempty"`
 	StartTime *metav1.Time `json:"startTime,omitempty"`
 }
 
+
 // The parameters for a RUN_COMMAND task type.
-//
+// 
 // For information about specifying and updating task parameters, see RegisterTaskWithMaintenanceWindow
 // and UpdateMaintenanceWindowTask.
-//
+// 
 // LoggingInfo has been deprecated. To specify an Amazon Simple Storage Service
 // (Amazon S3) bucket to contain logs, instead use the OutputS3BucketName and
 // OutputS3KeyPrefix options in the TaskInvocationParameters structure. For
 // information about how Amazon Web Services Systems Manager handles these options
 // for the supported maintenance window task types, see MaintenanceWindowTaskInvocationParameters.
-//
+// 
 // TaskParameters has been deprecated. To specify parameters to pass to a task
 // when it runs, instead use the Parameters option in the TaskInvocationParameters
 // structure. For information about how Systems Manager handles these options
 // for the supported maintenance window task types, see MaintenanceWindowTaskInvocationParameters.
-//
+// 
 // For RUN_COMMAND tasks, Systems Manager uses specified values for TaskParameters
 // and LoggingInfo only if no values are specified for TaskInvocationParameters.
 type MaintenanceWindowRunCommandParameters struct {
-	DocumentHash     *string `json:"documentHash,omitempty"`
+	DocumentHash *string `json:"documentHash,omitempty"`
 	DocumentHashType *string `json:"documentHashType,omitempty"`
-	DocumentVersion  *string `json:"documentVersion,omitempty"`
+	DocumentVersion *string `json:"documentVersion,omitempty"`
+	OutputS3BucketName *string `json:"outputS3BucketName,omitempty"`
+	OutputS3KeyPrefix *string `json:"outputS3KeyPrefix,omitempty"`
+	Parameters map[string][]*string `json:"parameters,omitempty"`
 }
+
+
+// The target registered with the maintenance window.
+type MaintenanceWindowTarget struct {
+	Targets []*Target `json:"targets,omitempty"`
+}
+
+
+// Information about a task defined for a maintenance window.
+type MaintenanceWindowTask struct {
+	// The details for the CloudWatch alarm you want to apply to an automation or
+// command.
+	AlarmConfiguration *AlarmConfiguration `json:"alarmConfiguration,omitempty"`
+	MaxConcurrency *string `json:"maxConcurrency,omitempty"`
+	MaxErrors *string `json:"maxErrors,omitempty"`
+	Targets []*Target `json:"targets,omitempty"`
+}
+
 
 // Operations engineers and IT professionals use Amazon Web Services Systems
 // Manager OpsCenter to view, investigate, and remediate operational work items
@@ -465,7 +750,7 @@ type MaintenanceWindowRunCommandParameters struct {
 // Configuring Amazon CloudWatch alarms and EventBridge events to automatically
 // create OpsItems allows you to quickly diagnose and remediate issues with
 // Amazon Web Services resources from a single console.
-//
+// 
 // To help you diagnose issues, each OpsItem includes contextually relevant
 // information such as the name and ID of the Amazon Web Services resource that
 // generated the OpsItem, alarm or event details, alarm history, and an alarm
@@ -475,13 +760,14 @@ type MaintenanceWindowRunCommandParameters struct {
 // more information, see Amazon Web Services Systems Manager OpsCenter (https://docs.aws.amazon.com/systems-manager/latest/userguide/OpsCenter.html)
 // in the Amazon Web Services Systems Manager User Guide.
 type OpsItem struct {
-	ActualEndTime    *metav1.Time `json:"actualEndTime,omitempty"`
-	ActualStartTime  *metav1.Time `json:"actualStartTime,omitempty"`
-	CreatedTime      *metav1.Time `json:"createdTime,omitempty"`
+	ActualEndTime *metav1.Time `json:"actualEndTime,omitempty"`
+	ActualStartTime *metav1.Time `json:"actualStartTime,omitempty"`
+	CreatedTime *metav1.Time `json:"createdTime,omitempty"`
 	LastModifiedTime *metav1.Time `json:"lastModifiedTime,omitempty"`
-	PlannedEndTime   *metav1.Time `json:"plannedEndTime,omitempty"`
+	PlannedEndTime *metav1.Time `json:"plannedEndTime,omitempty"`
 	PlannedStartTime *metav1.Time `json:"plannedStartTime,omitempty"`
 }
+
 
 // Summary information about an OpsItem event or that associated an OpsItem
 // with a related item.
@@ -489,37 +775,43 @@ type OpsItemEventSummary struct {
 	CreatedTime *metav1.Time `json:"createdTime,omitempty"`
 }
 
+
 // Summary information about related-item resources for an OpsItem.
 type OpsItemRelatedItemSummary struct {
-	CreatedTime      *metav1.Time `json:"createdTime,omitempty"`
+	CreatedTime *metav1.Time `json:"createdTime,omitempty"`
 	LastModifiedTime *metav1.Time `json:"lastModifiedTime,omitempty"`
 }
+
 
 // A count of OpsItems.
 type OpsItemSummary struct {
-	ActualEndTime    *metav1.Time `json:"actualEndTime,omitempty"`
-	ActualStartTime  *metav1.Time `json:"actualStartTime,omitempty"`
-	CreatedTime      *metav1.Time `json:"createdTime,omitempty"`
+	ActualEndTime *metav1.Time `json:"actualEndTime,omitempty"`
+	ActualStartTime *metav1.Time `json:"actualStartTime,omitempty"`
+	CreatedTime *metav1.Time `json:"createdTime,omitempty"`
 	LastModifiedTime *metav1.Time `json:"lastModifiedTime,omitempty"`
-	PlannedEndTime   *metav1.Time `json:"plannedEndTime,omitempty"`
+	PlannedEndTime *metav1.Time `json:"plannedEndTime,omitempty"`
 	PlannedStartTime *metav1.Time `json:"plannedStartTime,omitempty"`
 }
 
+
 // Operational metadata for an application in Application Manager.
 type OpsMetadata struct {
-	CreationDate     *metav1.Time `json:"creationDate,omitempty"`
+	CreationDate *metav1.Time `json:"creationDate,omitempty"`
 	LastModifiedDate *metav1.Time `json:"lastModifiedDate,omitempty"`
 }
+
 
 // An Amazon Web Services Systems Manager parameter in Parameter Store.
 type Parameter struct {
 	LastModifiedDate *metav1.Time `json:"lastModifiedDate,omitempty"`
 }
 
+
 // Information about parameter usage.
 type ParameterHistory struct {
 	LastModifiedDate *metav1.Time `json:"lastModifiedDate,omitempty"`
 }
+
 
 // Metadata includes information like the Amazon Resource Name (ARN) of the
 // last user to update the parameter and the date and time the parameter was
@@ -528,20 +820,23 @@ type ParameterMetadata struct {
 	LastModifiedDate *metav1.Time `json:"lastModifiedDate,omitempty"`
 }
 
+
 // Represents metadata about a patch.
 type Patch struct {
-	ID          *string      `json:"id,omitempty"`
+	ID *string `json:"id,omitempty"`
 	ReleaseDate *metav1.Time `json:"releaseDate,omitempty"`
 }
+
 
 // Defines the basic information about a patch baseline.
 type PatchBaselineIdentity struct {
 	BaselineDescription *string `json:"baselineDescription,omitempty"`
-	BaselineID          *string `json:"baselineID,omitempty"`
-	BaselineName        *string `json:"baselineName,omitempty"`
-	DefaultBaseline     *bool   `json:"defaultBaseline,omitempty"`
-	OperatingSystem     *string `json:"operatingSystem,omitempty"`
+	BaselineID *string `json:"baselineID,omitempty"`
+	BaselineName *string `json:"baselineName,omitempty"`
+	DefaultBaseline *bool `json:"defaultBaseline,omitempty"`
+	OperatingSystem *string `json:"operatingSystem,omitempty"`
 }
+
 
 // Information about the state of a patch on a particular managed node as it
 // relates to the patch baseline used to patch the node.
@@ -549,99 +844,110 @@ type PatchComplianceData struct {
 	InstalledTime *metav1.Time `json:"installedTime,omitempty"`
 }
 
+
 // Defines which patches should be included in a patch baseline.
-//
+// 
 // A patch filter consists of a key and a set of values. The filter key is a
 // patch property. For example, the available filter keys for WINDOWS are PATCH_SET,
 // PRODUCT, PRODUCT_FAMILY, CLASSIFICATION, and MSRC_SEVERITY.
-//
+// 
 // The filter values define a matching criterion for the patch property indicated
 // by the key. For example, if the filter key is PRODUCT and the filter values
 // are ["Office 2013", "Office 2016"], then the filter accepts all patches where
 // product name is either "Office 2013" or "Office 2016". The filter values
 // can be exact values for the patch property given as a key, or a wildcard
 // (*), which matches all values.
-//
+// 
 // You can view lists of valid values for the patch properties by running the
 // DescribePatchProperties command. For information about which patch properties
 // can be used with each major operating system, see DescribePatchProperties.
 type PatchFilter struct {
-	Key    *string   `json:"key,omitempty"`
+	Key *string `json:"key,omitempty"`
 	Values []*string `json:"values,omitempty"`
 }
+
 
 // A set of patch filters, typically used for approval rules.
 type PatchFilterGroup struct {
 	PatchFilters []*PatchFilter `json:"patchFilters,omitempty"`
 }
 
+
 // The mapping between a patch group and the patch baseline the patch group
 // is registered with.
 type PatchGroupPatchBaselineMapping struct {
 	// Defines the basic information about a patch baseline.
 	BaselineIdentity *PatchBaselineIdentity `json:"baselineIdentity,omitempty"`
-	PatchGroup       *string                `json:"patchGroup,omitempty"`
+	PatchGroup *string `json:"patchGroup,omitempty"`
 }
+
 
 // Defines a filter used in Patch Manager APIs. Supported filter keys depend
 // on the API operation that includes the filter. Patch Manager API operations
 // that use PatchOrchestratorFilter include the following:
-//
-//   - DescribeAvailablePatches
-//
-//   - DescribeInstancePatches
-//
-//   - DescribePatchBaselines
-//
-//   - DescribePatchGroups
+// 
+//    * DescribeAvailablePatches
+// 
+//    * DescribeInstancePatches
+// 
+//    * DescribePatchBaselines
+// 
+//    * DescribePatchGroups
 type PatchOrchestratorFilter struct {
-	Key    *string   `json:"key,omitempty"`
+	Key *string `json:"key,omitempty"`
 	Values []*string `json:"values,omitempty"`
 }
 
+
 // Defines an approval rule for a patch baseline.
 type PatchRule struct {
-	ApproveAfterDays  *int64  `json:"approveAfterDays,omitempty"`
-	ApproveUntilDate  *string `json:"approveUntilDate,omitempty"`
-	ComplianceLevel   *string `json:"complianceLevel,omitempty"`
-	EnableNonSecurity *bool   `json:"enableNonSecurity,omitempty"`
+	ApproveAfterDays *int64 `json:"approveAfterDays,omitempty"`
+	ApproveUntilDate *string `json:"approveUntilDate,omitempty"`
+	ComplianceLevel *string `json:"complianceLevel,omitempty"`
+	EnableNonSecurity *bool `json:"enableNonSecurity,omitempty"`
 	// A set of patch filters, typically used for approval rules.
 	PatchFilterGroup *PatchFilterGroup `json:"patchFilterGroup,omitempty"`
 }
+
 
 // A set of rules defining the approval rules for a patch baseline.
 type PatchRuleGroup struct {
 	PatchRules []*PatchRule `json:"patchRules,omitempty"`
 }
 
+
 // Information about the patches to use to update the managed nodes, including
 // target operating systems and source repository. Applies to Linux managed
 // nodes only.
 type PatchSource struct {
-	Configuration *string   `json:"configuration,omitempty"`
-	Name          *string   `json:"name,omitempty"`
-	Products      []*string `json:"products,omitempty"`
+	Configuration *string `json:"configuration,omitempty"`
+	Name *string `json:"name,omitempty"`
+	Products []*string `json:"products,omitempty"`
 }
+
 
 // Information about the approval status of a patch.
 type PatchStatus struct {
-	ApprovalDate    *metav1.Time `json:"approvalDate,omitempty"`
-	ComplianceLevel *string      `json:"complianceLevel,omitempty"`
+	ApprovalDate *metav1.Time `json:"approvalDate,omitempty"`
+	ComplianceLevel *string `json:"complianceLevel,omitempty"`
 }
+
 
 // Information about targets that resolved during the Automation execution.
 type ResolvedTargets struct {
 	Truncated *bool `json:"truncated,omitempty"`
 }
 
+
 // Information about the AwsOrganizationsSource resource data sync source. A
 // sync source of this type can synchronize data from Organizations or, if an
 // Amazon Web Services organization isn't present, from multiple Amazon Web
 // Services Regions.
 type ResourceDataSyncAWSOrganizationsSource struct {
-	OrganizationSourceType *string                               `json:"organizationSourceType,omitempty"`
-	OrganizationalUnits    []*ResourceDataSyncOrganizationalUnit `json:"organizationalUnits,omitempty"`
+	OrganizationSourceType *string `json:"organizationSourceType,omitempty"`
+	OrganizationalUnits []*ResourceDataSyncOrganizationalUnit `json:"organizationalUnits,omitempty"`
 }
+
 
 // Synchronize Amazon Web Services Systems Manager Inventory data from multiple
 // Amazon Web Services accounts defined in Organizations to a centralized Amazon
@@ -652,115 +958,136 @@ type ResourceDataSyncDestinationDataSharing struct {
 	DestinationDataSharingType *string `json:"destinationDataSharingType,omitempty"`
 }
 
+
 // Information about a resource data sync configuration, including its current
 // status and last successful sync.
 type ResourceDataSyncItem struct {
-	LastStatus             *string      `json:"lastStatus,omitempty"`
+	LastStatus *string `json:"lastStatus,omitempty"`
 	LastSuccessfulSyncTime *metav1.Time `json:"lastSuccessfulSyncTime,omitempty"`
-	LastSyncStatusMessage  *string      `json:"lastSyncStatusMessage,omitempty"`
-	LastSyncTime           *metav1.Time `json:"lastSyncTime,omitempty"`
+	LastSyncStatusMessage *string `json:"lastSyncStatusMessage,omitempty"`
+	LastSyncTime *metav1.Time `json:"lastSyncTime,omitempty"`
 	// Information about the target S3 bucket for the resource data sync.
-	S3Destination        *ResourceDataSyncS3Destination `json:"s3Destination,omitempty"`
-	SyncCreatedTime      *metav1.Time                   `json:"syncCreatedTime,omitempty"`
-	SyncLastModifiedTime *metav1.Time                   `json:"syncLastModifiedTime,omitempty"`
-	SyncName             *string                        `json:"syncName,omitempty"`
+	S3Destination *ResourceDataSyncS3Destination `json:"s3Destination,omitempty"`
+	SyncCreatedTime *metav1.Time `json:"syncCreatedTime,omitempty"`
+	SyncLastModifiedTime *metav1.Time `json:"syncLastModifiedTime,omitempty"`
+	SyncName *string `json:"syncName,omitempty"`
 	// The data type name for including resource data sync state. There are four
-	// sync states:
-	//
-	// OrganizationNotExists (Your organization doesn't exist)
-	//
-	// NoPermissions (The system can't locate the service-linked role. This role
-	// is automatically created when a user creates a resource data sync in Amazon
-	// Web Services Systems Manager Explorer.)
-	//
-	// InvalidOrganizationalUnit (You specified or selected an invalid unit in the
-	// resource data sync configuration.)
-	//
-	// TrustedAccessDisabled (You disabled Systems Manager access in the organization
-	// in Organizations.)
+// sync states:
+// 
+// OrganizationNotExists (Your organization doesn't exist)
+// 
+// NoPermissions (The system can't locate the service-linked role. This role
+// is automatically created when a user creates a resource data sync in Amazon
+// Web Services Systems Manager Explorer.)
+// 
+// InvalidOrganizationalUnit (You specified or selected an invalid unit in the
+// resource data sync configuration.)
+// 
+// TrustedAccessDisabled (You disabled Systems Manager access in the organization
+// in Organizations.)
 	SyncSource *ResourceDataSyncSourceWithState `json:"syncSource,omitempty"`
-	SyncType   *string                          `json:"syncType,omitempty"`
+	SyncType *string `json:"syncType,omitempty"`
 }
+
 
 // The Organizations organizational unit data source for the sync.
 type ResourceDataSyncOrganizationalUnit struct {
 	OrganizationalUnitID *string `json:"organizationalUnitID,omitempty"`
 }
 
+
 // Information about the target S3 bucket for the resource data sync.
 type ResourceDataSyncS3Destination struct {
 	AWSKMSKeyARN *string `json:"awsKMSKeyARN,omitempty"`
-	BucketName   *string `json:"bucketName,omitempty"`
+	BucketName *string `json:"bucketName,omitempty"`
 	// Synchronize Amazon Web Services Systems Manager Inventory data from multiple
-	// Amazon Web Services accounts defined in Organizations to a centralized Amazon
-	// S3 bucket. Data is synchronized to individual key prefixes in the central
-	// bucket. Each key prefix represents a different Amazon Web Services account
-	// ID.
+// Amazon Web Services accounts defined in Organizations to a centralized Amazon
+// S3 bucket. Data is synchronized to individual key prefixes in the central
+// bucket. Each key prefix represents a different Amazon Web Services account
+// ID.
 	DestinationDataSharing *ResourceDataSyncDestinationDataSharing `json:"destinationDataSharing,omitempty"`
-	Prefix                 *string                                 `json:"prefix,omitempty"`
-	Region                 *string                                 `json:"region,omitempty"`
-	SyncFormat             *string                                 `json:"syncFormat,omitempty"`
+	Prefix *string `json:"prefix,omitempty"`
+	Region *string `json:"region,omitempty"`
+	SyncFormat *string `json:"syncFormat,omitempty"`
 }
+
 
 // Information about the source of the data included in the resource data sync.
 type ResourceDataSyncSource struct {
 	// Information about the AwsOrganizationsSource resource data sync source. A
-	// sync source of this type can synchronize data from Organizations or, if an
-	// Amazon Web Services organization isn't present, from multiple Amazon Web
-	// Services Regions.
-	AWSOrganizationsSource  *ResourceDataSyncAWSOrganizationsSource `json:"awsOrganizationsSource,omitempty"`
-	EnableAllOpsDataSources *bool                                   `json:"enableAllOpsDataSources,omitempty"`
-	IncludeFutureRegions    *bool                                   `json:"includeFutureRegions,omitempty"`
-	SourceRegions           []*string                               `json:"sourceRegions,omitempty"`
-	SourceType              *string                                 `json:"sourceType,omitempty"`
+// sync source of this type can synchronize data from Organizations or, if an
+// Amazon Web Services organization isn't present, from multiple Amazon Web
+// Services Regions.
+	AWSOrganizationsSource *ResourceDataSyncAWSOrganizationsSource `json:"awsOrganizationsSource,omitempty"`
+	EnableAllOpsDataSources *bool `json:"enableAllOpsDataSources,omitempty"`
+	IncludeFutureRegions *bool `json:"includeFutureRegions,omitempty"`
+	SourceRegions []*string `json:"sourceRegions,omitempty"`
+	SourceType *string `json:"sourceType,omitempty"`
 }
+
 
 // The data type name for including resource data sync state. There are four
 // sync states:
-//
+// 
 // OrganizationNotExists (Your organization doesn't exist)
-//
+// 
 // NoPermissions (The system can't locate the service-linked role. This role
 // is automatically created when a user creates a resource data sync in Amazon
 // Web Services Systems Manager Explorer.)
-//
+// 
 // InvalidOrganizationalUnit (You specified or selected an invalid unit in the
 // resource data sync configuration.)
-//
+// 
 // TrustedAccessDisabled (You disabled Systems Manager access in the organization
 // in Organizations.)
 type ResourceDataSyncSourceWithState struct {
 	// Information about the AwsOrganizationsSource resource data sync source. A
-	// sync source of this type can synchronize data from Organizations or, if an
-	// Amazon Web Services organization isn't present, from multiple Amazon Web
-	// Services Regions.
-	AWSOrganizationsSource  *ResourceDataSyncAWSOrganizationsSource `json:"awsOrganizationsSource,omitempty"`
-	EnableAllOpsDataSources *bool                                   `json:"enableAllOpsDataSources,omitempty"`
-	IncludeFutureRegions    *bool                                   `json:"includeFutureRegions,omitempty"`
-	SourceRegions           []*string                               `json:"sourceRegions,omitempty"`
-	SourceType              *string                                 `json:"sourceType,omitempty"`
-	State                   *string                                 `json:"state,omitempty"`
+// sync source of this type can synchronize data from Organizations or, if an
+// Amazon Web Services organization isn't present, from multiple Amazon Web
+// Services Regions.
+	AWSOrganizationsSource *ResourceDataSyncAWSOrganizationsSource `json:"awsOrganizationsSource,omitempty"`
+	EnableAllOpsDataSources *bool `json:"enableAllOpsDataSources,omitempty"`
+	IncludeFutureRegions *bool `json:"includeFutureRegions,omitempty"`
+	SourceRegions []*string `json:"sourceRegions,omitempty"`
+	SourceType *string `json:"sourceType,omitempty"`
+	State *string `json:"state,omitempty"`
 }
+
 
 // Information about the result of a document review request.
 type ReviewInformation struct {
 	ReviewedTime *metav1.Time `json:"reviewedTime,omitempty"`
-	Reviewer     *string      `json:"reviewer,omitempty"`
-	Status       *string      `json:"status,omitempty"`
+	Reviewer *string `json:"reviewer,omitempty"`
+	Status *string `json:"status,omitempty"`
 }
+
 
 // Information about an Automation runbook used in a runbook workflow in Change
 // Manager.
-//
+// 
 // The Automation runbooks specified for the runbook workflow can't run until
 // all required approvals for the change request have been received.
 type Runbook struct {
-	DocumentName    *string `json:"documentName,omitempty"`
+	DocumentName *string `json:"documentName,omitempty"`
 	DocumentVersion *string `json:"documentVersion,omitempty"`
+	MaxConcurrency *string `json:"maxConcurrency,omitempty"`
+	MaxErrors *string `json:"maxErrors,omitempty"`
+	TargetLocations []*TargetLocation `json:"targetLocations,omitempty"`
+	TargetMaps []map[string][]*string `json:"targetMaps,omitempty"`
+	Targets []*Target `json:"targets,omitempty"`
 }
 
+
+// An S3 bucket where you want to store the results of this request.
+type S3OutputLocation struct {
+	OutputS3BucketName *string `json:"outputS3BucketName,omitempty"`
+	OutputS3KeyPrefix *string `json:"outputS3KeyPrefix,omitempty"`
+	OutputS3Region *string `json:"outputS3Region,omitempty"`
+}
+
+
 // The service setting data structure.
-//
+// 
 // ServiceSetting is an account-level setting for an Amazon Web Services service.
 // This setting defines how a user interacts with or uses a service or a feature
 // of a service. For example, if an Amazon Web Services service charges money
@@ -768,7 +1095,7 @@ type Runbook struct {
 // service team might create a default setting of "false". This means the user
 // can't use this feature unless they change the setting to "true" and intentionally
 // opt in for a paid feature.
-//
+// 
 // Services map a SettingId object to a setting value. Amazon Web Services services
 // teams define the default value for a SettingId. You can't create a new SettingId,
 // but you can overwrite the default value if you have the ssm:UpdateServiceSetting
@@ -780,20 +1107,28 @@ type ServiceSetting struct {
 	LastModifiedDate *metav1.Time `json:"lastModifiedDate,omitempty"`
 }
 
+
 // Information about a Session Manager connection to a managed node.
 type Session struct {
-	DocumentName *string      `json:"documentName,omitempty"`
-	EndDate      *metav1.Time `json:"endDate,omitempty"`
-	StartDate    *metav1.Time `json:"startDate,omitempty"`
+	DocumentName *string `json:"documentName,omitempty"`
+	EndDate *metav1.Time `json:"endDate,omitempty"`
+	StartDate *metav1.Time `json:"startDate,omitempty"`
 }
+
 
 // Detailed information about an the execution state of an Automation step.
 type StepExecution struct {
-	ExecutionEndTime   *metav1.Time `json:"executionEndTime,omitempty"`
+	ExecutionEndTime *metav1.Time `json:"executionEndTime,omitempty"`
 	ExecutionStartTime *metav1.Time `json:"executionStartTime,omitempty"`
-	IsCritical         *bool        `json:"isCritical,omitempty"`
-	IsEnd              *bool        `json:"isEnd,omitempty"`
+	IsCritical *bool `json:"isCritical,omitempty"`
+	IsEnd *bool `json:"isEnd,omitempty"`
+	// The combination of Amazon Web Services Regions and Amazon Web Services accounts
+// targeted by the current Automation execution.
+	TargetLocation *TargetLocation `json:"targetLocation,omitempty"`
+	Targets []*Target `json:"targets,omitempty"`
+	TriggeredAlarms []*AlarmStateInformation `json:"triggeredAlarms,omitempty"`
 }
+
 
 // Metadata that you assign to your Amazon Web Services resources. Tags enable
 // you to categorize your resources in different ways, for example, by purpose,
@@ -801,12 +1136,80 @@ type StepExecution struct {
 // tags to Systems Manager documents (SSM documents), managed nodes, maintenance
 // windows, parameters, patch baselines, OpsItems, and OpsMetadata.
 type Tag struct {
-	Key   *string `json:"key,omitempty"`
+	Key *string `json:"key,omitempty"`
 	Value *string `json:"value,omitempty"`
 }
+
+
+// An array of search criteria that targets managed nodes using a key-value
+// pair that you specify.
+// 
+// One or more targets must be specified for maintenance window Run Command-type
+// tasks. Depending on the task, targets are optional for other maintenance
+// window task types (Automation, Lambda, and Step Functions). For more information
+// about running tasks that don't specify targets, see Registering maintenance
+// window tasks without targets (https://docs.aws.amazon.com/systems-manager/latest/userguide/maintenance-windows-targetless-tasks.html)
+// in the Amazon Web Services Systems Manager User Guide.
+// 
+// Supported formats include the following.
+// 
+// For all Systems Manager capabilities:
+// 
+//    * Key=tag-key,Values=tag-value-1,tag-value-2
+// 
+// For Automation and Change Manager:
+// 
+//    * Key=tag:tag-key,Values=tag-value
+// 
+//    * Key=ResourceGroup,Values=resource-group-name
+// 
+//    * Key=ParameterValues,Values=value-1,value-2,value-3
+// 
+//    * To target all instances in the Amazon Web Services Region: Key=AWS::EC2::Instance,Values=*
+//    Key=InstanceIds,Values=*
+// 
+// For Run Command and Maintenance Windows:
+// 
+//    * Key=InstanceIds,Values=instance-id-1,instance-id-2,instance-id-3
+// 
+//    * Key=tag:tag-key,Values=tag-value-1,tag-value-2
+// 
+//    * Key=resource-groups:Name,Values=resource-group-name
+// 
+//    * Additionally, Maintenance Windows support targeting resource types:
+//    Key=resource-groups:ResourceTypeFilters,Values=resource-type-1,resource-type-2
+// 
+// For State Manager:
+// 
+//    * Key=InstanceIds,Values=instance-id-1,instance-id-2,instance-id-3
+// 
+//    * Key=tag:tag-key,Values=tag-value-1,tag-value-2
+// 
+//    * To target all instances in the Amazon Web Services Region: Key=InstanceIds,Values=*
+// 
+// For more information about how to send commands that target managed nodes
+// using Key,Value parameters, see Targeting multiple managed nodes (https://docs.aws.amazon.com/systems-manager/latest/userguide/send-commands-multiple.html#send-commands-targeting)
+// in the Amazon Web Services Systems Manager User Guide.
+type Target struct {
+	Key *string `json:"key,omitempty"`
+	Values []*string `json:"values,omitempty"`
+}
+
 
 // The combination of Amazon Web Services Regions and Amazon Web Services accounts
 // targeted by the current Automation execution.
 type TargetLocation struct {
+	Accounts []*string `json:"accounts,omitempty"`
+	ExcludeAccounts []*string `json:"excludeAccounts,omitempty"`
+	ExecutionRoleName *string `json:"executionRoleName,omitempty"`
 	IncludeChildOrganizationUnits *bool `json:"includeChildOrganizationUnits,omitempty"`
+	Regions []*string `json:"regions,omitempty"`
+	// The details for the CloudWatch alarm you want to apply to an automation or
+// command.
+	TargetLocationAlarmConfiguration *AlarmConfiguration `json:"targetLocationAlarmConfiguration,omitempty"`
+	TargetLocationMaxConcurrency *string `json:"targetLocationMaxConcurrency,omitempty"`
+	TargetLocationMaxErrors *string `json:"targetLocationMaxErrors,omitempty"`
+	Targets []*Target `json:"targets,omitempty"`
+	TargetsMaxConcurrency *string `json:"targetsMaxConcurrency,omitempty"`
+	TargetsMaxErrors *string `json:"targetsMaxErrors,omitempty"`
 }
