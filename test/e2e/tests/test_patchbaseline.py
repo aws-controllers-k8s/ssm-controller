@@ -50,7 +50,7 @@ class TestPatchBaseline:
         (reference, _) = patchbaseline
         time.sleep(CREATE_WAIT_AFTER_SECONDS)
 
-        assert k8s.wait_on_condition(reference, "ACK.ResourceSynced", "True", wait_periods=10)
+        assert k8s.wait_on_condition(reference, "Ready", "True", wait_periods=10)
 
         cr = k8s.get_resource(reference)
         assert cr is not None
@@ -68,7 +68,7 @@ class TestPatchBaseline:
 
         k8s.patch_custom_resource(reference, update_data)
         time.sleep(MODIFY_WAIT_AFTER_SECONDS)
-        assert k8s.wait_on_condition(reference, "ACK.ResourceSynced", "True", wait_periods=10)
+        assert k8s.wait_on_condition(reference, "Ready", "True", wait_periods=10)
 
         updated_cr = k8s.get_resource(reference)
         assert updated_cr["spec"]["approvedPatches"] == update_data["spec"]["approvedPatches"]
@@ -111,7 +111,7 @@ class TestPatchBaseline:
 
         k8s.patch_custom_resource(reference, tag_data)
         time.sleep(MODIFY_WAIT_AFTER_SECONDS)
-        assert k8s.wait_on_condition(reference, "ACK.ResourceSynced", "True", wait_periods=10)
+        assert k8s.wait_on_condition(reference, "Ready", "True", wait_periods=10)
         
         updated_cr = k8s.get_resource(reference)
         assert "tags" in updated_cr["spec"]
@@ -149,7 +149,7 @@ class TestPatchBaseline:
 
         k8s.patch_custom_resource(reference, remove_tag_data)
         time.sleep(MODIFY_WAIT_AFTER_SECONDS)
-        assert k8s.wait_on_condition(reference, "ACK.ResourceSynced", "True", wait_periods=10)
+        assert k8s.wait_on_condition(reference, "Ready", "True", wait_periods=10)
     
         updated_cr = k8s.get_resource(reference)
         assert "tags" in updated_cr["spec"]
