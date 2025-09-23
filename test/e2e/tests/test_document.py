@@ -52,7 +52,7 @@ class TestDocument:
         (reference, _) = document
         time.sleep(CREATE_WAIT_AFTER_SECONDS)
 
-        assert k8s.wait_on_condition(reference, "ACK.ResourceSynced", "True", wait_periods=10)
+        assert k8s.wait_on_condition(reference, "Ready", "True", wait_periods=10)
 
         cr = k8s.get_resource(reference)
         assert cr is not None
@@ -81,7 +81,7 @@ class TestDocument:
 
         k8s.patch_custom_resource(reference, update_data)
         time.sleep(MODIFY_WAIT_AFTER_SECONDS)
-        assert k8s.wait_on_condition(reference, "ACK.ResourceSynced", "True", wait_periods=10)
+        assert k8s.wait_on_condition(reference, "Ready", "True", wait_periods=10)
         
         updated_cr = k8s.get_resource(reference)       
         assert updated_cr["spec"]["content"] == update_data["spec"]["content"]
