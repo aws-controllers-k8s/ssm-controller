@@ -17,16 +17,15 @@ package document
 
 import (
 	"bytes"
-	"reflect"
 
 	ackcompare "github.com/aws-controllers-k8s/runtime/pkg/compare"
 	acktags "github.com/aws-controllers-k8s/runtime/pkg/tags"
+	"k8s.io/apimachinery/pkg/api/equality"
 )
 
 // Hack to avoid import errors during build...
 var (
 	_ = &bytes.Buffer{}
-	_ = &reflect.Method{}
 	_ = &acktags.Tags{}
 )
 
@@ -46,7 +45,7 @@ func newResourceDelta(
 	if len(a.ko.Spec.Attachments) != len(b.ko.Spec.Attachments) {
 		delta.Add("Spec.Attachments", a.ko.Spec.Attachments, b.ko.Spec.Attachments)
 	} else if len(a.ko.Spec.Attachments) > 0 {
-		if !reflect.DeepEqual(a.ko.Spec.Attachments, b.ko.Spec.Attachments) {
+		if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.Attachments, b.ko.Spec.Attachments) {
 			delta.Add("Spec.Attachments", a.ko.Spec.Attachments, b.ko.Spec.Attachments)
 		}
 	}
@@ -88,7 +87,7 @@ func newResourceDelta(
 	if len(a.ko.Spec.Requires) != len(b.ko.Spec.Requires) {
 		delta.Add("Spec.Requires", a.ko.Spec.Requires, b.ko.Spec.Requires)
 	} else if len(a.ko.Spec.Requires) > 0 {
-		if !reflect.DeepEqual(a.ko.Spec.Requires, b.ko.Spec.Requires) {
+		if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.Requires, b.ko.Spec.Requires) {
 			delta.Add("Spec.Requires", a.ko.Spec.Requires, b.ko.Spec.Requires)
 		}
 	}

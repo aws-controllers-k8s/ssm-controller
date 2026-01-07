@@ -17,16 +17,15 @@ package patch_baseline
 
 import (
 	"bytes"
-	"reflect"
 
 	ackcompare "github.com/aws-controllers-k8s/runtime/pkg/compare"
 	acktags "github.com/aws-controllers-k8s/runtime/pkg/tags"
+	"k8s.io/apimachinery/pkg/api/equality"
 )
 
 // Hack to avoid import errors during build...
 var (
 	_ = &bytes.Buffer{}
-	_ = &reflect.Method{}
 	_ = &acktags.Tags{}
 )
 
@@ -50,7 +49,7 @@ func newResourceDelta(
 		if len(a.ko.Spec.ApprovalRules.PatchRules) != len(b.ko.Spec.ApprovalRules.PatchRules) {
 			delta.Add("Spec.ApprovalRules.PatchRules", a.ko.Spec.ApprovalRules.PatchRules, b.ko.Spec.ApprovalRules.PatchRules)
 		} else if len(a.ko.Spec.ApprovalRules.PatchRules) > 0 {
-			if !reflect.DeepEqual(a.ko.Spec.ApprovalRules.PatchRules, b.ko.Spec.ApprovalRules.PatchRules) {
+			if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.ApprovalRules.PatchRules, b.ko.Spec.ApprovalRules.PatchRules) {
 				delta.Add("Spec.ApprovalRules.PatchRules", a.ko.Spec.ApprovalRules.PatchRules, b.ko.Spec.ApprovalRules.PatchRules)
 			}
 		}
@@ -96,7 +95,7 @@ func newResourceDelta(
 		if len(a.ko.Spec.GlobalFilters.PatchFilters) != len(b.ko.Spec.GlobalFilters.PatchFilters) {
 			delta.Add("Spec.GlobalFilters.PatchFilters", a.ko.Spec.GlobalFilters.PatchFilters, b.ko.Spec.GlobalFilters.PatchFilters)
 		} else if len(a.ko.Spec.GlobalFilters.PatchFilters) > 0 {
-			if !reflect.DeepEqual(a.ko.Spec.GlobalFilters.PatchFilters, b.ko.Spec.GlobalFilters.PatchFilters) {
+			if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.GlobalFilters.PatchFilters, b.ko.Spec.GlobalFilters.PatchFilters) {
 				delta.Add("Spec.GlobalFilters.PatchFilters", a.ko.Spec.GlobalFilters.PatchFilters, b.ko.Spec.GlobalFilters.PatchFilters)
 			}
 		}
@@ -132,7 +131,7 @@ func newResourceDelta(
 	if len(a.ko.Spec.Sources) != len(b.ko.Spec.Sources) {
 		delta.Add("Spec.Sources", a.ko.Spec.Sources, b.ko.Spec.Sources)
 	} else if len(a.ko.Spec.Sources) > 0 {
-		if !reflect.DeepEqual(a.ko.Spec.Sources, b.ko.Spec.Sources) {
+		if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.Sources, b.ko.Spec.Sources) {
 			delta.Add("Spec.Sources", a.ko.Spec.Sources, b.ko.Spec.Sources)
 		}
 	}
