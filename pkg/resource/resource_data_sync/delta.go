@@ -17,16 +17,15 @@ package resource_data_sync
 
 import (
 	"bytes"
-	"reflect"
 
 	ackcompare "github.com/aws-controllers-k8s/runtime/pkg/compare"
 	acktags "github.com/aws-controllers-k8s/runtime/pkg/tags"
+	"k8s.io/apimachinery/pkg/api/equality"
 )
 
 // Hack to avoid import errors during build...
 var (
 	_ = &bytes.Buffer{}
-	_ = &reflect.Method{}
 	_ = &acktags.Tags{}
 )
 
@@ -116,7 +115,7 @@ func newResourceDelta(
 			if len(a.ko.Spec.SyncSource.AWSOrganizationsSource.OrganizationalUnits) != len(b.ko.Spec.SyncSource.AWSOrganizationsSource.OrganizationalUnits) {
 				delta.Add("Spec.SyncSource.AWSOrganizationsSource.OrganizationalUnits", a.ko.Spec.SyncSource.AWSOrganizationsSource.OrganizationalUnits, b.ko.Spec.SyncSource.AWSOrganizationsSource.OrganizationalUnits)
 			} else if len(a.ko.Spec.SyncSource.AWSOrganizationsSource.OrganizationalUnits) > 0 {
-				if !reflect.DeepEqual(a.ko.Spec.SyncSource.AWSOrganizationsSource.OrganizationalUnits, b.ko.Spec.SyncSource.AWSOrganizationsSource.OrganizationalUnits) {
+				if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.SyncSource.AWSOrganizationsSource.OrganizationalUnits, b.ko.Spec.SyncSource.AWSOrganizationsSource.OrganizationalUnits) {
 					delta.Add("Spec.SyncSource.AWSOrganizationsSource.OrganizationalUnits", a.ko.Spec.SyncSource.AWSOrganizationsSource.OrganizationalUnits, b.ko.Spec.SyncSource.AWSOrganizationsSource.OrganizationalUnits)
 				}
 			}
