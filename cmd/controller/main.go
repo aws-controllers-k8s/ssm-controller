@@ -40,6 +40,7 @@ import (
 	svcresource "github.com/aws-controllers-k8s/ssm-controller/pkg/resource"
 
 	_ "github.com/aws-controllers-k8s/ssm-controller/pkg/resource/document"
+	_ "github.com/aws-controllers-k8s/ssm-controller/pkg/resource/parameter"
 	_ "github.com/aws-controllers-k8s/ssm-controller/pkg/resource/patch_baseline"
 	_ "github.com/aws-controllers-k8s/ssm-controller/pkg/resource/resource_data_sync"
 
