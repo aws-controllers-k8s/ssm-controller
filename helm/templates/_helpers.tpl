@@ -95,6 +95,7 @@ rules:
   - ssm.services.k8s.aws
   resources:
   - documents
+  - parameters
   - patchbaselines
   - resourcedatasyncs
   verbs:
@@ -109,6 +110,7 @@ rules:
   - ssm.services.k8s.aws
   resources:
   - documents/status
+  - parameters/status
   - patchbaselines/status
   - resourcedatasyncs/status
   verbs:

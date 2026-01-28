@@ -105,21 +105,36 @@ type AttachmentsSource struct {
 // Detailed information about the current state of an individual Automation
 // execution.
 type AutomationExecution struct {
+	AssociationID           *string      `json:"associationID,omitempty"`
+	CurrentAction           *string      `json:"currentAction,omitempty"`
+	CurrentStepName         *string      `json:"currentStepName,omitempty"`
 	DocumentName            *string      `json:"documentName,omitempty"`
 	DocumentVersion         *string      `json:"documentVersion,omitempty"`
+	ExecutedBy              *string      `json:"executedBy,omitempty"`
 	ExecutionEndTime        *metav1.Time `json:"executionEndTime,omitempty"`
 	ExecutionStartTime      *metav1.Time `json:"executionStartTime,omitempty"`
+	FailureMessage          *string      `json:"failureMessage,omitempty"`
+	OpsItemID               *string      `json:"opsItemID,omitempty"`
 	ScheduledTime           *metav1.Time `json:"scheduledTime,omitempty"`
 	StepExecutionsTruncated *bool        `json:"stepExecutionsTruncated,omitempty"`
+	Target                  *string      `json:"target,omitempty"`
 }
 
 // Details about a specific Automation execution.
 type AutomationExecutionMetadata struct {
+	AssociationID      *string      `json:"associationID,omitempty"`
+	CurrentAction      *string      `json:"currentAction,omitempty"`
+	CurrentStepName    *string      `json:"currentStepName,omitempty"`
 	DocumentName       *string      `json:"documentName,omitempty"`
 	DocumentVersion    *string      `json:"documentVersion,omitempty"`
+	ExecutedBy         *string      `json:"executedBy,omitempty"`
 	ExecutionEndTime   *metav1.Time `json:"executionEndTime,omitempty"`
 	ExecutionStartTime *metav1.Time `json:"executionStartTime,omitempty"`
+	FailureMessage     *string      `json:"failureMessage,omitempty"`
+	LogFile            *string      `json:"logFile,omitempty"`
+	OpsItemID          *string      `json:"opsItemID,omitempty"`
 	ScheduledTime      *metav1.Time `json:"scheduledTime,omitempty"`
+	Target             *string      `json:"target,omitempty"`
 }
 
 // Defines the basic information about a patch baseline override.
@@ -357,6 +372,12 @@ type DocumentVersionInfo struct {
 	VersionName       *string `json:"versionName,omitempty"`
 }
 
+// Information about an Automation failure.
+type FailureDetails struct {
+	FailureStage *string `json:"failureStage,omitempty"`
+	FailureType  *string `json:"failureType,omitempty"`
+}
+
 // One or more association documents on the managed node.
 type InstanceAssociation struct {
 	Content *string `json:"content,omitempty"`
@@ -380,7 +401,10 @@ type InstanceInformation struct {
 	LastAssociationExecutionDate           *metav1.Time `json:"lastAssociationExecutionDate,omitempty"`
 	LastPingDateTime                       *metav1.Time `json:"lastPingDateTime,omitempty"`
 	LastSuccessfulAssociationExecutionDate *metav1.Time `json:"lastSuccessfulAssociationExecutionDate,omitempty"`
+	Name                                   *string      `json:"name,omitempty"`
+	PlatformName                           *string      `json:"platformName,omitempty"`
 	PlatformType                           *string      `json:"platformType,omitempty"`
+	PlatformVersion                        *string      `json:"platformVersion,omitempty"`
 	RegistrationDate                       *metav1.Time `json:"registrationDate,omitempty"`
 }
 
@@ -404,6 +428,7 @@ type InstanceProperty struct {
 	LaunchTime                             *metav1.Time `json:"launchTime,omitempty"`
 	PlatformType                           *string      `json:"platformType,omitempty"`
 	RegistrationDate                       *metav1.Time `json:"registrationDate,omitempty"`
+	ResourceType                           *string      `json:"resourceType,omitempty"`
 }
 
 // The parameters for an AUTOMATION task type.
@@ -477,16 +502,34 @@ type MaintenanceWindowRunCommandParameters struct {
 type OpsItem struct {
 	ActualEndTime    *metav1.Time `json:"actualEndTime,omitempty"`
 	ActualStartTime  *metav1.Time `json:"actualStartTime,omitempty"`
+	CreatedBy        *string      `json:"createdBy,omitempty"`
 	CreatedTime      *metav1.Time `json:"createdTime,omitempty"`
+	LastModifiedBy   *string      `json:"lastModifiedBy,omitempty"`
 	LastModifiedTime *metav1.Time `json:"lastModifiedTime,omitempty"`
 	PlannedEndTime   *metav1.Time `json:"plannedEndTime,omitempty"`
 	PlannedStartTime *metav1.Time `json:"plannedStartTime,omitempty"`
+	Version          *string      `json:"version,omitempty"`
 }
 
 // Summary information about an OpsItem event or that associated an OpsItem
 // with a related item.
 type OpsItemEventSummary struct {
 	CreatedTime *metav1.Time `json:"createdTime,omitempty"`
+	Detail      *string      `json:"detail,omitempty"`
+	DetailType  *string      `json:"detailType,omitempty"`
+	EventID     *string      `json:"eventID,omitempty"`
+	OpsItemID   *string      `json:"opsItemID,omitempty"`
+	Source      *string      `json:"source,omitempty"`
+}
+
+// Information about the user or resource that created an OpsItem event.
+type OpsItemIdentity struct {
+	ARN *string `json:"arn,omitempty"`
+}
+
+// A notification about the OpsItem.
+type OpsItemNotification struct {
+	ARN *string `json:"arn,omitempty"`
 }
 
 // Summary information about related-item resources for an OpsItem.
@@ -499,7 +542,9 @@ type OpsItemRelatedItemSummary struct {
 type OpsItemSummary struct {
 	ActualEndTime    *metav1.Time `json:"actualEndTime,omitempty"`
 	ActualStartTime  *metav1.Time `json:"actualStartTime,omitempty"`
+	CreatedBy        *string      `json:"createdBy,omitempty"`
 	CreatedTime      *metav1.Time `json:"createdTime,omitempty"`
+	LastModifiedBy   *string      `json:"lastModifiedBy,omitempty"`
 	LastModifiedTime *metav1.Time `json:"lastModifiedTime,omitempty"`
 	PlannedEndTime   *metav1.Time `json:"plannedEndTime,omitempty"`
 	PlannedStartTime *metav1.Time `json:"plannedStartTime,omitempty"`
@@ -509,23 +554,66 @@ type OpsItemSummary struct {
 type OpsMetadata struct {
 	CreationDate     *metav1.Time `json:"creationDate,omitempty"`
 	LastModifiedDate *metav1.Time `json:"lastModifiedDate,omitempty"`
-}
-
-// An Amazon Web Services Systems Manager parameter in Parameter Store.
-type Parameter struct {
-	LastModifiedDate *metav1.Time `json:"lastModifiedDate,omitempty"`
+	LastModifiedUser *string      `json:"lastModifiedUser,omitempty"`
 }
 
 // Information about parameter usage.
 type ParameterHistory struct {
+	AllowedPattern   *string      `json:"allowedPattern,omitempty"`
+	DataType         *string      `json:"dataType,omitempty"`
+	Description      *string      `json:"description,omitempty"`
+	KeyID            *string      `json:"keyID,omitempty"`
 	LastModifiedDate *metav1.Time `json:"lastModifiedDate,omitempty"`
+	LastModifiedUser *string      `json:"lastModifiedUser,omitempty"`
+	Name             *string      `json:"name,omitempty"`
+	Tier             *string      `json:"tier,omitempty"`
+	Type             *string      `json:"type_,omitempty"`
+	Value            *string      `json:"value,omitempty"`
+	Version          *int64       `json:"version,omitempty"`
+}
+
+// One or more policies assigned to a parameter.
+type ParameterInlinePolicy struct {
+	PolicyStatus *string `json:"policyStatus,omitempty"`
+	PolicyText   *string `json:"policyText,omitempty"`
+	PolicyType   *string `json:"policyType,omitempty"`
 }
 
 // Metadata includes information like the Amazon Resource Name (ARN) of the
 // last user to update the parameter and the date and time the parameter was
 // last used.
 type ParameterMetadata struct {
+	ARN              *string      `json:"arn,omitempty"`
+	AllowedPattern   *string      `json:"allowedPattern,omitempty"`
+	DataType         *string      `json:"dataType,omitempty"`
+	Description      *string      `json:"description,omitempty"`
+	KeyID            *string      `json:"keyID,omitempty"`
 	LastModifiedDate *metav1.Time `json:"lastModifiedDate,omitempty"`
+	LastModifiedUser *string      `json:"lastModifiedUser,omitempty"`
+	Name             *string      `json:"name,omitempty"`
+	Tier             *string      `json:"tier,omitempty"`
+	Type             *string      `json:"type_,omitempty"`
+	Version          *int64       `json:"version,omitempty"`
+}
+
+// An Amazon Web Services Systems Manager parameter in Parameter Store.
+type Parameter_SDK struct {
+	ARN              *string      `json:"arn,omitempty"`
+	DataType         *string      `json:"dataType,omitempty"`
+	LastModifiedDate *metav1.Time `json:"lastModifiedDate,omitempty"`
+	Name             *string      `json:"name,omitempty"`
+	Selector         *string      `json:"selector,omitempty"`
+	SourceResult     *string      `json:"sourceResult,omitempty"`
+	Type             *string      `json:"type_,omitempty"`
+	Value            *string      `json:"value,omitempty"`
+	Version          *int64       `json:"version,omitempty"`
+}
+
+// A detailed status of the parent step.
+type ParentStepDetails struct {
+	IteratorValue   *string `json:"iteratorValue,omitempty"`
+	StepExecutionID *string `json:"stepExecutionID,omitempty"`
+	StepName        *string `json:"stepName,omitempty"`
 }
 
 // Represents metadata about a patch.
@@ -627,6 +715,13 @@ type PatchSource struct {
 type PatchStatus struct {
 	ApprovalDate    *metav1.Time `json:"approvalDate,omitempty"`
 	ComplianceLevel *string      `json:"complianceLevel,omitempty"`
+}
+
+// An OpsItems that shares something in common with the current OpsItem. For
+// example, related OpsItems can include OpsItems with similar error messages,
+// impacted resources, or statuses for the impacted resource.
+type RelatedOpsItem struct {
+	OpsItemID *string `json:"opsItemID,omitempty"`
 }
 
 // Information about targets that resolved during the Automation execution.
@@ -777,7 +872,10 @@ type Runbook struct {
 // value back to the original value defined by the Amazon Web Services service
 // team.
 type ServiceSetting struct {
+	ARN              *string      `json:"arn,omitempty"`
 	LastModifiedDate *metav1.Time `json:"lastModifiedDate,omitempty"`
+	LastModifiedUser *string      `json:"lastModifiedUser,omitempty"`
+	Status           *string      `json:"status,omitempty"`
 }
 
 // Information about a Session Manager connection to a managed node.
@@ -791,8 +889,15 @@ type Session struct {
 type StepExecution struct {
 	ExecutionEndTime   *metav1.Time `json:"executionEndTime,omitempty"`
 	ExecutionStartTime *metav1.Time `json:"executionStartTime,omitempty"`
+	FailureMessage     *string      `json:"failureMessage,omitempty"`
 	IsCritical         *bool        `json:"isCritical,omitempty"`
 	IsEnd              *bool        `json:"isEnd,omitempty"`
+	NextStep           *string      `json:"nextStep,omitempty"`
+	OnFailure          *string      `json:"onFailure,omitempty"`
+	Response           *string      `json:"response,omitempty"`
+	ResponseCode       *string      `json:"responseCode,omitempty"`
+	StepExecutionID    *string      `json:"stepExecutionID,omitempty"`
+	StepName           *string      `json:"stepName,omitempty"`
 }
 
 // Metadata that you assign to your Amazon Web Services resources. Tags enable
@@ -809,4 +914,10 @@ type Tag struct {
 // targeted by the current Automation execution.
 type TargetLocation struct {
 	IncludeChildOrganizationUnits *bool `json:"includeChildOrganizationUnits,omitempty"`
+}
+
+// Information about the resources that would be included in the actual runbook
+// execution, if it were to be run.
+type TargetPreview struct {
+	TargetType *string `json:"targetType,omitempty"`
 }

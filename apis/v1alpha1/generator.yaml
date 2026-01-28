@@ -6,6 +6,7 @@ ignore:
       # - Document
       - MaintenanceWindow
       - OpsItem
+      # - Parameter
       # - PatchBaseline
       # - ResourceDataSync
 
@@ -15,6 +16,22 @@ resources:
       errors:
         404:
           code: InvalidDocument
+
+  Parameter:
+    fields:
+      Name:
+        is_primary_key: true
+      Type:
+        go_tag: json:"type,omitempty"
+    exceptions:
+      errors:
+        404:
+          code: ParameterNotFound
+    hooks:
+      sdk_read_one_post_set_output:
+        template_path: hooks/parameter/sdk_read_one_post_set_output.go.tpl
+    tags:
+      ignore: true
 
   ResourceDataSync:
     fields:
@@ -44,3 +61,18 @@ operations:
     - Get
     resource_name:
       Document
+
+  PutParameter:
+    operation_type:
+    - Create
+    - Update
+    resource_name:
+      Parameter
+    override_values:
+      # For SSM Parameter Store, Overwrite must be true for update operations
+      # because the parameter already exists in AWS. PutParameter is used for
+      # both create and update, and requires Overwrite=true to modify existing
+      # parameters.
+      # This follows what the rds controller implements
+      # https://github.com/aws-controllers-k8s/rds-controller/blob/2d5427a8b4a2f6caf0bc889754370a6ab55dc135/generator.yaml#L103
+      Overwrite: aws.Bool(true)
