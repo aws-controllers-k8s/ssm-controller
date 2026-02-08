@@ -151,6 +151,7 @@ reconcile:
   # If specified, only the listed resource kinds will be reconciled.
   resources:
     - Document
+    - Parameter
     - PatchBaseline
     - ResourceDataSync
 
