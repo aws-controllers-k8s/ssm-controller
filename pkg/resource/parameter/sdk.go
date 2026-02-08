@@ -74,6 +74,12 @@ func (rm *resourceManager) sdkFind(
 	if err != nil {
 		return nil, err
 	}
+	// Set WithDecryption to true for SecureString parameters so we can retrieve
+	// the plaintext value. This allows proper comparison of the desired vs actual
+	// value without getting encrypted values.
+	if r.ko.Spec.Type != nil && *r.ko.Spec.Type == "SecureString" {
+		input.WithDecryption = aws.Bool(true)
+	}
 
 	var resp *svcsdk.GetParameterOutput
 	resp, err = rm.sdkapi.GetParameter(ctx, input)
@@ -124,12 +130,6 @@ func (rm *resourceManager) sdkFind(
 	// This causes a diff `"diff":[{"Path":{"Parts":["Spec","DataType"]},"A":null,"B":"text"}]}`
 	if r.ko.Spec.DataType == nil && ko.Spec.DataType != nil {
 		r.ko.Spec.DataType = ko.Spec.DataType
-	}
-
-	// For SecureString parameters, we should not compare the Value field
-	// because AWS returns the encrypted value, not the plaintext.
-	if r.ko.Spec.Type != nil && *r.ko.Spec.Type == "SecureString" {
-		ko.Spec.Value = r.ko.Spec.Value
 	}
 
 	return &resource{ko}, nil

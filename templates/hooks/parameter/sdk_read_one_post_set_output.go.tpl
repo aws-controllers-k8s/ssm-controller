@@ -3,9 +3,3 @@
 	if r.ko.Spec.DataType == nil && ko.Spec.DataType != nil {
 	    r.ko.Spec.DataType = ko.Spec.DataType
 	}
-
-	// For SecureString parameters, we should not compare the Value field
-	// because AWS returns the encrypted value, not the plaintext.
-	if r.ko.Spec.Type != nil && *r.ko.Spec.Type == "SecureString" {
-		ko.Spec.Value = r.ko.Spec.Value
-	}

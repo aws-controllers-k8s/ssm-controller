@@ -168,3 +168,36 @@ class TestParameter:
         # Verify status fields are populated
         assert 'status' in cr
         assert 'ackResourceMetadata' in cr["status"]
+
+    def test_update_secure_parameter_value(self, secure_parameter):
+        (reference, _, param_name) = secure_parameter
+        time.sleep(CREATE_WAIT_AFTER_SECONDS)
+
+        assert k8s.wait_on_condition(reference, "ACK.ResourceSynced", "True", wait_periods=10)
+
+        update_data = {
+            "spec": {
+                "value": "new-secret-value-1"
+            }
+        }
+
+        k8s.patch_custom_resource(reference, update_data)
+        time.sleep(MODIFY_WAIT_AFTER_SECONDS)
+        assert k8s.wait_on_condition(reference, "ACK.ResourceSynced", "True", wait_periods=10)
+
+        updated_cr = k8s.get_resource(reference)
+        assert updated_cr["spec"]["value"] == "new-secret-value-1"
+
+        update_data = {
+            "spec": {
+                "value": "new-secret-value-2"
+            }
+        }
+
+        k8s.patch_custom_resource(reference, update_data)
+        time.sleep(MODIFY_WAIT_AFTER_SECONDS)
+        assert k8s.wait_on_condition(reference, "ACK.ResourceSynced", "True", wait_periods=10)
+
+        updated_cr = k8s.get_resource(reference)
+        assert updated_cr["spec"]["value"] == "new-secret-value-2"
+
