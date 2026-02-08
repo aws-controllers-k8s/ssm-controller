@@ -225,6 +225,7 @@ type ParameterSpec struct {
 	//
 	// Specifying a parameter type isn't required when updating a parameter. You
 	// must specify a parameter type when creating a parameter.
+	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Value is immutable once set"
 	Type *string `json:"type,omitempty"`
 	// The parameter value that you want to add to the system. Standard parameters
 	// have a value limit of 4 KB. Advanced parameters have a value limit of 8 KB.

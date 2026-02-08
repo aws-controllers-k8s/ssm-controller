@@ -24,6 +24,12 @@ resources:
       Name:
         is_primary_key: true
       Type:
+        # Marking field as immutable
+        # From the docs:
+        # Parameter Store doesn't support changing a parameter type in a hierarchy.
+        # For example, you can't change a parameter from a String type to a SecureString type.
+        # You must create a new, unique parameter.
+        is_immutable: true
         go_tag: json:"type,omitempty"
     exceptions:
       errors:

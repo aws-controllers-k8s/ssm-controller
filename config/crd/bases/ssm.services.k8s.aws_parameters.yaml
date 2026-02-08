@@ -273,6 +273,9 @@ spec:
                   Specifying a parameter type isn't required when updating a parameter. You
                   must specify a parameter type when creating a parameter.
                 type: string
+                x-kubernetes-validations:
+                - message: Value is immutable once set
+                  rule: self == oldSelf
               value:
                 description: |-
                   The parameter value that you want to add to the system. Standard parameters
