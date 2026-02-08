@@ -221,23 +221,22 @@ func (rm *resourceManager) newCreateRequestPayload(
 	if r.ko.Spec.Name != nil {
 		res.Name = r.ko.Spec.Name
 	}
-	res.Overwrite = aws.Bool(true)
 	if r.ko.Spec.Policies != nil {
 		res.Policies = r.ko.Spec.Policies
 	}
 	if r.ko.Spec.Tags != nil {
-		f7 := []svcsdktypes.Tag{}
-		for _, f7iter := range r.ko.Spec.Tags {
-			f7elem := &svcsdktypes.Tag{}
-			if f7iter.Key != nil {
-				f7elem.Key = f7iter.Key
+		f6 := []svcsdktypes.Tag{}
+		for _, f6iter := range r.ko.Spec.Tags {
+			f6elem := &svcsdktypes.Tag{}
+			if f6iter.Key != nil {
+				f6elem.Key = f6iter.Key
 			}
-			if f7iter.Value != nil {
-				f7elem.Value = f7iter.Value
+			if f6iter.Value != nil {
+				f6elem.Value = f6iter.Value
 			}
-			f7 = append(f7, *f7elem)
+			f6 = append(f6, *f6elem)
 		}
-		res.Tags = f7
+		res.Tags = f6
 	}
 	if r.ko.Spec.Tier != nil {
 		res.Tier = svcsdktypes.ParameterTier(*r.ko.Spec.Tier)
@@ -269,6 +268,11 @@ func (rm *resourceManager) sdkUpdate(
 	if err != nil {
 		return nil, err
 	}
+	// For SSM Parameter, Overwrite must be true for update operations
+	// PutParameter is used for both create and update, and requires Overwrite=true to modify existing parameters.
+	// This follows what the rds controller implements but using hooks to avoid the Overwrite field from being added to the api Spec
+	// https://github.com/aws-controllers-k8s/rds-controller/blob/2d5427a8b4a2f6caf0bc889754370a6ab55dc135/generator.yaml#L103
+	input.Overwrite = aws.Bool(true)
 
 	var resp *svcsdk.PutParameterOutput
 	_ = resp
@@ -316,23 +320,22 @@ func (rm *resourceManager) newUpdateRequestPayload(
 	if r.ko.Spec.Name != nil {
 		res.Name = r.ko.Spec.Name
 	}
-	res.Overwrite = aws.Bool(true)
 	if r.ko.Spec.Policies != nil {
 		res.Policies = r.ko.Spec.Policies
 	}
 	if r.ko.Spec.Tags != nil {
-		f7 := []svcsdktypes.Tag{}
-		for _, f7iter := range r.ko.Spec.Tags {
-			f7elem := &svcsdktypes.Tag{}
-			if f7iter.Key != nil {
-				f7elem.Key = f7iter.Key
+		f6 := []svcsdktypes.Tag{}
+		for _, f6iter := range r.ko.Spec.Tags {
+			f6elem := &svcsdktypes.Tag{}
+			if f6iter.Key != nil {
+				f6elem.Key = f6iter.Key
 			}
-			if f7iter.Value != nil {
-				f7elem.Value = f7iter.Value
+			if f6iter.Value != nil {
+				f6elem.Value = f6iter.Value
 			}
-			f7 = append(f7, *f7elem)
+			f6 = append(f6, *f6elem)
 		}
-		res.Tags = f7
+		res.Tags = f6
 	}
 	if r.ko.Spec.Tier != nil {
 		res.Tier = svcsdktypes.ParameterTier(*r.ko.Spec.Tier)

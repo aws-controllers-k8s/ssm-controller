@@ -77,13 +77,6 @@ func newResourceDelta(
 			delta.Add("Spec.Name", a.ko.Spec.Name, b.ko.Spec.Name)
 		}
 	}
-	if ackcompare.HasNilDifference(a.ko.Spec.Overwrite, b.ko.Spec.Overwrite) {
-		delta.Add("Spec.Overwrite", a.ko.Spec.Overwrite, b.ko.Spec.Overwrite)
-	} else if a.ko.Spec.Overwrite != nil && b.ko.Spec.Overwrite != nil {
-		if *a.ko.Spec.Overwrite != *b.ko.Spec.Overwrite {
-			delta.Add("Spec.Overwrite", a.ko.Spec.Overwrite, b.ko.Spec.Overwrite)
-		}
-	}
 	if ackcompare.HasNilDifference(a.ko.Spec.Policies, b.ko.Spec.Policies) {
 		delta.Add("Spec.Policies", a.ko.Spec.Policies, b.ko.Spec.Policies)
 	} else if a.ko.Spec.Policies != nil && b.ko.Spec.Policies != nil {

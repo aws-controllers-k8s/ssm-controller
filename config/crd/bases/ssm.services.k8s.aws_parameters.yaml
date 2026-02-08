@@ -139,10 +139,6 @@ spec:
                   for a parameter name that you create is 1011 characters. This includes the
                   characters in the ARN that precede the name you specify, such as arn:aws:ssm:us-east-2:111122223333:parameter/.
                 type: string
-              overwrite:
-                description: Overwrite an existing parameter. The default value is
-                  false.
-                type: boolean
               policies:
                 description: |-
                   One or more policies to apply to a parameter. This operation takes a JSON

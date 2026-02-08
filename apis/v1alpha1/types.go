@@ -559,17 +559,18 @@ type OpsMetadata struct {
 
 // Information about parameter usage.
 type ParameterHistory struct {
-	AllowedPattern   *string      `json:"allowedPattern,omitempty"`
-	DataType         *string      `json:"dataType,omitempty"`
-	Description      *string      `json:"description,omitempty"`
-	KeyID            *string      `json:"keyID,omitempty"`
-	LastModifiedDate *metav1.Time `json:"lastModifiedDate,omitempty"`
-	LastModifiedUser *string      `json:"lastModifiedUser,omitempty"`
-	Name             *string      `json:"name,omitempty"`
-	Tier             *string      `json:"tier,omitempty"`
-	Type             *string      `json:"type_,omitempty"`
-	Value            *string      `json:"value,omitempty"`
-	Version          *int64       `json:"version,omitempty"`
+	AllowedPattern   *string                  `json:"allowedPattern,omitempty"`
+	DataType         *string                  `json:"dataType,omitempty"`
+	Description      *string                  `json:"description,omitempty"`
+	KeyID            *string                  `json:"keyID,omitempty"`
+	LastModifiedDate *metav1.Time             `json:"lastModifiedDate,omitempty"`
+	LastModifiedUser *string                  `json:"lastModifiedUser,omitempty"`
+	Name             *string                  `json:"name,omitempty"`
+	Policies         []*ParameterInlinePolicy `json:"policies,omitempty"`
+	Tier             *string                  `json:"tier,omitempty"`
+	Type             *string                  `json:"type_,omitempty"`
+	Value            *string                  `json:"value,omitempty"`
+	Version          *int64                   `json:"version,omitempty"`
 }
 
 // One or more policies assigned to a parameter.
@@ -583,17 +584,25 @@ type ParameterInlinePolicy struct {
 // last user to update the parameter and the date and time the parameter was
 // last used.
 type ParameterMetadata struct {
-	ARN              *string      `json:"arn,omitempty"`
-	AllowedPattern   *string      `json:"allowedPattern,omitempty"`
-	DataType         *string      `json:"dataType,omitempty"`
-	Description      *string      `json:"description,omitempty"`
-	KeyID            *string      `json:"keyID,omitempty"`
-	LastModifiedDate *metav1.Time `json:"lastModifiedDate,omitempty"`
-	LastModifiedUser *string      `json:"lastModifiedUser,omitempty"`
-	Name             *string      `json:"name,omitempty"`
-	Tier             *string      `json:"tier,omitempty"`
-	Type             *string      `json:"type_,omitempty"`
-	Version          *int64       `json:"version,omitempty"`
+	ARN              *string                  `json:"arn,omitempty"`
+	AllowedPattern   *string                  `json:"allowedPattern,omitempty"`
+	DataType         *string                  `json:"dataType,omitempty"`
+	Description      *string                  `json:"description,omitempty"`
+	KeyID            *string                  `json:"keyID,omitempty"`
+	LastModifiedDate *metav1.Time             `json:"lastModifiedDate,omitempty"`
+	LastModifiedUser *string                  `json:"lastModifiedUser,omitempty"`
+	Name             *string                  `json:"name,omitempty"`
+	Policies         []*ParameterInlinePolicy `json:"policies,omitempty"`
+	Tier             *string                  `json:"tier,omitempty"`
+	Type             *string                  `json:"type_,omitempty"`
+	Version          *int64                   `json:"version,omitempty"`
+}
+
+// One or more filters. Use a filter to return a more specific list of results.
+type ParameterStringFilter struct {
+	Key    *string   `json:"key,omitempty"`
+	Option *string   `json:"option,omitempty"`
+	Values []*string `json:"values,omitempty"`
 }
 
 // An Amazon Web Services Systems Manager parameter in Parameter Store.
@@ -607,6 +616,12 @@ type Parameter_SDK struct {
 	Type             *string      `json:"type_,omitempty"`
 	Value            *string      `json:"value,omitempty"`
 	Version          *int64       `json:"version,omitempty"`
+}
+
+// This data type is deprecated. Instead, use ParameterStringFilter.
+type ParametersFilter struct {
+	Key    *string   `json:"key,omitempty"`
+	Values []*string `json:"values,omitempty"`
 }
 
 // A detailed status of the parent step.

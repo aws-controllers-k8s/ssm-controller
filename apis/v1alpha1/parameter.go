@@ -113,8 +113,6 @@ type ParameterSpec struct {
 	// characters in the ARN that precede the name you specify, such as arn:aws:ssm:us-east-2:111122223333:parameter/.
 	// +kubebuilder:validation:Required
 	Name *string `json:"name"`
-	// Overwrite an existing parameter. The default value is false.
-	Overwrite *bool `json:"overwrite,omitempty"`
 	// One or more policies to apply to a parameter. This operation takes a JSON
 	// array. Parameter Store, a capability of Amazon Web Services Systems Manager
 	// supports the following policy types:
