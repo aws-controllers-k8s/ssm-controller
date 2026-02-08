@@ -76,7 +76,8 @@ type ParameterSpec struct {
 	//     Key ID parameter.
 	//
 	// Regex Pattern: `^([a-zA-Z0-9:/_-]+)$`
-	KeyID *string `json:"keyID,omitempty"`
+	KeyID  *string                                  `json:"keyID,omitempty"`
+	KeyRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"keyRef,omitempty"`
 	// The fully qualified name of the parameter that you want to add to the system.
 	//
 	// You can't enter the Amazon Resource Name (ARN) for a parameter, only the
@@ -225,6 +226,7 @@ type ParameterSpec struct {
 	//
 	// Specifying a parameter type isn't required when updating a parameter. You
 	// must specify a parameter type when creating a parameter.
+	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Value is immutable once set"
 	Type *string `json:"type,omitempty"`
 	// The parameter value that you want to add to the system. Standard parameters
 	// have a value limit of 4 KB. Advanced parameters have a value limit of 8 KB.

@@ -24,7 +24,20 @@ resources:
       Name:
         is_primary_key: true
       Type:
+        # Marking field as immutable
+        # From the docs:
+        # Parameter Store doesn't support changing a parameter type in a hierarchy.
+        # For example, you can't change a parameter from a String type to a SecureString type.
+        # You must create a new, unique parameter.
+        is_immutable: true
         go_tag: json:"type,omitempty"
+      KeyId:
+        references:
+          service_name: kms
+          resource: Key
+          path: Status.ACKResourceMetadata.ARN
+      DataType:
+        late_initialize: {}
     exceptions:
       errors:
         404:
@@ -32,8 +45,6 @@ resources:
     hooks:
       sdk_read_one_post_build_request:
         template_path: hooks/parameter/sdk_read_one_post_build_request.go.tpl
-      sdk_read_one_post_set_output:
-        template_path: hooks/parameter/sdk_read_one_post_set_output.go.tpl
       sdk_update_post_build_request:
         template_path: hooks/parameter/sdk_update_post_build_request.go.tpl
     tags:

@@ -77,7 +77,7 @@ func (rm *resourceManager) sdkFind(
 	// Set WithDecryption to true for SecureString parameters so we can retrieve
 	// the plaintext value. This allows proper comparison of the desired vs actual
 	// value without getting encrypted values.
-	if r.ko.Spec.Type != nil && *r.ko.Spec.Type == "SecureString" {
+	if r.ko.Spec.Type != nil && *r.ko.Spec.Type == string(svcsdktypes.ParameterTypeSecureString) {
 		input.WithDecryption = aws.Bool(true)
 	}
 
@@ -126,12 +126,6 @@ func (rm *resourceManager) sdkFind(
 	ko.Status.Version = &resp.Parameter.Version
 
 	rm.setStatusDefaults(ko)
-	// DataType is optional on creation and AWS defaults it to "text".
-	// This causes a diff `"diff":[{"Path":{"Parts":["Spec","DataType"]},"A":null,"B":"text"}]}`
-	if r.ko.Spec.DataType == nil && ko.Spec.DataType != nil {
-		r.ko.Spec.DataType = ko.Spec.DataType
-	}
-
 	return &resource{ko}, nil
 }
 

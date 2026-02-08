@@ -46,8 +46,9 @@ def simple_parameter():
     assert k8s.get_resource_exists(reference)
     yield reference, cr, PARAMETER_NAME
 
-    k8s.delete_custom_resource(reference)
+    _, deleted = k8s.delete_custom_resource(reference)
     time.sleep(DELETE_WAIT_AFTER_SECONDS)
+    assert deleted is True
 
 
 @pytest.fixture(scope="module")
