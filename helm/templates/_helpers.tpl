@@ -70,6 +70,14 @@ rules:
   - list
   - watch
 - apiGroups:
+  - kms.services.k8s.aws
+  resources:
+  - keys
+  - keys/status
+  verbs:
+  - get
+  - list
+- apiGroups:
   - services.k8s.aws
   resources:
   - fieldexports
@@ -95,6 +103,7 @@ rules:
   - ssm.services.k8s.aws
   resources:
   - documents
+  - parameters
   - patchbaselines
   - resourcedatasyncs
   verbs:
@@ -109,6 +118,7 @@ rules:
   - ssm.services.k8s.aws
   resources:
   - documents/status
+  - parameters/status
   - patchbaselines/status
   - resourcedatasyncs/status
   verbs:
