@@ -52,7 +52,7 @@ func newResourceDelta(
 	if ackcompare.HasNilDifference(a.ko.Spec.Content, b.ko.Spec.Content) {
 		delta.Add("Spec.Content", a.ko.Spec.Content, b.ko.Spec.Content)
 	} else if a.ko.Spec.Content != nil && b.ko.Spec.Content != nil {
-		if *a.ko.Spec.Content != *b.ko.Spec.Content {
+		if equal, err := ackcompare.DocumentEqual(*a.ko.Spec.Content, *b.ko.Spec.Content); err != nil || !equal {
 			delta.Add("Spec.Content", a.ko.Spec.Content, b.ko.Spec.Content)
 		}
 	}
