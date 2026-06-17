@@ -115,8 +115,8 @@ type ParameterSpec struct {
 	// +kubebuilder:validation:Required
 	Name *string `json:"name"`
 	// One or more policies to apply to a parameter. This operation takes a JSON
-	// array. Parameter Store, a capability of Amazon Web Services Systems Manager
-	// supports the following policy types:
+	// array. Parameter Store, a tool in Amazon Web Services Systems Manager supports
+	// the following policy types:
 	//
 	// Expiration: This policy deletes the parameter after it expires. When you
 	// create the policy, you specify the expiration date. You can update the expiration
@@ -232,7 +232,8 @@ type ParameterSpec struct {
 	// have a value limit of 4 KB. Advanced parameters have a value limit of 8 KB.
 	//
 	// Parameters can't be referenced or nested in the values of other parameters.
-	// You can't include {{}} or {{ssm:parameter-name}} in a parameter value.
+	// You can't include values wrapped in double brackets {{}} or {{ssm:parameter-name}}
+	// in a parameter value.
 	// +kubebuilder:validation:Required
 	Value *string `json:"value"`
 }

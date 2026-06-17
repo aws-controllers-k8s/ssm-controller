@@ -14,6 +14,9 @@ ignore:
 
 resources:
   Document:
+    fields:
+      Content:
+        is_document: true
     exceptions:
       errors:
         404:
