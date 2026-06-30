@@ -267,6 +267,10 @@ func (rm *resourceManager) sdkUpdate(
 	// This follows what the rds controller implements but using hooks to avoid the Overwrite field from being added to the api Spec
 	// https://github.com/aws-controllers-k8s/rds-controller/blob/2d5427a8b4a2f6caf0bc889754370a6ab55dc135/generator.yaml#L103
 	input.Overwrite = aws.Bool(true)
+	// SSM PutParameter rejects requests that include both Tags and Overwrite.
+	// Tags are only accepted on initial creation; updates must use
+	// AddTagsToResource / RemoveTagsFromResource instead.
+	input.Tags = nil
 
 	var resp *svcsdk.PutParameterOutput
 	_ = resp

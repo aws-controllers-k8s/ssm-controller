@@ -1,0 +1,14 @@
+apiVersion: ssm.services.k8s.aws/v1alpha1
+kind: Parameter
+metadata:
+  name: $NAME
+spec:
+  name: $PARAMETER_NAME
+  type: String
+  value: $PARAMETER_VALUE
+  description: Test parameter with tags created by e2e tests
+  tags:
+    - key: Environment
+      value: test
+    - key: ManagedBy
+      value: ack-e2e

@@ -52,6 +52,43 @@ def simple_parameter():
 
 
 @pytest.fixture(scope="module")
+def tagged_parameter():
+    RESOURCE_NAME = random_suffix_name("tagged-param", 24)
+    PARAMETER_NAME = f"/ack-test/{RESOURCE_NAME}"
+
+    resources = get_bootstrap_resources()
+    logging.debug(resources)
+
+    replacements = REPLACEMENT_VALUES.copy()
+    replacements["NAME"] = RESOURCE_NAME
+    replacements["PARAMETER_NAME"] = PARAMETER_NAME
+    replacements["PARAMETER_VALUE"] = "initial-value"
+
+    resource_data = load_ssm_resource("parameter_with_tags", additional_replacements=replacements)
+
+    reference = k8s.CustomResourceReference(
+        CRD_GROUP,
+        CRD_VERSION,
+        RESOURCE_PLURAL,
+        RESOURCE_NAME,
+        namespace='default',
+    )
+
+    k8s.create_custom_resource(reference, resource_data)
+    cr = k8s.wait_resource_consumed_by_controller(reference)
+
+    logging.debug(cr)
+
+    assert cr is not None
+    assert k8s.get_resource_exists(reference)
+    yield reference, cr, PARAMETER_NAME
+
+    _, deleted = k8s.delete_custom_resource(reference)
+    time.sleep(DELETE_WAIT_AFTER_SECONDS)
+    assert deleted is True
+
+
+@pytest.fixture(scope="module")
 def secure_parameter():
     RESOURCE_NAME = random_suffix_name("secure-param", 24)
     PARAMETER_NAME = f"/ack-test/secure/{RESOURCE_NAME}"
@@ -169,6 +206,38 @@ class TestParameter:
         # Verify status fields are populated
         assert 'status' in cr
         assert 'ackResourceMetadata' in cr["status"]
+
+    def test_update_parameter_with_tags(self, tagged_parameter):
+        """Regression test: PutParameter with Overwrite=true must not include
+        Tags in the request, otherwise the SSM API returns:
+        'Invalid request: tags and overwrite can't be used together.'
+        """
+        (reference, _, param_name) = tagged_parameter
+        time.sleep(CREATE_WAIT_AFTER_SECONDS)
+
+        assert k8s.wait_on_condition(reference, "ACK.ResourceSynced", "True", wait_periods=10)
+
+        cr = k8s.get_resource(reference)
+        assert cr is not None
+        assert cr["spec"]["value"] == "initial-value"
+        assert cr["spec"]["tags"] is not None
+        assert len(cr["spec"]["tags"]) == 2
+
+        # Update the value — this triggers PutParameter with Overwrite=true.
+        # Before the fix, the controller also sent Tags in the same request,
+        # causing the SSM API to reject it.
+        update_data = {
+            "spec": {
+                "value": "updated-value-with-tags"
+            }
+        }
+
+        k8s.patch_custom_resource(reference, update_data)
+        time.sleep(MODIFY_WAIT_AFTER_SECONDS)
+        assert k8s.wait_on_condition(reference, "ACK.ResourceSynced", "True", wait_periods=10)
+
+        updated_cr = k8s.get_resource(reference)
+        assert updated_cr["spec"]["value"] == "updated-value-with-tags"
 
     def test_update_secure_parameter_value(self, secure_parameter):
         (reference, _, param_name) = secure_parameter
