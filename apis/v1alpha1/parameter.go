@@ -34,11 +34,11 @@ type ParameterSpec struct {
 	//
 	// The following data type values are supported.
 	//
-	//   - text
+	//    * text
 	//
-	//   - aws:ec2:image
+	//    * aws:ec2:image
 	//
-	//   - aws:ssm:integration
+	//    * aws:ssm:integration
 	//
 	// When you create a String parameter and specify aws:ec2:image, Amazon Web
 	// Services Systems Manager validates the parameter value is in the required
@@ -72,8 +72,8 @@ type ParameterSpec struct {
 	// with your Amazon Web Services account which is not as secure as using a custom
 	// key.
 	//
-	//   - To use a custom KMS key, choose the SecureString data type with the
-	//     Key ID parameter.
+	//    * To use a custom KMS key, choose the SecureString data type with the
+	//    Key ID parameter.
 	//
 	// Regex Pattern: `^([a-zA-Z0-9:/_-]+)$`
 	KeyID  *string                                  `json:"keyID,omitempty"`
@@ -90,19 +90,19 @@ type ParameterSpec struct {
 	//
 	// Naming Constraints:
 	//
-	//   - Parameter names are case sensitive.
+	//    * Parameter names are case sensitive.
 	//
-	//   - A parameter name must be unique within an Amazon Web Services Region
+	//    * A parameter name must be unique within an Amazon Web Services Region
 	//
-	//   - A parameter name can't be prefixed with "aws" or "ssm" (case-insensitive).
+	//    * A parameter name can't be prefixed with "aws" or "ssm" (case-insensitive).
 	//
-	//   - Parameter names can include only the following symbols and letters:
-	//     a-zA-Z0-9_.- In addition, the slash character ( / ) is used to delineate
-	//     hierarchies in parameter names. For example: /Dev/Production/East/Project-ABC/MyParameter
+	//    * Parameter names can include only the following symbols and letters:
+	//    a-zA-Z0-9_.- In addition, the slash character ( / ) is used to delineate
+	//    hierarchies in parameter names. For example: /Dev/Production/East/Project-ABC/MyParameter
 	//
-	//   - A parameter name can't include spaces.
+	//    * A parameter name can't include spaces.
 	//
-	//   - Parameter hierarchies are limited to a maximum depth of fifteen levels.
+	//    * Parameter hierarchies are limited to a maximum depth of fifteen levels.
 	//
 	// For additional information about valid values for parameter names, see Creating
 	// Systems Manager parameters (https://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-paramstore-su-create.html)
@@ -145,11 +145,11 @@ type ParameterSpec struct {
 	// configuration data referenced by the parameter. In this case, you could specify
 	// the following key-value pairs:
 	//
-	//   - Key=Resource,Value=S3bucket
+	//    * Key=Resource,Value=S3bucket
 	//
-	//   - Key=OS,Value=Windows
+	//    * Key=OS,Value=Windows
 	//
-	//   - Key=ParameterType,Value=LicenseKey
+	//    * Key=ParameterType,Value=LicenseKey
 	//
 	// To add tags to an existing Systems Manager parameter, use the AddTagsToResource
 	// operation.
@@ -179,7 +179,7 @@ type ParameterSpec struct {
 	// incur charges for an advanced parameter, you must delete it and recreate
 	// it as a new standard parameter.
 	//
-	// # Using the Default Tier Configuration
+	// Using the Default Tier Configuration
 	//
 	// In PutParameter requests, you can specify the tier to create the parameter
 	// in. Whenever you specify a tier in the request, Parameter Store creates or
@@ -191,26 +191,26 @@ type ParameterSpec struct {
 	// tier. If you use the advanced-parameter tier, you can specify one of the
 	// following as the default:
 	//
-	//   - Advanced: With this option, Parameter Store evaluates all requests as
-	//     advanced parameters.
+	//    * Advanced: With this option, Parameter Store evaluates all requests as
+	//    advanced parameters.
 	//
-	//   - Intelligent-Tiering: With this option, Parameter Store evaluates each
-	//     request to determine if the parameter is standard or advanced. If the
-	//     request doesn't include any options that require an advanced parameter,
-	//     the parameter is created in the standard-parameter tier. If one or more
-	//     options requiring an advanced parameter are included in the request, Parameter
-	//     Store create a parameter in the advanced-parameter tier. This approach
-	//     helps control your parameter-related costs by always creating standard
-	//     parameters unless an advanced parameter is necessary.
+	//    * Intelligent-Tiering: With this option, Parameter Store evaluates each
+	//    request to determine if the parameter is standard or advanced. If the
+	//    request doesn't include any options that require an advanced parameter,
+	//    the parameter is created in the standard-parameter tier. If one or more
+	//    options requiring an advanced parameter are included in the request, Parameter
+	//    Store create a parameter in the advanced-parameter tier. This approach
+	//    helps control your parameter-related costs by always creating standard
+	//    parameters unless an advanced parameter is necessary.
 	//
 	// Options that require an advanced parameter include the following:
 	//
-	//   - The content size of the parameter is more than 4 KB.
+	//    * The content size of the parameter is more than 4 KB.
 	//
-	//   - The parameter uses a parameter policy.
+	//    * The parameter uses a parameter policy.
 	//
-	//   - More than 10,000 parameters already exist in your Amazon Web Services
-	//     account in the current Amazon Web Services Region.
+	//    * More than 10,000 parameters already exist in your Amazon Web Services
+	//    account in the current Amazon Web Services Region.
 	//
 	// For more information about configuring the default tier option, see Specifying
 	// a default parameter tier (https://docs.aws.amazon.com/systems-manager/latest/userguide/parameter-store-advanced-parameters.html#ps-default-tier)
