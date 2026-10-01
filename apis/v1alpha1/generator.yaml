@@ -1,7 +1,7 @@
 ignore:
   resource_names:
       - Activation
-      - Association
+      # - Association
       - AssociationBatch
       # - Document
       - MaintenanceWindow
@@ -11,8 +11,27 @@ ignore:
       # - ResourceDataSync
   field_paths:
       - PutParameterInput.Overwrite
+      # TargetMaps is list<map<string, list<string>>>. The code generator cannot
+      # currently handle this shape: it panics in GoCodeSetCreateInput and
+      # GoCodeSetUpdateInput, and emits an invalid Go type
+      # ("[][][][][][][]]*string") for the output setter. Excluded until the
+      # generator supports a list of maps of lists.
+      - CreateAssociationInput.TargetMaps
+      - UpdateAssociationInput.TargetMaps
+      - AssociationDescription.TargetMaps
+      # AssociationStatusAggregatedCount is map<string, Integer>. For a map with
+      # a non-pointer primitive value the generator emits a double pointer
+      # (`&f19f0val` where f19f0val is already *int64), which does not compile.
+      - AssociationOverview.AssociationStatusAggregatedCount
 
 resources:
+  Association:
+    fields:
+      # DescribeAssociation accepts both Name (the SSM document name, which is
+      # not unique per association) and AssociationId. Without this the
+      # generator reports "found multiple possible primary identifiers".
+      AssociationId:
+        is_primary_key: true
   Document:
     fields:
       Content:
