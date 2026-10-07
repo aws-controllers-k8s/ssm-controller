@@ -41,6 +41,7 @@ func newResourceDelta(
 		delta.Add("", a, b)
 		return delta
 	}
+	compareTags(delta, a, b)
 
 	if ackcompare.HasNilDifference(a.ko.Spec.AlarmConfiguration, b.ko.Spec.AlarmConfiguration) {
 		delta.Add("Spec.AlarmConfiguration", a.ko.Spec.AlarmConfiguration, b.ko.Spec.AlarmConfiguration)
@@ -193,11 +194,6 @@ func newResourceDelta(
 		if *a.ko.Spec.SyncCompliance != *b.ko.Spec.SyncCompliance {
 			delta.Add("Spec.SyncCompliance", a.ko.Spec.SyncCompliance, b.ko.Spec.SyncCompliance)
 		}
-	}
-	desiredACKTags, _ := convertToOrderedACKTags(a.ko.Spec.Tags)
-	latestACKTags, _ := convertToOrderedACKTags(b.ko.Spec.Tags)
-	if !ackcompare.MapStringStringEqual(desiredACKTags, latestACKTags) {
-		delta.Add("Spec.Tags", a.ko.Spec.Tags, b.ko.Spec.Tags)
 	}
 	if len(a.ko.Spec.TargetLocations) != len(b.ko.Spec.TargetLocations) {
 		delta.Add("Spec.TargetLocations", a.ko.Spec.TargetLocations, b.ko.Spec.TargetLocations)

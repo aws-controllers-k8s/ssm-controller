@@ -8,6 +8,9 @@ spec:
   parameters:
     commands:
     - echo initial ACK association test
+  tags:
+  - key: ack-e2e-association-tag
+    value: initial
   targets:
   - key: tag:ack-e2e-association
     values:

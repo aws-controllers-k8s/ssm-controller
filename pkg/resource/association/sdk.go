@@ -372,6 +372,14 @@ func (rm *resourceManager) sdkFind(
 	}
 
 	rm.setStatusDefaults(ko)
+	if ko.Status.AssociationID != nil {
+		tags, err := rm.fetchCurrentTags(ctx, ko.Status.AssociationID)
+		if err != nil {
+			return nil, err
+		}
+		ko.Spec.Tags = fromACKTags(tags, nil)
+	}
+
 	return &resource{ko}, nil
 }
 
@@ -925,6 +933,17 @@ func (rm *resourceManager) sdkUpdate(
 	defer func() {
 		exit(err)
 	}()
+	if delta.DifferentAt("Spec.Tags") {
+		err = rm.syncTags(ctx, desired, latest)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if !delta.DifferentExcept("Spec.Tags") {
+		return desired, nil
+	}
+
 	input, err := rm.newUpdateRequestPayload(ctx, desired, delta)
 	if err != nil {
 		return nil, err

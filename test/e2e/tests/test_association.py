@@ -73,6 +73,11 @@ class TestAssociation:
         )["AssociationDescription"]
         assert association_aws["Name"] == "AWS-RunShellScript"
         assert association_aws["AssociationName"] == resource_name
+        tags = ssm_client.list_tags_for_resource(
+            ResourceType="Association",
+            ResourceId=cr["status"]["associationID"],
+        )["TagList"]
+        assert {"Key": "ack-e2e-association-tag", "Value": "initial"} in tags
 
     def test_update_parameters(self, association):
         reference, _, _ = association
@@ -104,3 +109,32 @@ class TestAssociation:
 
         updated_cr = k8s.get_resource(reference)
         assert updated_cr["spec"]["parameters"] == update_data["spec"]["parameters"]
+
+    def test_update_tags(self, association, ssm_client):
+        reference, _, _ = association
+        update_data = {
+            "spec": {
+                "tags": [
+                    {
+                        "key": "ack-e2e-association-tag",
+                        "value": "updated",
+                    },
+                ],
+            },
+        }
+
+        k8s.patch_custom_resource(reference, update_data)
+        time.sleep(MODIFY_WAIT_AFTER_SECONDS)
+        assert k8s.wait_on_condition(
+            reference,
+            "ACK.ResourceSynced",
+            "True",
+            wait_periods=10,
+        )
+
+        cr = k8s.get_resource(reference)
+        tags = ssm_client.list_tags_for_resource(
+            ResourceType="Association",
+            ResourceId=cr["status"]["associationID"],
+        )["TagList"]
+        assert {"Key": "ack-e2e-association-tag", "Value": "updated"} in tags
