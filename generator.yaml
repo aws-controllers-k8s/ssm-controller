@@ -32,6 +32,11 @@ resources:
       # generator reports "found multiple possible primary identifiers".
       AssociationId:
         is_primary_key: true
+    exceptions:
+      errors:
+        404:
+          # https://docs.aws.amazon.com/systems-manager/latest/APIReference/API_DescribeAssociation.html#API_DescribeAssociation_Errors
+          code: AssociationDoesNotExist
   Document:
     fields:
       Content:
