@@ -46,6 +46,23 @@ resources:
           if r.ko.Status.AssociationID == nil {
               return nil, ackerr.NotFound
           }
+      # DescribeAssociation treats AssociationId and InstanceId+Name as
+      # mutually exclusive. Once an ID is known, look the association up by ID
+      # alone or the call is rejected with a ValidationException.
+      sdk_read_one_post_build_request:
+        code: |
+          if input.AssociationId != nil {
+              input.InstanceId = nil
+              input.Name = nil
+          }
+      # DeleteAssociation requires the association ID for target-based
+      # associations. Do not combine it with the legacy instance/name lookup.
+      sdk_delete_post_build_request:
+        code: |
+          if input.AssociationId != nil {
+              input.InstanceId = nil
+              input.Name = nil
+          }
   Document:
     fields:
       Content:

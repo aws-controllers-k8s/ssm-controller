@@ -79,6 +79,10 @@ func (rm *resourceManager) sdkFind(
 	if err != nil {
 		return nil, err
 	}
+	if input.AssociationId != nil {
+		input.InstanceId = nil
+		input.Name = nil
+	}
 
 	var resp *svcsdk.DescribeAssociationOutput
 	resp, err = rm.sdkapi.DescribeAssociation(ctx, input)
@@ -1418,6 +1422,11 @@ func (rm *resourceManager) sdkDelete(
 	if err != nil {
 		return nil, err
 	}
+	if input.AssociationId != nil {
+		input.InstanceId = nil
+		input.Name = nil
+	}
+
 	var resp *svcsdk.DeleteAssociationOutput
 	_ = resp
 	resp, err = rm.sdkapi.DeleteAssociation(ctx, input)
