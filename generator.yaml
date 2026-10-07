@@ -37,6 +37,15 @@ resources:
         404:
           # https://docs.aws.amazon.com/systems-manager/latest/APIReference/API_DescribeAssociation.html#API_DescribeAssociation_Errors
           code: AssociationDoesNotExist
+    hooks:
+      # DescribeAssociation cannot look up a target-based association by
+      # document name. Before CreateAssociation supplies an ID, report it as
+      # absent so ACK takes the create path.
+      sdk_read_one_pre_build_request:
+        code: |
+          if r.ko.Status.AssociationID == nil {
+              return nil, ackerr.NotFound
+          }
   Document:
     fields:
       Content:
