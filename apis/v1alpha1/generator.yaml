@@ -41,8 +41,7 @@ resources:
       AssociationId:
         is_primary_key: true
       Tags:
-        compare:
-          is_ignored: true
+        custom_sync: {}
     exceptions:
       errors:
         404:
@@ -57,12 +56,8 @@ resources:
           if r.ko.Status.AssociationID == nil {
               return nil, ackerr.NotFound
           }
-      delta_pre_compare:
-        code: compareTags(delta, a, b)
       sdk_read_one_post_set_output:
         template_path: hooks/association/sdk_read_one_post_set_output.go.tpl
-      sdk_update_pre_build_request:
-        template_path: hooks/association/sdk_update_pre_build_request.go.tpl
   Document:
     fields:
       Content:

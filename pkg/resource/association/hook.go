@@ -82,19 +82,6 @@ func (rm *resourceManager) sdkTags(tags map[string]string) []svcsdktypes.Tag {
 	return sdkTags
 }
 
-func compareTags(
-	delta *ackcompare.Delta,
-	a *resource,
-	b *resource,
-) {
-	desiredTags, _ := convertToOrderedACKTags(a.ko.Spec.Tags)
-	latestTags, _ := convertToOrderedACKTags(b.ko.Spec.Tags)
-	added, _, removed := ackcompare.GetTagsDifference(latestTags, desiredTags)
-	if len(added) > 0 || len(removed) > 0 {
-		delta.Add("Spec.Tags", a.ko.Spec.Tags, b.ko.Spec.Tags)
-	}
-}
-
 func (rm *resourceManager) fetchCurrentTags(
 	ctx context.Context,
 	resourceID *string,

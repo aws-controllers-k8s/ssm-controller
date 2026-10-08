@@ -706,6 +706,11 @@ func (rm *resourceManager) sdkCreate(
 	}
 
 	rm.setStatusDefaults(ko)
+	if ko.Spec.Tags != nil {
+		msg := "Secondary sync required; resource will be requeued"
+		ackcondition.SetSynced(&resource{ko}, corev1.ConditionFalse, &msg, nil)
+	}
+
 	return &resource{ko}, nil
 }
 
@@ -923,15 +928,16 @@ func (rm *resourceManager) sdkUpdate(
 	defer func() {
 		exit(err)
 	}()
+	updatedDesired := desired.DeepCopy()
+	updatedDesired.SetStatus(latest)
 	if delta.DifferentAt("Spec.Tags") {
 		err = rm.syncTags(ctx, desired, latest)
 		if err != nil {
 			return nil, err
 		}
 	}
-
 	if !delta.DifferentExcept("Spec.Tags") {
-		return desired, nil
+		return rm.concreteResource(updatedDesired), nil
 	}
 
 	input, err := rm.newUpdateRequestPayload(ctx, desired, delta)
