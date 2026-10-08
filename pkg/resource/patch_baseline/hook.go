@@ -4,88 +4,27 @@ import (
 	"context"
 
 	ackcompare "github.com/aws-controllers-k8s/runtime/pkg/compare"
-	ackrtlog "github.com/aws-controllers-k8s/runtime/pkg/runtime/log"
-	"github.com/aws/aws-sdk-go-v2/aws"
 	svcsdk "github.com/aws/aws-sdk-go-v2/service/ssm"
 	svcsdktypes "github.com/aws/aws-sdk-go-v2/service/ssm/types"
+
+	"github.com/aws-controllers-k8s/ssm-controller/pkg/tags"
 )
 
-// syncTags used to keep tags in sync by calling Create and Delete API's
+// syncTags keeps tags in sync by delegating to the shared tag-sync helper.
 func (rm *resourceManager) syncTags(
 	ctx context.Context,
 	desired *resource,
 	latest *resource,
 ) (err error) {
-	rlog := ackrtlog.FromContext(ctx)
-	exit := rlog.Trace("rm.syncTags")
-
-	defer func(err error) {
-		exit(err)
-	}(err)
-
-	resourceID := latest.ko.Status.BaselineID
-
-	desiredTags, _ := convertToOrderedACKTags(desired.ko.Spec.Tags)
-	latestTags, _ := convertToOrderedACKTags(latest.ko.Spec.Tags)
-
-	added, _, removed := ackcompare.GetTagsDifference(latestTags, desiredTags)
-
-	toAdd := fromACKTags(added, nil)
-
-	var toDeleteTagKeys []string
-	for k := range removed {
-		toDeleteTagKeys = append(toDeleteTagKeys, k)
-	}
-
-	// Remove tags
-	if len(toDeleteTagKeys) > 0 {
-		rlog.Debug("removing tags from resource", "tags", toDeleteTagKeys)
-		_, err = rm.sdkapi.RemoveTagsFromResource(
-			ctx,
-			&svcsdk.RemoveTagsFromResourceInput{
-				ResourceType: svcsdktypes.ResourceTypeForTaggingPatchBaseline,
-				ResourceId:   aws.String(*resourceID),
-				TagKeys:      toDeleteTagKeys,
-			},
-		)
-
-		rm.metrics.RecordAPICall("UPDATE", "RemoveTagsFromResource", err)
-		if err != nil {
-			return err
-		}
-	}
-
-	// Add tags
-	if len(toAdd) > 0 {
-		rlog.Debug("adding tags to resource", "tags", toAdd)
-		_, err = rm.sdkapi.AddTagsToResource(
-			ctx,
-			&svcsdk.AddTagsToResourceInput{
-				ResourceType: svcsdktypes.ResourceTypeForTaggingPatchBaseline,
-				ResourceId:   aws.String(*resourceID),
-				Tags:         rm.sdkTags(added),
-			},
-		)
-
-		rm.metrics.RecordAPICall("UPDATE", "AddTagsToResource", err)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// sdkTags converts *svcapitypes.Tag array to a *svcsdk.Tag array
-func (rm *resourceManager) sdkTags(tags map[string]string) (sdkTags []svcsdktypes.Tag) {
-
-	for key, value := range tags {
-		sdktag := svcsdktypes.Tag{
-			Key:   aws.String(key),
-			Value: aws.String(value),
-		}
-		sdkTags = append(sdkTags, sdktag)
-	}
-	return sdkTags
+	return tags.SyncTags(
+		ctx,
+		rm.sdkapi,
+		rm.metrics,
+		svcsdktypes.ResourceTypeForTaggingPatchBaseline,
+		*latest.ko.Status.BaselineID,
+		desired.ko.Spec.Tags,
+		latest.ko.Spec.Tags,
+	)
 }
 
 func compareTags(
