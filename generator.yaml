@@ -21,6 +21,9 @@ resources:
       errors:
         404:
           code: InvalidDocument
+    hooks:
+      sdk_update_pre_build_request:
+        template_path: hooks/document/sdk_update_pre_build_request.go.tpl
 
   Parameter:
     fields:
