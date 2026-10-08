@@ -23,6 +23,8 @@ ignore:
       # Do not combine it with the legacy InstanceId/Name lookup in reads.
       - DescribeAssociationInput.InstanceId
       - DescribeAssociationInput.Name
+      # Omit the version to read the latest Association state.
+      - DescribeAssociationInput.AssociationVersion
       # Delete target-based associations by AssociationId rather than the
       # legacy InstanceId/Name lookup.
       - DeleteAssociationInput.InstanceId

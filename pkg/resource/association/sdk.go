@@ -398,9 +398,6 @@ func (rm *resourceManager) newDescribeRequestPayload(
 	if r.ko.Status.AssociationID != nil {
 		res.AssociationId = r.ko.Status.AssociationID
 	}
-	if r.ko.Status.AssociationVersion != nil {
-		res.AssociationVersion = r.ko.Status.AssociationVersion
-	}
 
 	return res, nil
 }
