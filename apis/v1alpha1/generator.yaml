@@ -23,6 +23,10 @@ ignore:
       # Do not combine it with the legacy InstanceId/Name lookup in reads.
       - DescribeAssociationInput.InstanceId
       - DescribeAssociationInput.Name
+      # Delete target-based associations by AssociationId rather than the
+      # legacy InstanceId/Name lookup.
+      - DeleteAssociationInput.InstanceId
+      - DeleteAssociationInput.Name
       # AssociationStatusAggregatedCount is map<string, Integer>. For a map with
       # a non-pointer primitive value the generator emits a double pointer
       # (`&f19f0val` where f19f0val is already *int64), which does not compile.
@@ -52,14 +56,6 @@ resources:
         code: |
           if r.ko.Status.AssociationID == nil {
               return nil, ackerr.NotFound
-          }
-      # DeleteAssociation requires the association ID for target-based
-      # associations. Do not combine it with the legacy instance/name lookup.
-      sdk_delete_post_build_request:
-        code: |
-          if input.AssociationId != nil {
-              input.InstanceId = nil
-              input.Name = nil
           }
       delta_pre_compare:
         code: compareTags(delta, a, b)

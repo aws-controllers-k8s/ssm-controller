@@ -1431,11 +1431,6 @@ func (rm *resourceManager) sdkDelete(
 	if err != nil {
 		return nil, err
 	}
-	if input.AssociationId != nil {
-		input.InstanceId = nil
-		input.Name = nil
-	}
-
 	var resp *svcsdk.DeleteAssociationOutput
 	_ = resp
 	resp, err = rm.sdkapi.DeleteAssociation(ctx, input)
@@ -1452,12 +1447,6 @@ func (rm *resourceManager) newDeleteRequestPayload(
 
 	if r.ko.Status.AssociationID != nil {
 		res.AssociationId = r.ko.Status.AssociationID
-	}
-	if r.ko.Spec.InstanceID != nil {
-		res.InstanceId = r.ko.Spec.InstanceID
-	}
-	if r.ko.Spec.Name != nil {
-		res.Name = r.ko.Spec.Name
 	}
 
 	return res, nil
