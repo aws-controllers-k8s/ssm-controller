@@ -79,10 +79,6 @@ func (rm *resourceManager) sdkFind(
 	if err != nil {
 		return nil, err
 	}
-	if input.AssociationId != nil {
-		input.InstanceId = nil
-		input.Name = nil
-	}
 
 	var resp *svcsdk.DescribeAssociationOutput
 	resp, err = rm.sdkapi.DescribeAssociation(ctx, input)
@@ -404,12 +400,6 @@ func (rm *resourceManager) newDescribeRequestPayload(
 	}
 	if r.ko.Status.AssociationVersion != nil {
 		res.AssociationVersion = r.ko.Status.AssociationVersion
-	}
-	if r.ko.Spec.InstanceID != nil {
-		res.InstanceId = r.ko.Spec.InstanceID
-	}
-	if r.ko.Spec.Name != nil {
-		res.Name = r.ko.Spec.Name
 	}
 
 	return res, nil

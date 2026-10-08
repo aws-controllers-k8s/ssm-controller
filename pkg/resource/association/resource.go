@@ -97,14 +97,6 @@ func (r *resource) SetIdentifiers(identifier *ackv1alpha1.AWSIdentifiers) error 
 	if f1ok {
 		r.ko.Status.AssociationVersion = aws.String(f1)
 	}
-	f2, f2ok := identifier.AdditionalKeys["instanceID"]
-	if f2ok {
-		r.ko.Spec.InstanceID = aws.String(f2)
-	}
-	f3, f3ok := identifier.AdditionalKeys["name"]
-	if f3ok {
-		r.ko.Spec.Name = aws.String(f3)
-	}
 
 	return nil
 }
@@ -120,14 +112,6 @@ func (r *resource) PopulateResourceFromAnnotation(fields map[string]string) erro
 	f1, f1ok := fields["associationVersion"]
 	if f1ok {
 		r.ko.Status.AssociationVersion = aws.String(f1)
-	}
-	f2, f2ok := fields["instanceID"]
-	if f2ok {
-		r.ko.Spec.InstanceID = aws.String(f2)
-	}
-	f3, f3ok := fields["name"]
-	if f3ok {
-		r.ko.Spec.Name = aws.String(f3)
 	}
 
 	return nil
