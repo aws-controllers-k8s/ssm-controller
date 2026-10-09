@@ -1,0 +1,17 @@
+apiVersion: ssm.services.k8s.aws/v1alpha1
+kind: Association
+metadata:
+  name: $NAME
+spec:
+  associationName: $NAME
+  name: AWS-RunShellScript
+  parameters:
+    commands:
+    - echo initial ACK association test
+  tags:
+  - key: ack-e2e-association-tag
+    value: initial
+  targets:
+  - key: tag:ack-e2e-association
+    values:
+    - $NAME
