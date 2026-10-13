@@ -102,6 +102,7 @@ rules:
 - apiGroups:
   - ssm.services.k8s.aws
   resources:
+  - associations
   - documents
   - parameters
   - patchbaselines
@@ -117,6 +118,7 @@ rules:
 - apiGroups:
   - ssm.services.k8s.aws
   resources:
+  - associations/status
   - documents/status
   - parameters/status
   - patchbaselines/status

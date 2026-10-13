@@ -42,6 +42,7 @@ import (
 	svctypes "github.com/aws-controllers-k8s/ssm-controller/apis/v1alpha1"
 	svcresource "github.com/aws-controllers-k8s/ssm-controller/pkg/resource"
 
+	_ "github.com/aws-controllers-k8s/ssm-controller/pkg/resource/association"
 	_ "github.com/aws-controllers-k8s/ssm-controller/pkg/resource/document"
 	_ "github.com/aws-controllers-k8s/ssm-controller/pkg/resource/parameter"
 	_ "github.com/aws-controllers-k8s/ssm-controller/pkg/resource/patch_baseline"
