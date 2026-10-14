@@ -15,7 +15,10 @@ package document
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	svcsdk "github.com/aws/aws-sdk-go-v2/service/ssm"
 	svcsdktypes "github.com/aws/aws-sdk-go-v2/service/ssm/types"
 
 	"github.com/aws-controllers-k8s/ssm-controller/pkg/tags"
@@ -38,4 +41,29 @@ func (rm *resourceManager) syncTags(
 		desired.ko.Spec.Tags,
 		latest.ko.Spec.Tags,
 	)
+}
+
+// getDocumentContent reads the exact SSM document version observed by
+// DescribeDocument. DescribeDocument does not return the document body, so
+// sdkFind must use GetDocument to populate Spec.Content before calculating the
+// desired-versus-observed delta.
+func (rm *resourceManager) getDocumentContent(
+	ctx context.Context,
+	name *string,
+	version *string,
+	format svcsdktypes.DocumentFormat,
+) (*string, error) {
+	resp, err := rm.sdkapi.GetDocument(ctx, &svcsdk.GetDocumentInput{
+		Name:            name,
+		DocumentVersion: version,
+		DocumentFormat:  format,
+	})
+	rm.metrics.RecordAPICall("READ_ONE", "GetDocument", err)
+	if err != nil {
+		return nil, err
+	}
+	if resp.Content == nil {
+		return nil, fmt.Errorf("GetDocument returned no content for document %q", aws.ToString(name))
+	}
+	return resp.Content, nil
 }
