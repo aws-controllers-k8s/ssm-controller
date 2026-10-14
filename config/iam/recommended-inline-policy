@@ -9,6 +9,7 @@
                 "ssm:UpdateDocument",
                 "ssm:DeleteDocument",
                 "ssm:DescribeDocument",
+                "ssm:GetDocument",
                 "ssm:RemoveTagsFromResource",
                 "ssm:AddTagsToResource",
                 "ssm:ListTagsForResource",
