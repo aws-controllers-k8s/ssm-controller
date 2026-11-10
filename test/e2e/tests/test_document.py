@@ -49,7 +49,7 @@ def document():
 
 @service_marker
 class TestDocument:
-    def test_create_delete(self, document):
+    def test_create_delete(self, document, ssm_client):
         (reference, _) = document
         time.sleep(CREATE_WAIT_AFTER_SECONDS)
 
@@ -60,6 +60,11 @@ class TestDocument:
         assert 'spec' in cr
         assert 'name' in cr["spec"]
         assert 'content' in cr["spec"]
+
+        document_name = cr["spec"]["name"]
+        previous_latest_version = ssm_client.describe_document(
+            Name=document_name,
+        )["Document"]["LatestVersion"]
 
         # Update test
         update_data = {
@@ -86,6 +91,21 @@ class TestDocument:
         
         updated_cr = k8s.get_resource(reference)       
         assert updated_cr["spec"]["content"] == update_data["spec"]["content"]
+
+        updated_document = ssm_client.describe_document(
+            Name=document_name,
+        )["Document"]
+        latest_version = updated_document["LatestVersion"]
+        assert int(latest_version) > int(previous_latest_version)
+
+        latest_document = ssm_client.get_document(
+            Name=document_name,
+            DocumentVersion=latest_version,
+            DocumentFormat=updated_document["DocumentFormat"],
+        )
+        assert json.loads(latest_document["Content"]) == json.loads(
+            update_data["spec"]["content"]
+        )
 
     def test_update_document_with_tags(self, document, ssm_client):
         """Regression test: UpdateDocumentInput has no Tags member, so a
